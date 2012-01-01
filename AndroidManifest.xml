@@ -1,0 +1,51 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" 
+    package="net.momodalo.app.vimtouch"
+    android:versionCode="10"
+    android:versionName="1.0"
+    >
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <application android:icon="@drawable/app_vimtouch"
+                android:label="@string/application_vimtouch">
+        <activity android:name="VimTouch"
+                android:theme="@style/Theme"
+                android:launchMode="singleInstance"
+                android:configChanges="keyboard|keyboardHidden|orientation"
+                android:windowSoftInputMode="adjustResize|stateHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.EDIT" />
+                <action android:name="android.intent.action.PICK" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.EDIT" />
+                <action android:name="android.intent.action.PICK" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/octet-stream" />
+                <data android:mimeType="application/javascript" />
+                <data android:mimeType="application/json" />
+                <data android:mimeType="application/atom+xml" />
+                <data android:mimeType="application/soap+xm" />
+                <data android:mimeType="application/xhtml+xml" />
+                <data android:mimeType="application/xml-dtd" />
+                <data android:mimeType="application/x-latex" />
+                <data android:mimeType="application/*xml" />
+                <data android:mimeType="application/ecmascript" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.googlecode.android_scripting.action.EDIT_SCRIPT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name="VimTouchPreferences"/>
+        <activity android:name="InstallProgress"
+                android:launchMode="singleInstance"
+        />
+    </application>
+</manifest> 

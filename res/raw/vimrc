@@ -1,0 +1,22 @@
+
+let color = "true"
+syntax on
+
+set mouse=a
+set ttymouse=""
+
+"set fdm=syntax
+"set foldlevelstart=20
+
+set shiftwidth=4
+set tabstop=4
+set expandtab
+colorscheme desert
+
+set ruler
+
+set cindent
+set autoindent
+set smartindent
+
+set nocompatible
