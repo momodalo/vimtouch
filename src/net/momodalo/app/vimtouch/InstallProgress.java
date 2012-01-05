@@ -8,6 +8,7 @@ import android.util.Log;
 
 import java.io.FileInputStream;
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.InputStream;
 import java.io.FileOutputStream;
 import java.io.File;
@@ -62,13 +63,18 @@ public class InstallProgress extends Activity {
                     if(!file.isDirectory())
                         file.mkdirs();
                 } else { 
-                    FileOutputStream fout = new FileOutputStream(dirname+"/"+ze.getName());
-                    for (int c = zin.read(); c != -1; c = zin.read()) { 
-                        fout.write(c); 
-                    } 
+                    int size;
+                    byte[] buffer = new byte[2048];
 
+                    FileOutputStream fout = new FileOutputStream(dirname+"/"+ze.getName());
+                    BufferedOutputStream bufferOut = new BufferedOutputStream(fout, buffer.length);
+                    while((size = zin.read(buffer, 0, buffer.length)) != -1) {
+                        bufferOut.write(buffer, 0, size);
+                    }
+
+                    bufferOut.flush();
+                    bufferOut.close(); 
                     zin.closeEntry(); 
-                    fout.close(); 
                 } 
 
             } 
