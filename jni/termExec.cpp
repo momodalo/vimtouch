@@ -359,7 +359,9 @@ static void vimtouch_Exec_close(JNIEnv *env, jobject clazz, jobject fileDescript
 
 static int register_FileDescriptor(JNIEnv *env)
 {
-    class_fileDescriptor = env->FindClass("java/io/FileDescriptor");
+    jclass clazz = env->FindClass("java/io/FileDescriptor");
+
+    class_fileDescriptor = (jclass)env->NewGlobalRef(clazz);
 
     if (class_fileDescriptor == NULL) {
         LOGE("Can't find java/io/FileDescriptor");
