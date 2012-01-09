@@ -30,13 +30,12 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "Exec"
+#define LOG_TAG "TermExec"
 
 #include "jni.h"
-#include "utils/Log.h"
-#include "utils/misc.h"
-#include <utils/threads.h>
-#include "android_runtime/AndroidRuntime.h"
+#include <utils/Log.h>
+#include <linux/threads.h>
+#include <pthread.h>
 
 #include <sys/types.h>
 #include <sys/ioctl.h>
@@ -71,7 +70,7 @@ public:
         }
     }
 
-    void set(const char16_t* o, size_t numChars) {
+    void set(const uint16_t* o, size_t numChars) {
         mString = (char*) malloc(numChars + 1);
         for (size_t i = 0; i < numChars; i++) {
             mString[i] = (char) o[i];

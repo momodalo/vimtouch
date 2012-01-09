@@ -2,9 +2,6 @@
 #include "gpm.h"
 #include <unistd.h>
 #include <fcntl.h>
-#include "utils/Log.h"
-
-#define TAG "FAKEGPM"
 
 int gpm_flag = 0;
 int gpm_fd = 0;
