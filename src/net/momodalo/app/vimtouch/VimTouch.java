@@ -372,8 +372,7 @@ public class VimTouch extends Activity {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onStop() {
         if (mTermFd != null) {
             try{
                 mTermOut.write((":q!\r").getBytes("UTF-8"));
@@ -602,6 +601,11 @@ public class VimTouch extends Activity {
     @Override
     public void onNewIntent(Intent intent) {
         String url = getIntentUrl(intent);
+        if(mTermFd != null){
+            mUrl = url;
+            startEmulator();
+            return;
+        }
         if(url == mUrl || url == "") return;
         
         Exec.doCommand("new "+url);

@@ -48,4 +48,7 @@
                 android:launchMode="singleInstance"
         />
     </application>
+    <uses-sdk android:minSdkVersion="9" 
+              android:targetSdkVersion="14"
+    />
 </manifest> 
