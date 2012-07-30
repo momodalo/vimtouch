@@ -186,10 +186,10 @@
 #define HAVE_SETPGID 1
 #define HAVE_SETSID 1
 #define HAVE_SIGACTION 1
-#define HAVE_SIGALTSTACK 1
+/* #define HAVE_SIGALTSTACK */
 /* #undef HAVE_SIGSET */
 /* #undef HAVE_SIGSETJMP */
-#define HAVE_SIGSTACK 1
+/* #define HAVE_SIGSTACK */
 #define HAVE_SIGVEC 1
 #define HAVE_STRCASECMP 1
 #define HAVE_STRERROR 1
@@ -202,8 +202,8 @@
 #define HAVE_ST_BLKSIZE 1
 #define HAVE_SYSCONF 1
 /* #undef HAVE_SYSCTL */
-#define HAVE_SYSINFO 1
-#define HAVE_SYSINFO_MEM_UNIT 1
+/* #define HAVE_SYSINFO */
+/* #define HAVE_SYSINFO_MEM_UNIT */
 #define HAVE_TGETENT 1
 #define HAVE_TOWLOWER 1
 #define HAVE_TOWUPPER 1
@@ -255,7 +255,7 @@
 #define HAVE_SYS_STATFS_H 1
 /* #undef HAVE_SYS_STREAM_H */
 #define HAVE_SYS_SYSCTL_H 1
-#define HAVE_SYS_SYSINFO_H 1
+/* #define HAVE_SYS_SYSINFO_H 1 */
 /* #undef HAVE_SYS_SYSTEMINFO_H */
 #define HAVE_SYS_TIME_H 1
 #define HAVE_SYS_TYPES_H 1

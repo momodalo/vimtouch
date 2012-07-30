@@ -23,7 +23,7 @@
 # include <limits.h>
 #endif
 
-#include "utils/Log.h"
+#include "common.h"
 
 /* Maximum number of commands from + or -c arguments. */
 #define MAX_ARG_CMDS 10

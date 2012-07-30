@@ -32,8 +32,8 @@
 
 #define LOG_TAG "TermExec"
 
-#include "jni.h"
-#include <utils/Log.h>
+#include <jni.h>
+#include "common.h"
 #include <linux/threads.h>
 #include <pthread.h>
 

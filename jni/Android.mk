@@ -83,6 +83,8 @@ LOCAL_SRC_FILES:= \
 LOCAL_SHARED_LIBRARIES := \
 	libutils libdl libncurses
 
+LOCAL_LDLIBS := -llog
+
 # No static libraries.
 LOCAL_STATIC_LIBRARIES :=
 
@@ -91,7 +93,7 @@ LOCAL_C_INCLUDES += \
 	$(JNI_H_INCLUDE)
 
 # No special compiler flags.
-LOCAL_CFLAGS += -I$(LOCAL_PATH) -I$(LOCAL_PATH)/vim/src/ -I$(LOCAL_PATH)/vim/src/proto -I$(LOCAL_PATH)/libncurses/include -DHAVE_CONFIG_H
+LOCAL_CFLAGS += -I$(LOCAL_PATH) -I$(LOCAL_PATH)/vim/src/ -I$(LOCAL_PATH)/vim/src/proto -I$(LOCAL_PATH)/libncurses/include -DUNIX -DHAVE_CONFIG_H
 
 # Don't prelink this library.  For more efficient code, you may want
 # to add this library to the prelink map and set this to true. However,
