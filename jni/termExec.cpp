@@ -277,7 +277,8 @@ static void vimtouch_Exec_setPtyWindowSize(JNIEnv *env, jobject clazz,
     sz.ws_ypixel = ypixel;
     
     ioctl(fd, TIOCSWINSZ, &sz);
-    update_screen(0);
+    redraw_later(CLEAR);
+    update_screen(CLEAR);
     setcursor();
     out_flush();
     mch_get_shellsize();
@@ -285,6 +286,7 @@ static void vimtouch_Exec_setPtyWindowSize(JNIEnv *env, jobject clazz,
 
 static void updateScreen()
 {
+    //redraw_later(NOT_VALID);
     update_screen(0);
     //setcursor();
     out_flush();

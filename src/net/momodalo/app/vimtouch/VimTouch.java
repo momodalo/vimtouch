@@ -2978,9 +2978,11 @@ class EmulatorView extends View implements
                     try {
                         while(true) {
                             int read = mTermIn.read(mBuffer);
-                            mByteQueue.write(mBuffer, 0, read);
-                            mHandler.sendMessage(
+                            if(read > 0){
+                                mByteQueue.write(mBuffer, 0, read);
+                                mHandler.sendMessage(
                                     mHandler.obtainMessage(UPDATE));
+                            }
                         }
                     } catch (IOException e) {
                     } catch (InterruptedException e) {
