@@ -601,7 +601,7 @@ public class VimTouch extends Activity {
     @Override
     public void onNewIntent(Intent intent) {
         String url = getIntentUrl(intent);
-        if(mTermFd != null){
+        if(mTermFd == null){
             mUrl = url;
             startEmulator();
             return;
