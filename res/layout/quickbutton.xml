@@ -8,5 +8,5 @@
     android:text="@string/paste"
     android:textColor="#DDDDDD"
     android:padding="2sp"
-    android:background="@drawable/button_bg" >
+    android:background="@drawable/button_selector" >
 </TextView>
