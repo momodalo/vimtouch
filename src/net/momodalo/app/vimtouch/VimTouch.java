@@ -2839,6 +2839,12 @@ class EmulatorView extends View implements
         }
         if (handleControlKey(keyCode, true)) {
             return true;
+        }else if (keyCode == KeyEvent.KEYCODE_BACK) {
+            try {
+                mTermOut.write(27); 
+                return true;
+            } catch (IOException e) {
+            }
         } else if (isSystemKey(keyCode, event)) {
             // Don't intercept the system keys
             return super.onKeyDown(keyCode, event);
@@ -2865,6 +2871,8 @@ class EmulatorView extends View implements
             Log.w(TAG, "onKeyUp " + keyCode);
         }
         if (handleControlKey(keyCode, false)) {
+            return true;
+        }else if (keyCode == KeyEvent.KEYCODE_BACK) {
             return true;
         } else if (isSystemKey(keyCode, event)) {
             // Don't intercept the system keys
