@@ -373,6 +373,7 @@ public class VimTouch extends Activity {
 
     @Override
     public void onStop() {
+        super.onStop();
         if (mTermFd != null) {
             try{
                 mTermOut.write((":q!\r").getBytes("UTF-8"));
