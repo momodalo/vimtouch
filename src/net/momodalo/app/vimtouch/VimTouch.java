@@ -355,9 +355,13 @@ public class VimTouch extends Activity {
         updatePrefs();
         mAlreadyStarted = true;
     }
+
+    public String getVimrc() {
+        return getApplicationContext().getFilesDir()+"/vim/vimrc";
+    }
     
     private boolean checkVimRuntime(){
-        File vimrc = new File(getApplicationContext().getFilesDir()+"/vim/vimrc");
+        File vimrc = new File(getVimrc());
         if(vimrc.exists()) return true;
         
         Intent intent = new Intent(getApplicationContext(), InstallProgress.class);
@@ -610,6 +614,7 @@ public class VimTouch extends Activity {
         if(url == mUrl || url == "") return;
         
         Exec.doCommand("new "+url);
+        Exec.updateScreen();
     }
 
     @Override
@@ -630,6 +635,9 @@ public class VimTouch extends Activity {
         int id = item.getItemId();
         if (id == R.id.menu_preferences) {
             doPreferences();
+        } else if (id == R.id.menu_vimrc) {
+            Exec.doCommand("new "+getVimrc());
+            Exec.updateScreen();
         } else if (id == R.id.menu_toggle_soft_keyboard) {
             doToggleSoftKeyboard();
         }

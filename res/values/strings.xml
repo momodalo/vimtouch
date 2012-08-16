@@ -108,4 +108,6 @@
    <string name="dialog_title_content_error">Content Error</string>
    <string name="message_content_too_big">The content is too big to do preview. Please save it first.</string>
 
+   <string name="vimrc">Edit vimrc</string>
+
 </resources>
