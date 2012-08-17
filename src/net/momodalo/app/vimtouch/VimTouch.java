@@ -377,15 +377,16 @@ public class VimTouch extends Activity {
 
     @Override
     public void onStop() {
-        super.onStop();
+        Log.e(VimTouch.LOG_TAG, "on stop.");
         if (mTermFd != null) {
             try{
-                mTermOut.write((":q!\r").getBytes("UTF-8"));
+                //mTermOut.write((":q!\r").getBytes("UTF-8"));
             }catch (Exception e){
             }
             Exec.close(mTermFd);
             mTermFd = null;
         }
+        super.onStop();
     }
 
     private void startListening() {
@@ -591,6 +592,7 @@ public class VimTouch extends Activity {
 
     @Override
     public void onResume() {
+        Log.e(VimTouch.LOG_TAG, "on resume.");
         super.onResume();
         readPrefs();
         updatePrefs();
@@ -599,12 +601,14 @@ public class VimTouch extends Activity {
 
     @Override
     public void onPause() {
+        Log.e(VimTouch.LOG_TAG, "on pause.");
         super.onPause();
         mEmulatorView.onPause();
     }
 
     @Override
-    public void onNewIntent(Intent intent) {
+    protected void onNewIntent(Intent intent) {
+        Log.e(VimTouch.LOG_TAG, "on new intent.");
         String url = getIntentUrl(intent);
         if(mTermFd == null){
             mUrl = url;

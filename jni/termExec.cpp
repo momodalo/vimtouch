@@ -88,13 +88,17 @@ private:
 static void *thread_wrapper ( void* value)
 {
     int pts;
+            LOGE("thread wrapper");
 
     char** thread_arg = (char**)value;
 
         setsid();
         
         pts = open(thread_arg[0], O_RDWR);
-        if(pts < 0) exit(-1);
+        if(pts < 0){
+            LOGE("PTY open failed");
+            exit(-1);
+        }
 
         dup2(pts, 0);
         dup2(pts, 1);
