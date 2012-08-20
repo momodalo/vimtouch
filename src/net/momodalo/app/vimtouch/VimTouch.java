@@ -381,6 +381,7 @@ public class VimTouch extends Activity {
     @Override
     public void onStop() {
         Log.e(VimTouch.LOG_TAG, "on stop.");
+        /*
         if (mTermFd != null) {
             try{
                 //mTermOut.write((":q!\r").getBytes("UTF-8"));
@@ -389,6 +390,7 @@ public class VimTouch extends Activity {
             Exec.close(mTermFd);
             mTermFd = null;
         }
+        */
         super.onStop();
     }
 
