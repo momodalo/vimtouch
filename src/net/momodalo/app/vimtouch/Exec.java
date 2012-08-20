@@ -17,6 +17,7 @@
 package net.momodalo.app.vimtouch;
 
 import java.io.FileDescriptor;
+import android.util.Log;
 
 /**
  * Utility methods for creating and managing a subprocess.
@@ -32,6 +33,32 @@ public class Exec
     static {
         System.loadLibrary("ncurses");
         System.loadLibrary("vimtouch");
+    }
+
+    static public VimTouch vimtouch;
+    static private int dialogState = 0;
+    static private int dialogDefaultState = 0;
+
+    static public final int DIALOG_INPROGRESS = -1;
+
+    static public void resultDialogState(int state){
+        dialogState = state;
+    }
+
+    static public void resultDialogDefaultState(){
+        dialogState = dialogDefaultState;
+    }
+
+    static public int getDialogState(){
+        return dialogState;
+    }
+
+    public static void showDialog(
+        int	type, String title, String message, String buttons, int	default_button, String textfield
+    ) {
+        dialogState = DIALOG_INPROGRESS;
+        dialogDefaultState = default_button;
+        vimtouch.showDialog(type,title, message, buttons, default_button, textfield);
     }
 
     /**

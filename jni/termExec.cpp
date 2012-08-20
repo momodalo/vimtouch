@@ -53,9 +53,14 @@ int AndroidMain(int argc, char**argv);
 extern int fake_gpm_fd[2];
 };
 
+static JNIEnv* global_env;
+static JavaVM* global_vm;
 static jclass class_fileDescriptor;
 static jfieldID field_fileDescriptor_descriptor;
 static jmethodID method_fileDescriptor_init;
+static jclass class_Exec;
+static jmethodID method_Exec_showDialog;
+static jmethodID method_Exec_getDialogState;
 
 
 class String8 {
@@ -92,6 +97,8 @@ static void *thread_wrapper ( void* value)
 
     char** thread_arg = (char**)value;
 
+    global_vm->AttachCurrentThread(&global_env, NULL);
+
         setsid();
         
         pts = open(thread_arg[0], O_RDWR);
@@ -114,7 +121,9 @@ static void *thread_wrapper ( void* value)
         free(thread_arg[0]);
         free(thread_arg[1]);
         free(thread_arg);
-        exit(-1);
+
+    global_vm->DetachCurrentThread();
+    exit(-1);
 }
 
 static int create_subprocess(const char *cmd, const char *arg0, const char *arg1,
@@ -363,6 +372,38 @@ static void vimtouch_Exec_close(JNIEnv *env, jobject clazz, jobject fileDescript
     getout(0);
 }
 
+extern "C" {
+
+int vimtouch_Exec_getDialogState() 
+{
+    jint result = global_env->CallStaticIntMethod(class_Exec, method_Exec_getDialogState);
+    return result;
+}
+
+void vimtouch_Exec_showDialog(
+	int	type,
+	char_u	*title,
+	char_u	*message,
+	char_u	*buttons,
+	int	default_button,
+	char_u	*textfield){
+
+    jstring titleStr = global_env->NewStringUTF((const char*)(title));
+    jstring messageStr = global_env->NewStringUTF((const char*)(message));
+    jstring buttonsStr = global_env->NewStringUTF((const char*)(buttons));
+    jstring textfieldStr = global_env->NewStringUTF((const char*)(textfield));
+
+    global_env->CallStaticVoidMethod(class_Exec, method_Exec_showDialog, 
+            type, titleStr, messageStr, buttonsStr, default_button, textfieldStr);
+
+    global_env->DeleteLocalRef(titleStr);
+    global_env->DeleteLocalRef(messageStr);
+    global_env->DeleteLocalRef(buttonsStr);
+    global_env->DeleteLocalRef(textfieldStr);
+}
+
+}
+
 static int register_FileDescriptor(JNIEnv *env)
 {
     jclass clazz = env->FindClass("java/io/FileDescriptor");
@@ -439,12 +480,32 @@ static int registerNativeMethods(JNIEnv* env, const char* className,
  */
 static int registerNatives(JNIEnv* env)
 {
-  if (!registerNativeMethods(env, classPathName, method_table, 
+    if (!registerNativeMethods(env, classPathName, method_table, 
                  sizeof(method_table) / sizeof(method_table[0]))) {
-    return JNI_FALSE;
-  }
+        return JNI_FALSE;
+    }
+  
+    /* get class */
+    jclass clazz = env->FindClass(classPathName);
 
-  return JNI_TRUE;
+    class_Exec = (jclass)env->NewGlobalRef(clazz);
+
+    if (class_Exec == NULL) {
+        return -1;
+    }
+
+    method_Exec_showDialog = env->GetStaticMethodID(class_Exec, "showDialog", "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)V");
+    if (method_Exec_showDialog == NULL) {
+        LOGE("Can't find Exec.showDialog");
+        return -1;
+    }
+    method_Exec_getDialogState = env->GetStaticMethodID(class_Exec, "getDialogState", "()I");
+    if (method_Exec_getDialogState == NULL) {
+        LOGE("Can't find Exec.getDialogState");
+        return -1;
+    }
+
+    return JNI_TRUE;
 }
 
 
@@ -472,6 +533,8 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
         goto bail;
     }
     env = uenv.env;
+    global_env = env;
+    global_vm = vm;
     
     if ((result = register_FileDescriptor(env)) < 0) {
         LOGE("ERROR: registerFileDescriptor failed");

@@ -74,6 +74,7 @@ import android.view.ScaleGestureDetector;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
+import android.content.DialogInterface;
 
 /**
  * A terminal emulator activity.
@@ -338,6 +339,8 @@ public class VimTouch extends Activity {
 
         if(checkVimRuntime())
             startEmulator();
+
+        Exec.vimtouch = this;
     }
 
     private void startEmulator() {
@@ -626,6 +629,84 @@ public class VimTouch extends Activity {
         super.onConfigurationChanged(newConfig);
 
         mEmulatorView.updateSize(true);
+    }
+
+    private final int MSG_DIALOG = 1;
+    private class DialogObj {
+        public int type;
+        public String title;
+        public String message;
+        public String buttons;
+        public int def_button;
+        public String textfield;
+    };
+    
+    private Handler mHandler = new Handler() {
+        @Override public void handleMessage(Message msg) {
+            switch (msg.what) {
+            case MSG_DIALOG:
+                DialogObj obj = (DialogObj)msg.obj;
+                realShowDialog(obj.type, obj.title, obj.message, obj.buttons, obj.def_button, obj.textfield);
+                break;
+            default:
+                super.handleMessage(msg);
+            }
+        }
+    };
+
+    public void showDialog(int type, String title, String message, String buttons, int def_button, String textfield) {
+        DialogObj obj = new DialogObj();
+        obj.type = type;
+        obj.title = title;
+        obj.message = message;
+        obj.buttons = buttons;
+        obj.def_button = def_button;
+        obj.textfield = textfield;
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_DIALOG, obj));
+    }
+
+    private AlertDialog.Builder actionBuilder;
+
+    private void realShowDialog(int type, String title, String message, String buttons, int def_button, String textfield) {
+        buttons = buttons.replaceAll("&", "");
+        String button_array[] = buttons.split("\n");
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(message)
+               .setTitle(title)
+               .setPositiveButton(button_array[def_button], new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        Exec.resultDialogDefaultState();
+                    }
+               })
+               .setNegativeButton("More", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        AlertDialog actdialog = actionBuilder.create();
+                        actdialog.show();
+                    }
+               });
+               /*
+        switch(type) {
+            case 1:
+                break;
+            case 2:
+                break;
+            default:
+                dialog = null;
+        }
+        */
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        actionBuilder = new AlertDialog.Builder(VimTouch.this);
+        actionBuilder.setTitle(title)
+                  .setCancelable(false)
+                  .setItems(button_array, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog2, int item) {
+                            Exec.resultDialogState(item);
+                        }
+                  });
     }
 
     @Override

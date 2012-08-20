@@ -31,6 +31,7 @@ LOCAL_SRC_FILES:= \
   termExec.cpp \
   android_main.c\
   fakegpm.c\
+  gui_android.c\
   vim/src/buffer.c\
   vim/src/blowfish.c\
   vim/src/charset.c\
