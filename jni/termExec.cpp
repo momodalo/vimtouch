@@ -271,7 +271,6 @@ static jobject vimtouch_Exec_createSubProcess(JNIEnv *env, jobject clazz,
     return result;
 }
 
-
 static void vimtouch_Exec_setPtyWindowSize(JNIEnv *env, jobject clazz,
     jobject fileDescriptor, jint row, jint col, jint xpixel, jint ypixel)
 {
@@ -290,11 +289,11 @@ static void vimtouch_Exec_setPtyWindowSize(JNIEnv *env, jobject clazz,
     sz.ws_ypixel = ypixel;
     
     ioctl(fd, TIOCSWINSZ, &sz);
-    redraw_later(CLEAR);
-    update_screen(CLEAR);
-    setcursor();
     out_flush();
-    mch_get_shellsize();
+    shell_resized_check();
+    //redraw_later(CLEAR);
+    //update_screen(CLEAR);
+    //setcursor();
 }
 
 static void updateScreen()

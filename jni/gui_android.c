@@ -55,6 +55,6 @@ gui_mch_dialog(
         usleep(100000);
         state = vimtouch_Exec_getDialogState();
     }
-    return state+1;
+    return state;
 }
 #endif

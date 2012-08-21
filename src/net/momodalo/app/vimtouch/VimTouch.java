@@ -75,6 +75,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
 import android.content.DialogInterface;
+import android.os.ParcelFileDescriptor;
 
 /**
  * A terminal emulator activity.
@@ -151,6 +152,8 @@ public class VimTouch extends Activity {
     private static final String IME_KEY = "ime";
     private static final String SHELL_KEY = "shell";
     private static final String INITIALCOMMAND_KEY = "initialcommand";
+
+    private static final String TERM_FD = "TERM_FD";
 
     public static final int WHITE = 0xffffffff;
     public static final int BLACK = 0xff000000;
@@ -337,10 +340,23 @@ public class VimTouch extends Activity {
         button.setOnClickListener(mClickListener);
         mButtonBar.addView((View)button);
 
+        mTermFd = null;
+        if(icicle != null && icicle.containsKey(TERM_FD))
+            mTermFd = ((ParcelFileDescriptor)icicle.getParcelable(TERM_FD)).getFileDescriptor();
+        
         if(checkVimRuntime())
             startEmulator();
 
         Exec.vimtouch = this;
+    }
+
+    protected void onSaveInstanceState (Bundle outState) {
+        super.onSaveInstanceState(outState);
+        try {
+            outState.putParcelable(TERM_FD,ParcelFileDescriptor.dup(mTermFd));
+        }catch(Exception e){
+            Log.e(VimTouch.LOG_TAG, "Save Instance State error " + e);
+        }
     }
 
     private void startEmulator() {
@@ -357,6 +373,9 @@ public class VimTouch extends Activity {
 
         updatePrefs();
         mAlreadyStarted = true;
+
+        mEmulatorView.updateSize(true);
+        Exec.updateScreen();
     }
 
     public String getVimrc() {
@@ -395,29 +414,31 @@ public class VimTouch extends Activity {
     }
 
     private void startListening() {
-        int[] processId = new int[1];
-
-        createSubprocess(processId);
-        final int procId = processId[0];
-
-        final Handler handler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-            }
-        };
-
-        Runnable watchForDeath = new Runnable() {
-
-            public void run() {
-                Log.i(VimTouch.LOG_TAG, "waiting for: " + procId);
-               int result = Exec.waitFor(procId);
-                Log.i(VimTouch.LOG_TAG, "Subprocess exited: " + result);
-                handler.sendEmptyMessage(result);
-             }
-
-        };
-        Thread watcher = new Thread(watchForDeath);
-        watcher.start();
+        if(mTermFd == null){
+            int[] processId = new int[1];
+    
+            createSubprocess(processId);
+            final int procId = processId[0];
+    
+            final Handler handler = new Handler() {
+                @Override
+                public void handleMessage(Message msg) {
+                }
+            };
+    
+            Runnable watchForDeath = new Runnable() {
+    
+                public void run() {
+                    Log.i(VimTouch.LOG_TAG, "waiting for: " + procId);
+                   int result = Exec.waitFor(procId);
+                    Log.i(VimTouch.LOG_TAG, "Subprocess exited: " + result);
+                    handler.sendEmptyMessage(result);
+                 }
+    
+            };
+            Thread watcher = new Thread(watchForDeath);
+            watcher.start();
+        }
 
         mTermOut = new FileOutputStream(mTermFd);
 
@@ -630,7 +651,7 @@ public class VimTouch extends Activity {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        mEmulatorView.updateSize(true);
+        //mEmulatorView.updateSize(true);
     }
 
     private final int MSG_DIALOG = 1;
@@ -706,7 +727,7 @@ public class VimTouch extends Activity {
                   .setCancelable(false)
                   .setItems(button_array, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog2, int item) {
-                            Exec.resultDialogState(item);
+                            Exec.resultDialogState(item+1);
                         }
                   });
     }
