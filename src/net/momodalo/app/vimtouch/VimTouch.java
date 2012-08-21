@@ -340,23 +340,10 @@ public class VimTouch extends Activity {
         button.setOnClickListener(mClickListener);
         mButtonBar.addView((View)button);
 
-        mTermFd = null;
-        if(icicle != null && icicle.containsKey(TERM_FD))
-            mTermFd = ((ParcelFileDescriptor)icicle.getParcelable(TERM_FD)).getFileDescriptor();
-        
         if(checkVimRuntime())
             startEmulator();
 
         Exec.vimtouch = this;
-    }
-
-    protected void onSaveInstanceState (Bundle outState) {
-        super.onSaveInstanceState(outState);
-        try {
-            outState.putParcelable(TERM_FD,ParcelFileDescriptor.dup(mTermFd));
-        }catch(Exception e){
-            Log.e(VimTouch.LOG_TAG, "Save Instance State error " + e);
-        }
     }
 
     private void startEmulator() {
@@ -651,7 +638,8 @@ public class VimTouch extends Activity {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        //mEmulatorView.updateSize(true);
+        Log.e(VimTouch.LOG_TAG, "on configuration changed");
+        mEmulatorView.updateSize(true);
     }
 
     private final int MSG_DIALOG = 1;
@@ -3153,9 +3141,9 @@ class EmulatorView extends View implements
             int h = getHeight();//mVisibleRect.height();
             // Log.w("Term", "(" + w + ", " + h + ")");
             if (force || w != mVisibleWidth || h != mVisibleHeight) {
-                updateSize(w, h);
                 mVisibleWidth = w;
                 mVisibleHeight = h;
+                updateSize(w, h);
                 Exec.updateScreen();
             }
         }

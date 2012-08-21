@@ -9,7 +9,7 @@
         <activity android:name="VimTouch"
                 android:theme="@style/Theme"
                 android:launchMode="singleInstance"
-                android:configChanges="keyboard|keyboardHidden|orientation"
+                android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
                 android:windowSoftInputMode="adjustResize|stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

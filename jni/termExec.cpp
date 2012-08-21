@@ -291,9 +291,9 @@ static void vimtouch_Exec_setPtyWindowSize(JNIEnv *env, jobject clazz,
     ioctl(fd, TIOCSWINSZ, &sz);
     out_flush();
     shell_resized_check();
-    //redraw_later(CLEAR);
-    //update_screen(CLEAR);
-    //setcursor();
+    redraw_later(CLEAR);
+    update_screen(CLEAR);
+    setcursor();
 }
 
 static void updateScreen()
