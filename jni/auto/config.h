@@ -168,7 +168,7 @@
 #define HAVE_GETTIMEOFDAY 1
 #define HAVE_GETWD 1
 #define HAVE_ICONV 1
-#define HAVE_NL_LANGINFO_CODESET 1
+/* #undef HAVE_NL_LANGINFO_CODESET */
 #define HAVE_LSTAT 1
 #define HAVE_MEMCMP 1
 #define HAVE_MEMSET 1
@@ -227,7 +227,7 @@
 /* #undef HAVE_FRAME_H */
 #define HAVE_ICONV_H 1
 #define HAVE_INTTYPES_H 1
-#define HAVE_LANGINFO_H 1
+/* #undef HAVE_LANGINFO_H */
 /* #undef HAVE_LIBC_H */
 #define HAVE_LIBGEN_H 1
 #define HAVE_LIBINTL_H 1
@@ -377,7 +377,7 @@
 /* #undef FEAT_CSCOPE */
 
 /* Define if you want to include multibyte support. */
-/* #undef FEAT_MBYTE */
+#define FEAT_MBYTE 1
 
 /* Define if you want to include fontset support. */
 /* #undef FEAT_XFONTSET */
@@ -407,7 +407,7 @@
 /* #undef HAVE_GETTEXT */
 
 /* Define if _nl_msg_cat_cntr is present. */
-#define HAVE_NL_MSG_CAT_CNTR 1
+/* #undef HAVE_NL_MSG_CAT_CNTR */
 
 /* Define if we have dlopen() */
 #define HAVE_DLOPEN 1

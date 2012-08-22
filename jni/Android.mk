@@ -25,6 +25,10 @@ LOCAL_MODULE_TAGS := eng
 # This is the target being built.
 LOCAL_MODULE:= libvimtouch
 
+$(shell cp $(LOCAL_PATH)/iconv_h/include/iconv.h $(LOCAL_PATH)/libiconv/include/iconv.h )
+$(shell cp $(LOCAL_PATH)/iconv_h/lib/config.h $(LOCAL_PATH)/libiconv/lib/config.h )
+$(shell cp $(LOCAL_PATH)/iconv_h/libcharset/config.h $(LOCAL_PATH)/libiconv/libcharset/config.h )
+$(shell cp $(LOCAL_PATH)/iconv_h/libcharset/include/localcharset.h $(LOCAL_PATH)/libiconv/libcharset/include/localcharset.h )
 
 # All of the source files that we will compile.
 LOCAL_SRC_FILES:= \
@@ -32,6 +36,10 @@ LOCAL_SRC_FILES:= \
   android_main.c\
   fakegpm.c\
   gui_android.c\
+  misc.c\
+  libiconv/lib/iconv.c \
+  libiconv/libcharset/lib/localcharset.c \
+  libiconv/lib/relocatable.c \
   vim/src/buffer.c\
   vim/src/blowfish.c\
   vim/src/charset.c\
@@ -93,8 +101,13 @@ LOCAL_STATIC_LIBRARIES :=
 LOCAL_C_INCLUDES += \
 	$(JNI_H_INCLUDE)
 
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/libiconv/include \
+                   $(LOCAL_PATH)/libiconv/libcharset \
+                   $(LOCAL_PATH)/libiconv/libcharset/include
+
 # No special compiler flags.
 LOCAL_CFLAGS += -I$(LOCAL_PATH) -I$(LOCAL_PATH)/vim/src/ -I$(LOCAL_PATH)/vim/src/proto -I$(LOCAL_PATH)/libncurses/include -DUNIX -DHAVE_CONFIG_H
+LOCAL_CFLAGS += -DLIBDIR=\"\"
 
 # Don't prelink this library.  For more efficient code, you may want
 # to add this library to the prelink map and set this to true. However,
