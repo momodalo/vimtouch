@@ -134,6 +134,11 @@ public class TermView extends EmulatorView implements
         mScaleSpan = (float)-1.0;
     }
 
+    public boolean onSingleTapUp(MotionEvent ev) {
+        mSession.write(27);
+        return true;
+    }
+
     private float mVelocity = 0;
 
     private Runnable mFlingRun = new Runnable() {
