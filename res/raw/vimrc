@@ -20,3 +20,5 @@ set autoindent
 set smartindent
 
 set nocompatible
+
+set encoding=utf8
