@@ -363,15 +363,18 @@ public class VimTouch extends Activity {
         super.onResume();
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         mSettings.readPrefs(mPrefs);
-        updatePrefs();
-        mEmulatorView.onResume();
+        if(mEmulatorView != null){
+            updatePrefs();
+            mEmulatorView.onResume();
+        }
     }
 
     @Override
     public void onPause() {
         Log.e(VimTouch.LOG_TAG, "on pause.");
         super.onPause();
-        mEmulatorView.onPause();
+        if(mEmulatorView != null)
+            mEmulatorView.onPause();
     }
 
     @Override
