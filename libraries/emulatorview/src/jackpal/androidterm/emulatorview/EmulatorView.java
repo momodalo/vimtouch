@@ -105,6 +105,7 @@ public class EmulatorView extends View implements GestureDetector.OnGestureListe
      * Used to render text
      */
     private TextRenderer mTextRenderer;
+    private TextRenderer mZoomTextRenderer;
 
     /**
      * Text size. Zero means 4 x 8 font.
@@ -1042,9 +1043,11 @@ public class EmulatorView extends View implements GestureDetector.OnGestureListe
         ColorScheme scheme = mColorScheme;
         if (mTextSize > 0) {
             mTextRenderer = new PaintRenderer(mTextSize, scheme);
+            mZoomTextRenderer = new PaintRenderer(mTextSize*3, scheme);
         }
         else {
             mTextRenderer = new Bitmap4x8FontRenderer(getResources(), scheme);
+            mZoomTextRenderer = new Bitmap4x8FontRenderer(getResources(), scheme);
         }
         mBackgroundPaint.setColor(scheme.getBackColor());
         mCharacterWidth = mTextRenderer.getCharacterWidth();
@@ -1131,6 +1134,19 @@ public class EmulatorView extends View implements GestureDetector.OnGestureListe
         int endLine = mTopRow + mRows;
         int cx = mEmulator.getCursorCol();
         int cy = mEmulator.getCursorRow();
+        int middle = mTopRow + mRows/2;
+        int zoomStart = 0;
+        int zoomEnd = 0;
+        int zoomDist = mRows/5;
+        if(zoomDist < 10) zoomDist = 10;
+        if(cy<middle){
+            zoomStart = zoomDist;
+            zoomEnd = zoomDist+9;
+        }else{
+            zoomStart = -zoomDist;
+            zoomEnd = -zoomDist+9;
+        }
+
         for (int i = mTopRow; i < endLine; i++) {
             int cursorX = -1;
             if (i == cy && mCursorVisible) {
@@ -1148,8 +1164,26 @@ public class EmulatorView extends View implements GestureDetector.OnGestureListe
                     selx2 = mColumns;
                 }
             }
+            if( mZoom && 
+                i >= cy + zoomStart && i < cy + zoomEnd){
+            }else
             mTranscriptScreen.drawText(i, canvas, x, y, mTextRenderer, cursorX, selx1, selx2, mImeBuffer);
             y += mCharacterHeight;
+        }
+
+        if(mZoom){
+            float newx = -2 * cx * mCharacterWidth;
+            mTranscriptScreen.drawText(cy, canvas, newx, 
+                    (cy+zoomEnd-4)*mCharacterHeight, mZoomTextRenderer, cx, -1 ,-1 ,mImeBuffer);
+            mTranscriptScreen.drawText(cy - 1, canvas, newx, 
+                    (cy+zoomEnd-7)*mCharacterHeight, mZoomTextRenderer, -1, -1 ,-1 ,mImeBuffer);
+            mTranscriptScreen.drawText(cy + 1, canvas, newx, 
+                    (cy+zoomEnd-1)*mCharacterHeight, mZoomTextRenderer, -1, -1 ,-1 ,mImeBuffer);
+        }
+
+        char[] lastLine = mTranscriptScreen.getLine(endLine-1);
+        if (!mZoom && lastLine != null && (lastLine[0] == ':' || lastLine[0] == 'E')){
+            mTranscriptScreen.drawText(endLine-1, canvas, x * 3, mCharacterHeight*3, mZoomTextRenderer, cx, -1 ,-1 ,"");
         }
     }
 
@@ -1233,6 +1267,24 @@ public class EmulatorView extends View implements GestureDetector.OnGestureListe
      */
     public void setFnKeyCode(int keyCode) {
         mFnKeyCode = keyCode;
+    }
+
+    public float getCharacterWidth(){
+        return mCharacterWidth;
+    }
+
+    public float getCharacterHeight(){
+        return mCharacterHeight;
+    }
+
+
+    boolean mZoom = false;
+    public void setZoom(boolean zoom) {
+        mZoom = zoom;
+    }
+
+    public boolean getZoom() {
+        return mZoom;
     }
 }
 

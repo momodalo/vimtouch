@@ -413,4 +413,14 @@ class TranscriptScreen implements Screen {
     public void resize(int columns, int rows, int foreColor, int backColor) {
         init(columns, mTotalRows, rows, foreColor, backColor);
     }
+
+    public char[] getLine(int row) {
+        char[] line;
+        try {
+            line = mData.getLine(row);
+            return line;
+        }catch (Exception e){
+            return null;
+        }
+    }
 }
