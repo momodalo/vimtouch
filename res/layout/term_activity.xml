@@ -19,6 +19,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" 
     android:layout_height="match_parent"
+    android:id="@+id/main_layout"
     android:orientation="vertical">
 
 
@@ -36,12 +37,4 @@
         </LinearLayout>
     </HorizontalScrollView>
 
-    <net.momodalo.app.vimtouch.EmulatorView android:id="@+id/emulatorView"
-	      android:layout_width="wrap_content"
-	      android:layout_height="match_parent"
-	      android:layout_alignParentLeft="true"
-          android:layout_weight="1"
-	      />
-
-   
 </LinearLayout>

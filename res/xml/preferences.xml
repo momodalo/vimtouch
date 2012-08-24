@@ -22,7 +22,7 @@
 
         <ListPreference
                 android:key="fontsize"
-                android:defaultValue="@string/default_value_fontsize_preference"
+                android:defaultValue="@string/pref_fontsize_default"
                 android:title="@string/title_fontsize_preference"
                 android:summary="@string/summary_fontsize_preference"
                 android:entries="@array/entries_fontsize_preference"
@@ -31,12 +31,18 @@
 
         <ListPreference
                 android:key="color"
-                android:defaultValue="@string/default_value_color_preference"
+                android:defaultValue="@string/pref_color_default"
                 android:title="@string/title_color_preference"
                 android:summary="@string/summary_color_preference"
                 android:entries="@array/entries_color_preference"
                 android:entryValues="@array/entryvalues_color_preference"
                 android:dialogTitle="@string/dialog_title_color_preference" />
+
+        <CheckBoxPreference
+                android:key="utf8_by_default"
+                android:defaultValue="@bool/pref_utf8_by_default_default"
+                android:title="@string/title_utf8_by_default_preference"
+                android:summary="@string/summary_utf8_by_default_preference" />
 
     </PreferenceCategory>
 
@@ -44,13 +50,40 @@
             android:title="@string/keyboard_preferences">
 
         <ListPreference
+                android:key="backaction"
+                android:defaultValue="@string/pref_backaction_default"
+                android:title="@string/title_backaction_preference"
+                android:summary="@string/summary_backaction_preference"
+                android:entries="@array/entries_backaction_preference"
+                android:entryValues="@array/entryvalues_backaction_preference"
+                android:dialogTitle="@string/dialog_title_backaction_preference" />
+
+        <ListPreference
                 android:key="controlkey"
-                android:defaultValue="@string/default_value_controlkey_preference"
+                android:defaultValue="@string/pref_controlkey_default"
                 android:title="@string/title_controlkey_preference"
                 android:summary="@string/summary_controlkey_preference"
                 android:entries="@array/entries_controlkey_preference"
                 android:entryValues="@array/entryvalues_controlkey_preference"
                 android:dialogTitle="@string/dialog_title_controlkey_preference" />
+
+        <ListPreference
+                android:key="fnkey"
+                android:defaultValue="@string/pref_fnkey_default"
+                android:title="@string/title_fnkey_preference"
+                android:summary="@string/summary_fnkey_preference"
+                android:entries="@array/entries_fnkey_preference"
+                android:entryValues="@array/entryvalues_fnkey_preference"
+                android:dialogTitle="@string/dialog_title_fnkey_preference" />
+
+        <ListPreference
+                android:key="ime"
+                android:defaultValue="@string/pref_ime_default"
+                android:title="@string/title_ime_preference"
+                android:summary="@string/summary_ime_preference"
+                android:entries="@array/entries_ime_preference"
+                android:entryValues="@array/entryvalues_ime_preference"
+                android:dialogTitle="@string/dialog_title_ime_preference" />
 
     </PreferenceCategory>
 

@@ -25,10 +25,10 @@ LOCAL_MODULE_TAGS := eng
 # This is the target being built.
 LOCAL_MODULE:= libvimtouch
 
-$(shell cp $(LOCAL_PATH)/iconv_h/include/iconv.h $(LOCAL_PATH)/libiconv/include/iconv.h )
-$(shell cp $(LOCAL_PATH)/iconv_h/lib/config.h $(LOCAL_PATH)/libiconv/lib/config.h )
-$(shell cp $(LOCAL_PATH)/iconv_h/libcharset/config.h $(LOCAL_PATH)/libiconv/libcharset/config.h )
-$(shell cp $(LOCAL_PATH)/iconv_h/libcharset/include/localcharset.h $(LOCAL_PATH)/libiconv/libcharset/include/localcharset.h )
+$(shell if [ ! -f $(LOCAL_PATH)/libiconv/include/iconv.h ]; then cp $(LOCAL_PATH)/iconv_h/include/iconv.h $(LOCAL_PATH)/libiconv/include/iconv.h; fi )
+$(shell if [ ! -f $(LOCAL_PATH)/libiconv/lib/config.h ]; then cp $(LOCAL_PATH)/iconv_h/lib/config.h $(LOCAL_PATH)/libiconv/lib/config.h; fi )
+$(shell if [ ! -f $(LOCAL_PATH)/libiconv/libcharset/config.h ]; then cp $(LOCAL_PATH)/iconv_h/libcharset/config.h $(LOCAL_PATH)/libiconv/libcharset/config.h; fi )
+$(shell if [ ! -f $(LOCAL_PATH)/libiconv/libcharset/include/localcharset.h ]; then cp $(LOCAL_PATH)/iconv_h/libcharset/include/localcharset.h $(LOCAL_PATH)/libiconv/libcharset/include/localcharset.h; fi )
 
 # All of the source files that we will compile.
 LOCAL_SRC_FILES:= \

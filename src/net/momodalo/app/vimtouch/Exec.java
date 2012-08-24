@@ -86,6 +86,9 @@ public class Exec
     public static native void setPtyWindowSize(FileDescriptor fd,
        int row, int col, int xpixel, int ypixel);
 
+    public static native void setPtyUTF8Mode(FileDescriptor fd,
+       boolean utf8Mode);
+
     public static native int scrollBy(int processId);
 
     /**

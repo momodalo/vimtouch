@@ -110,4 +110,19 @@
 
    <string name="vimrc">Edit vimrc</string>
 
+   <string name="title_utf8_by_default_preference">Default to UTF-8</string>
+   <string name="summary_utf8_by_default_preference">Whether UTF-8 mode is enabled by default.</string>
+
+   <string name="title_backaction_preference">Back button behavior</string>
+   <string name="summary_backaction_preference">Choose what pressing the back button does.</string>
+   <string name="dialog_title_backaction_preference">Back button behavior</string>
+
+   <string name="title_fnkey_preference">Fn key</string>
+   <string name="summary_fnkey_preference">Choose Fn key.</string>
+   <string name="dialog_title_fnkey_preference">Fn key</string>
+
+   <string name="title_ime_preference">Input method</string>
+   <string name="summary_ime_preference">Choose input method for soft keyboard.</string>
+   <string name="dialog_title_ime_preference">Input method</string>
+
 </resources>

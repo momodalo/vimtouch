@@ -92,9 +92,8 @@ private:
 
 static void *thread_wrapper ( void* value)
 {
+    LOGE("thread wrapper");
     int pts;
-            LOGE("thread wrapper");
-
     char** thread_arg = (char**)value;
 
     global_vm->AttachCurrentThread(&global_env, NULL);
@@ -123,6 +122,7 @@ static void *thread_wrapper ( void* value)
         free(thread_arg);
 
     global_vm->DetachCurrentThread();
+    LOGE("thread leave");
     exit(-1);
 }
 
@@ -296,6 +296,27 @@ static void vimtouch_Exec_setPtyWindowSize(JNIEnv *env, jobject clazz,
     setcursor();
 }
 
+static void vimtouch_Exec_setPtyUTF8Mode(JNIEnv *env, jobject clazz,
+    jobject fileDescriptor, jboolean utf8Mode)
+{
+    int fd;
+    struct termios tios;
+
+    fd = env->GetIntField(fileDescriptor, field_fileDescriptor_descriptor);
+
+    if (env->ExceptionOccurred() != NULL) {
+        return;
+    }
+
+    tcgetattr(fd, &tios);
+    if (utf8Mode) {
+        tios.c_iflag |= IUTF8;
+    } else {
+        tios.c_iflag &= ~IUTF8;
+    }
+    tcsetattr(fd, TCSANOW, &tios);
+}
+
 static void updateScreen()
 {
     //redraw_later(NOT_VALID);
@@ -437,6 +458,8 @@ static JNINativeMethod method_table[] = {
         (void*) vimtouch_Exec_createSubProcess },
     { "setPtyWindowSize", "(Ljava/io/FileDescriptor;IIII)V",
         (void*) vimtouch_Exec_setPtyWindowSize},
+    { "setPtyUTF8Mode", "(Ljava/io/FileDescriptor;Z)V",
+        (void*) vimtouch_Exec_setPtyUTF8Mode},
     { "moveCursor", "(II)V",
         (void*) vimtouch_Exec_moveCursor},
     { "scrollBy", "(I)I",
