@@ -18,8 +18,27 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/menu_vimrc"
         android:title="@string/vimrc" />
+    <item android:id="@+id/menu_fullscreen"
+        android:title="@string/toggle_fullscreen" />
     <item android:id="@+id/menu_preferences"
+        android:icon="@android:drawable/ic_menu_preferences"
         android:title="@string/preferences" />
     <item android:id="@+id/menu_toggle_soft_keyboard"
+        android:showAsAction="always"
+        android:icon="@android:drawable/ic_menu_edit"
         android:title="@string/toggle_soft_keyboard" />
+    <item android:id="@+id/menu_ESC"
+        android:showAsAction="always"
+        android:title="@string/esc_key" />
+    <item android:id="@+id/menu_quit"
+        android:showAsAction="always"
+        android:title="@string/quit_file" />
+    <item android:id="@+id/menu_save"
+        android:showAsAction="always"
+        android:icon="@android:drawable/ic_menu_save"
+        android:title="@string/save_file" />
+    <item android:id="@+id/menu_keys"
+        android:showAsAction="always"
+        android:icon="@android:drawable/ic_menu_more"
+        android:title="@string/more_key" />
 </menu>

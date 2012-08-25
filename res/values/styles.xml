@@ -15,7 +15,7 @@
 -->
 
 <resources>
-    <style name="Theme" parent="@android:style/Theme.Light">
+    <style name="Theme" parent="@android:style/Theme.Holo">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowFrame">@null</item>
     </style>

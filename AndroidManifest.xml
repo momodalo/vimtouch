@@ -7,7 +7,7 @@
     <application android:icon="@drawable/app_vimtouch"
                 android:label="@string/application_vimtouch">
         <activity android:name="VimTouch"
-                android:theme="@style/Theme"
+                android:theme="@android:style/Theme.Holo"
                 android:launchMode="singleInstance"
                 android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
                 android:windowSoftInputMode="adjustResize|stateHidden">

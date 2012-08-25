@@ -24,11 +24,12 @@
 
 
     <HorizontalScrollView
+        android:id="@+id/button_bar"
         android:background="@drawable/bar_bg"
         android:layout_width="fill_parent"
         android:layout_height="30sp">
         <LinearLayout
-            android:id="@+id/button_bar"
+            android:id="@+id/button_bar_layout"
             android:background="@drawable/bar_bg"
             android:layout_width="match_parent" 
             android:layout_height="30sp"

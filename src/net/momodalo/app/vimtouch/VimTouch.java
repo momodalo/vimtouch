@@ -115,8 +115,10 @@ public class VimTouch extends Activity {
     private TermView mEmulatorView;
     private VimTermSession mSession;
     private TermSettings mSettings;
+    private LinearLayout mMainLayout;
 
-    private LinearLayout mButtonBar;
+    private LinearLayout mButtonBarLayout;
+    private View mButtonBar;
 
     private int mControlKeyId = 0;
 
@@ -215,67 +217,73 @@ public class VimTouch extends Activity {
 
         setContentView(R.layout.term_activity);
 
-        mButtonBar = (LinearLayout) findViewById(R.id.button_bar);
-        TextView button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBar, false);
+        mButtonBar = findViewById(R.id.button_bar);
+
+        mButtonBarLayout = (LinearLayout) findViewById(R.id.button_bar_layout);
+        TextView button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
         button.setText(R.string.title_keyboard);
         button.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){ doToggleSoftKeyboard(); }
         });
-        mButtonBar.addView((View)button);
+        /*
+        mButtonBarLayout.addView((View)button);
 
-        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBar, false);
+        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
         button.setText(R.string.title_esc);
         button.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){ mSession.write(27); }
         });
-        mButtonBar.addView((View)button);
+        mButtonBarLayout.addView((View)button);
+        */
 
         Resources res = getResources();
 
-        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBar, false);
+        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
         button.setText(mPrefs.getString("normal_qucik1", res.getString(R.string.default_normal_quick1)));
         button.setOnClickListener(mClickListener);
-        mButtonBar.addView((View)button);
+        mButtonBarLayout.addView((View)button);
 
-        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBar, false);
+        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
         button.setText(mPrefs.getString("normal_qucik2", res.getString(R.string.default_normal_quick2)));
         button.setOnClickListener(mClickListener);
-        mButtonBar.addView((View)button);
+        mButtonBarLayout.addView((View)button);
 
-        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBar, false);
+        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
         button.setText(mPrefs.getString("normal_qucik3", res.getString(R.string.default_normal_quick3)));
         button.setOnClickListener(mClickListener);
-        mButtonBar.addView((View)button);
+        mButtonBarLayout.addView((View)button);
 
-        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBar, false);
+        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
         button.setText(mPrefs.getString("normal_qucik4", res.getString(R.string.default_normal_quick4)));
         button.setOnClickListener(mClickListener);
-        mButtonBar.addView((View)button);
+        mButtonBarLayout.addView((View)button);
 
-        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBar, false);
+        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
         button.setText(mPrefs.getString("normal_qucik5", res.getString(R.string.default_normal_quick5)));
         button.setOnClickListener(mClickListener);
-        mButtonBar.addView((View)button);
+        mButtonBarLayout.addView((View)button);
 
-        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBar, false);
+        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
         button.setText(mPrefs.getString("normal_qucik6", res.getString(R.string.default_normal_quick6)));
         button.setOnClickListener(mClickListener);
-        mButtonBar.addView((View)button);
+        mButtonBarLayout.addView((View)button);
 
-        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBar, false);
+        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
         button.setText(mPrefs.getString("normal_qucik7", res.getString(R.string.default_normal_quick7)));
         button.setOnClickListener(mClickListener);
-        mButtonBar.addView((View)button);
+        mButtonBarLayout.addView((View)button);
 
-        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBar, false);
+        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
         button.setText(mPrefs.getString("normal_qucik8", res.getString(R.string.default_normal_quick8)));
         button.setOnClickListener(mClickListener);
-        mButtonBar.addView((View)button);
+        mButtonBarLayout.addView((View)button);
 
-        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBar, false);
+        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
         button.setText(mPrefs.getString("normal_qucik9", res.getString(R.string.default_normal_quick9)));
         button.setOnClickListener(mClickListener);
-        mButtonBar.addView((View)button);
+        mButtonBarLayout.addView((View)button);
+
+        mMainLayout = (LinearLayout)findViewById(R.id.main_layout);
 
         if(checkVimRuntime())
             startEmulator();
@@ -293,10 +301,9 @@ public class VimTouch extends Activity {
     }
 
     private void startEmulator() {
-        LinearLayout layout = (LinearLayout)findViewById(R.id.main_layout);
         mSession = new VimTermSession( getApplicationContext().getFilesDir().getPath() ,mUrl, mSettings, "");
         mEmulatorView = createEmulatorView(mSession);
-        layout.addView(mEmulatorView);
+        mMainLayout.addView(mEmulatorView);
 
         mEmulatorView.updateSize(true);
         Exec.updateScreen();
@@ -398,9 +405,11 @@ public class VimTouch extends Activity {
 
         Log.e(VimTouch.LOG_TAG, "on configuration changed");
         mEmulatorView.updateSize(true);
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_UPDATE), 500);
     }
 
     private final int MSG_DIALOG = 1;
+    private final int MSG_UPDATE = 2;
     private class DialogObj {
         public int type;
         public String title;
@@ -413,6 +422,9 @@ public class VimTouch extends Activity {
     private Handler mHandler = new Handler() {
         @Override public void handleMessage(Message msg) {
             switch (msg.what) {
+            case MSG_UPDATE:
+                Exec.updateScreen();
+                break;
             case MSG_DIALOG:
                 DialogObj obj = (DialogObj)msg.obj;
                 realShowDialog(obj.type, obj.title, obj.message, obj.buttons, obj.def_button, obj.textfield);
@@ -489,11 +501,29 @@ public class VimTouch extends Activity {
         int id = item.getItemId();
         if (id == R.id.menu_preferences) {
             doPreferences();
+        } else if (id == R.id.menu_fullscreen) {
+            WindowManager.LayoutParams attrs = getWindow().getAttributes(); 
+            if((attrs.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN ) != 0) 
+                attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            else
+                attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN; 
+            getWindow().setAttributes(attrs); 
         } else if (id == R.id.menu_vimrc) {
             Exec.doCommand("new "+getVimrc());
             Exec.updateScreen();
         } else if (id == R.id.menu_toggle_soft_keyboard) {
             doToggleSoftKeyboard();
+        } else if (id == R.id.menu_ESC) {
+            mSession.write(27);
+        } else if (id == R.id.menu_quit) {
+            mSession.write(":q!\r");
+        } else if (id == R.id.menu_save) {
+            mSession.write(":w\r");
+        } else if (id == R.id.menu_keys) {
+            if(mButtonBarLayout.isShown())
+                mButtonBar.setVisibility(View.GONE);
+            else
+                mButtonBar.setVisibility(View.VISIBLE);
         }
         return super.onOptionsItemSelected(item);
     }
