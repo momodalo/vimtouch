@@ -215,6 +215,9 @@ public class VimTouch extends Activity {
 
         mUrl = getIntentUrl(getIntent());
 
+        if(Integer.valueOf(android.os.Build.VERSION.SDK) < 11)
+            requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         setContentView(R.layout.term_activity);
 
         mButtonBar = findViewById(R.id.button_bar);
