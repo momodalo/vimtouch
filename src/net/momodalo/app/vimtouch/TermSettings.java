@@ -45,6 +45,9 @@ public class TermSettings {
     private boolean mVerifyPath;
     private boolean mDoPathExtensions;
     private boolean mAllowPathPrepend;
+    private boolean mTouchGesture;
+    private boolean mSingleTapESC;
+    private boolean mZoomBottom;
 
     private String mPrependPath = null;
     private String mAppendPath = null;
@@ -67,6 +70,9 @@ public class TermSettings {
     private static final String VERIFYPATH_KEY = "verify_path";
     private static final String PATHEXTENSIONS_KEY = "do_path_extensions";
     private static final String PATHPREPEND_KEY = "allow_prepend_path";
+    private static final String TOUCHGESTURE_KEY = "touch_gesture";
+    private static final String SINGLETAPESC_KEY = "single_tap_esc";
+    private static final String ZOOMBOTTOM_KEY = "zoombottom";
 
     public static final int WHITE = 0xffffffff;
     public static final int BLACK = 0xff000000;
@@ -151,6 +157,9 @@ public class TermSettings {
         mVerifyPath = res.getBoolean(R.bool.pref_verify_path_default);
         mDoPathExtensions = res.getBoolean(R.bool.pref_do_path_extensions_default);
         mAllowPathPrepend = res.getBoolean(R.bool.pref_allow_prepend_path_default);
+        mTouchGesture = res.getBoolean(R.bool.pref_touch_gesture_default);
+        mSingleTapESC = res.getBoolean(R.bool.pref_single_tap_esc_default);
+        mZoomBottom = res.getBoolean(R.bool.pref_zoombottom_default);
     }
 
     public void readPrefs(SharedPreferences prefs) {
@@ -175,6 +184,9 @@ public class TermSettings {
         mVerifyPath = readBooleanPref(VERIFYPATH_KEY, mVerifyPath);
         mDoPathExtensions = readBooleanPref(PATHEXTENSIONS_KEY, mDoPathExtensions);
         mAllowPathPrepend = readBooleanPref(PATHPREPEND_KEY, mAllowPathPrepend);
+        mTouchGesture = readBooleanPref(TOUCHGESTURE_KEY, mTouchGesture);
+        mSingleTapESC = readBooleanPref(SINGLETAPESC_KEY, mSingleTapESC);
+        mZoomBottom = readBooleanPref(ZOOMBOTTOM_KEY, mZoomBottom);
         mPrefs = null;  // we leak a Context if we hold on to this
     }
 
@@ -308,5 +320,17 @@ public class TermSettings {
 
     public String getAppendPath() {
         return mAppendPath;
+    }
+
+    public boolean getTouchGesture() {
+        return mTouchGesture;
+    }
+
+    public boolean getSingleTapESC() {
+        return mSingleTapESC;
+    }
+
+    public boolean getZoomBottom() {
+        return mZoomBottom;
     }
 }

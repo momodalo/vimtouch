@@ -20,6 +20,8 @@ public class TermView extends EmulatorView implements
     private int mTopRow = 0; //we don't use termnial scroll
     private GestureDetector mGestureDetector;
     private ScaleGestureDetector mScaleDetector;
+    private boolean mSingleTapESC;
+    private boolean mTouchGesture;
 
     private static final int FLING_REFRESH_PERIOD = 50;
     private static final int SCREEN_CHECK_PERIOD = 1000;
@@ -44,6 +46,9 @@ public class TermView extends EmulatorView implements
         setBackKeyCharacter(settings.getBackKeyCharacter());
         setControlKeyCode(settings.getControlKeyCode());
         setFnKeyCode(settings.getFnKeyCode());
+        setZoomBottom(settings.getZoomBottom());
+        mSingleTapESC = settings.getSingleTapESC();
+        mTouchGesture = settings.getTouchGesture();
     }
 
     public void updatePrefs(TermSettings settings) {
@@ -135,7 +140,7 @@ public class TermView extends EmulatorView implements
     }
 
     public boolean onSingleTapUp(MotionEvent ev) {
-        mSession.write(27);
+        if(mSingleTapESC)mSession.write(27);
         return true;
     }
 
@@ -189,7 +194,7 @@ public class TermView extends EmulatorView implements
             if(mLastY == -1){
                 mLastY = y;
             } else if(mLastY != -1 && Math.abs(y-mLastY) > getCharacterHeight() && !getZoom()){
-                Exec.scrollBy((int)((mLastY - y)/getCharacterHeight()));
+                if(mTouchGesture)Exec.scrollBy((int)((mLastY - y)/getCharacterHeight()));
                 mLastY = y;
             }
             Exec.moveCursor( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
@@ -199,7 +204,7 @@ public class TermView extends EmulatorView implements
             setZoom(false);
             invalidate();
         }
-        if (mScaleSpan < 0.0) 
+        if (mTouchGesture && mScaleSpan < 0.0) 
             mGestureDetector.onTouchEvent(ev);
         return mScaleDetector.onTouchEvent(ev);
     }

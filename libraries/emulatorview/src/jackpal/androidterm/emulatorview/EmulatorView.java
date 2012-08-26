@@ -1182,7 +1182,7 @@ public class EmulatorView extends View implements GestureDetector.OnGestureListe
         }
 
         char[] lastLine = mTranscriptScreen.getLine(endLine-1);
-        if (!mZoom && lastLine != null && (lastLine[0] == ':' || lastLine[0] == 'E')){
+        if (mZoomBottom && !mZoom && lastLine != null && (lastLine[0] == ':' || lastLine[0] == 'E')){
             mTranscriptScreen.drawText(endLine-1, canvas, x * 3, mCharacterHeight*3, mZoomTextRenderer, cx, -1 ,-1 ,"");
         }
     }
@@ -1285,6 +1285,14 @@ public class EmulatorView extends View implements GestureDetector.OnGestureListe
 
     public boolean getZoom() {
         return mZoom;
+    }
+    boolean mZoomBottom = true;
+    public void setZoomBottom(boolean zoom) {
+        mZoomBottom = zoom;
+    }
+
+    public boolean getZoomBottom() {
+        return mZoomBottom;
     }
 }
 

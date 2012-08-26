@@ -47,6 +47,25 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+            android:title="@string/vim_preferences">
+        <CheckBoxPreference
+                android:key="touch_gesture"
+                android:defaultValue="@bool/pref_touch_gesture_default"
+                android:title="@string/title_touch_gesture_preference"
+                android:summary="@string/summary_touch_gesture_preference" />
+        <CheckBoxPreference
+                android:key="single_tap_esc"
+                android:defaultValue="@bool/pref_single_tap_esc_default"
+                android:title="@string/title_single_tap_esc_preference"
+                android:summary="@string/summary_single_tap_esc_preference" />
+        <CheckBoxPreference
+                android:key="zoombottom"
+                android:defaultValue="@bool/pref_zoombottom_default"
+                android:title="@string/title_zoombottom_preference"
+                android:summary="@string/summary_zoombottom_preference" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
             android:title="@string/keyboard_preferences">
 
         <ListPreference
