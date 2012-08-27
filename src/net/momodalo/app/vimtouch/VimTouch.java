@@ -334,6 +334,11 @@ public class VimTouch extends Activity {
     @Override
     public void onStop() {
         Log.e(VimTouch.LOG_TAG, "on stop.");
+        if(mEmulatorView != null){
+            InputMethodManager imm = (InputMethodManager)
+                getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow( mEmulatorView.getWindowToken(), 0);
+        }
         /*
         if (mTermFd != null) {
             try{

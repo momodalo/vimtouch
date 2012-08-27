@@ -238,7 +238,6 @@ public class VimTermSession extends TermSession {
 
     @Override
     public void finish() {
-        //haha Exec.hangupProcessGroup(mProcId);
         Exec.close(mTermFd);
         super.finish();
     }

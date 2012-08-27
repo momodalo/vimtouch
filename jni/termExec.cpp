@@ -51,6 +51,10 @@ extern "C" {
 #include "gpm.h"
 int AndroidMain(int argc, char**argv);
 extern int fake_gpm_fd[2];
+
+void exit(int n){
+    pthread_exit(NULL);
+}
 };
 
 static JNIEnv* global_env;
