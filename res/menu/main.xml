@@ -17,10 +17,12 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/menu_vimrc"
+        android:showAsAction="ifRoom|withText"
         android:title="@string/vimrc" />
     <item android:id="@+id/menu_fullscreen"
         android:title="@string/toggle_fullscreen" />
     <item android:id="@+id/menu_preferences"
+        android:showAsAction="ifRoom|withText"
         android:icon="@android:drawable/ic_menu_preferences"
         android:title="@string/preferences" />
     <item android:id="@+id/menu_toggle_soft_keyboard"
