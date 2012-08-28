@@ -119,6 +119,8 @@ public class VimTouch extends Activity {
 
     private LinearLayout mButtonBarLayout;
     private View mButtonBar;
+    private TextView mButtons[];
+    private final static int QUICK_BUTTON_SIZE=9;
 
     private int mControlKeyId = 0;
 
@@ -239,52 +241,63 @@ public class VimTouch extends Activity {
         mButtonBarLayout.addView((View)button);
         */
 
+        mButtons = new TextView[QUICK_BUTTON_SIZE];
         Resources res = getResources();
 
         button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
-        button.setText(mPrefs.getString("normal_qucik1", res.getString(R.string.default_normal_quick1)));
+        button.setText(mPrefs.getString("normal_quick1", res.getString(R.string.default_normal_quick1)));
         button.setOnClickListener(mClickListener);
         mButtonBarLayout.addView((View)button);
+        mButtons[0] = button;
 
         button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
-        button.setText(mPrefs.getString("normal_qucik2", res.getString(R.string.default_normal_quick2)));
+        button.setText(mPrefs.getString("normal_quick2", res.getString(R.string.default_normal_quick2)));
+        Log.e(VimTouch.LOG_TAG, "test quick " + mPrefs.getString("normal_quick2", res.getString(R.string.default_normal_quick2)));
         button.setOnClickListener(mClickListener);
         mButtonBarLayout.addView((View)button);
+        mButtons[1] = button;
 
         button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
-        button.setText(mPrefs.getString("normal_qucik3", res.getString(R.string.default_normal_quick3)));
+        button.setText(mPrefs.getString("normal_quick3", res.getString(R.string.default_normal_quick3)));
         button.setOnClickListener(mClickListener);
         mButtonBarLayout.addView((View)button);
+        mButtons[2] = button;
 
         button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
-        button.setText(mPrefs.getString("normal_qucik4", res.getString(R.string.default_normal_quick4)));
+        button.setText(mPrefs.getString("normal_quick4", res.getString(R.string.default_normal_quick4)));
         button.setOnClickListener(mClickListener);
         mButtonBarLayout.addView((View)button);
+        mButtons[3] = button;
 
         button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
-        button.setText(mPrefs.getString("normal_qucik5", res.getString(R.string.default_normal_quick5)));
+        button.setText(mPrefs.getString("normal_quick5", res.getString(R.string.default_normal_quick5)));
         button.setOnClickListener(mClickListener);
         mButtonBarLayout.addView((View)button);
+        mButtons[4] = button;
 
         button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
-        button.setText(mPrefs.getString("normal_qucik6", res.getString(R.string.default_normal_quick6)));
+        button.setText(mPrefs.getString("normal_quick6", res.getString(R.string.default_normal_quick6)));
         button.setOnClickListener(mClickListener);
         mButtonBarLayout.addView((View)button);
+        mButtons[5] = button;
 
         button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
-        button.setText(mPrefs.getString("normal_qucik7", res.getString(R.string.default_normal_quick7)));
+        button.setText(mPrefs.getString("normal_quick7", res.getString(R.string.default_normal_quick7)));
         button.setOnClickListener(mClickListener);
         mButtonBarLayout.addView((View)button);
+        mButtons[6] = button;
 
         button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
-        button.setText(mPrefs.getString("normal_qucik8", res.getString(R.string.default_normal_quick8)));
+        button.setText(mPrefs.getString("normal_quick8", res.getString(R.string.default_normal_quick8)));
         button.setOnClickListener(mClickListener);
         mButtonBarLayout.addView((View)button);
+        mButtons[7] = button;
 
         button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
-        button.setText(mPrefs.getString("normal_qucik9", res.getString(R.string.default_normal_quick9)));
+        button.setText(mPrefs.getString("normal_quick9", res.getString(R.string.default_normal_quick9)));
         button.setOnClickListener(mClickListener);
         mButtonBarLayout.addView((View)button);
+        mButtons[8] = button;
 
         mMainLayout = (LinearLayout)findViewById(R.id.main_layout);
 
@@ -370,6 +383,17 @@ public class VimTouch extends Activity {
         mEmulatorView.updatePrefs(mSettings);
 
         mSession.updatePrefs(mSettings);
+
+        Resources res = getResources();
+        mButtons[0].setText(mPrefs.getString("normal_quick1", res.getString(R.string.default_normal_quick1)));
+        mButtons[1].setText(mPrefs.getString("normal_quick2", res.getString(R.string.default_normal_quick2)));
+        mButtons[2].setText(mPrefs.getString("normal_quick3", res.getString(R.string.default_normal_quick3)));
+        mButtons[3].setText(mPrefs.getString("normal_quick4", res.getString(R.string.default_normal_quick4)));
+        mButtons[4].setText(mPrefs.getString("normal_quick5", res.getString(R.string.default_normal_quick5)));
+        mButtons[5].setText(mPrefs.getString("normal_quick6", res.getString(R.string.default_normal_quick6)));
+        mButtons[6].setText(mPrefs.getString("normal_quick7", res.getString(R.string.default_normal_quick7)));
+        mButtons[7].setText(mPrefs.getString("normal_quick8", res.getString(R.string.default_normal_quick8)));
+        mButtons[8].setText(mPrefs.getString("normal_quick9", res.getString(R.string.default_normal_quick9)));
     }
 
     @Override
