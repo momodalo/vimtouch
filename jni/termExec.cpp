@@ -296,9 +296,9 @@ static void vimtouch_Exec_setPtyWindowSize(JNIEnv *env, jobject clazz,
     out_flush();
     shell_resized_check();
     redraw_later(CLEAR);
-    update_screen(CLEAR);
-    setcursor();
-    out_flush();
+    //update_screen(CLEAR);
+    //setcursor();
+    //out_flush();
 }
 
 static void vimtouch_Exec_setPtyUTF8Mode(JNIEnv *env, jobject clazz,
