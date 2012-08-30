@@ -26,7 +26,6 @@ import android.view.KeyEvent;
 public class TermSettings {
     private SharedPreferences mPrefs;
 
-    private int mStatusBar;
     private int mActionBarMode;
     private int mCursorStyle;
     private int mCursorBlink;
@@ -138,7 +137,6 @@ public class TermSettings {
     }
 
     private void readDefaultPrefs(Resources res) {
-        mStatusBar = Integer.parseInt(res.getString(R.string.pref_statusbar_default));
         mActionBarMode = res.getInteger(R.integer.pref_actionbar_default);
         mCursorStyle = Integer.parseInt(res.getString(R.string.pref_cursorstyle_default));
         mCursorBlink = Integer.parseInt(res.getString(R.string.pref_cursorblink_default));
@@ -164,7 +162,6 @@ public class TermSettings {
 
     public void readPrefs(SharedPreferences prefs) {
         mPrefs = prefs;
-        mStatusBar = readIntPref(STATUSBAR_KEY, mStatusBar, 1);
         mActionBarMode = readIntPref(ACTIONBAR_KEY, mActionBarMode, ACTION_BAR_MODE_MAX);
         // mCursorStyle = readIntPref(CURSORSTYLE_KEY, mCursorStyle, 2);
         // mCursorBlink = readIntPref(CURSORBLINK_KEY, mCursorBlink, 1);
@@ -208,10 +205,6 @@ public class TermSettings {
 
     private boolean readBooleanPref(String key, boolean defaultValue) {
         return mPrefs.getBoolean(key, defaultValue);
-    }
-
-    public boolean showStatusBar() {
-        return (mStatusBar != 0);
     }
 
     public int actionBarMode() {
