@@ -2,6 +2,7 @@
     package="net.momodalo.app.vimtouch"
     android:versionCode="14"
     android:versionName="1.4"
+    android:installLocation="auto"
     >
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <application android:icon="@drawable/app_vimtouch"
