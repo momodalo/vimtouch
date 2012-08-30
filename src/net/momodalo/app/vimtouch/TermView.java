@@ -23,7 +23,7 @@ public class TermView extends EmulatorView implements
     private boolean mSingleTapESC;
     private boolean mTouchGesture;
 
-    private static final int FLING_REFRESH_PERIOD = 50;
+    private static final int FLING_REFRESH_PERIOD = 100;
     private static final int SCREEN_CHECK_PERIOD = 1000;
     private static final int CURSOR_BLINK_PERIOD = 1000;
 
@@ -162,7 +162,7 @@ public class TermView extends EmulatorView implements
 
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
             float velocityY) {
-        mVelocity = -velocityY/(5*getCharacterHeight());
+        mVelocity = -velocityY/(10*getCharacterHeight());
         mHandler.postDelayed(mFlingRun, FLING_REFRESH_PERIOD);
         return true;
     }
