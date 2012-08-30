@@ -135,6 +135,7 @@
    <string name="title_zoombottom_preference">Zoom Bottom Text</string>
    <string name="summary_zoombottom_preference">Whether zoom bottom text is enabled.</string>
 
+   <string name="open_file">Open File</string>
    <string name="esc_key">ESC</string>
    <string name="more_key">Toggle Quick Keys</string>
    <string name="save_file">Save</string>

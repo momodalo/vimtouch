@@ -79,6 +79,7 @@ import android.os.ParcelFileDescriptor;
 
 import jackpal.androidterm.emulatorview.EmulatorView;
 import jackpal.androidterm.emulatorview.ColorScheme;
+import com.lamerman.FileDialog;
 
 /**
  * A terminal emulator activity.
@@ -101,6 +102,9 @@ public class VimTouch extends Activity {
      * Set to true to log unknown escape sequences.
      */
     public static final boolean LOG_UNKNOWN_ESCAPE_SEQUENCES = DEBUG && true;
+
+    private static final int REQUEST_INSTALL = 0;
+    private static final int REQUEST_OPEN = 1;
 
     /**
      * The tag we use when logging, so that our messages can be distinguished
@@ -323,6 +327,7 @@ public class VimTouch extends Activity {
 
         mEmulatorView.updateSize(true);
         Exec.updateScreen();
+        mUrl = null;
     }
 
     public String getVimrc() {
@@ -334,14 +339,24 @@ public class VimTouch extends Activity {
         if(vimrc.exists()) return true;
         
         Intent intent = new Intent(getApplicationContext(), InstallProgress.class);
-        startActivityForResult(intent, 0);
+        Log.e(VimTouch.LOG_TAG, "on request1.");
+        startActivityForResult(intent, REQUEST_INSTALL);
 
         return false;
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(checkVimRuntime())
-            startEmulator();
+        if(requestCode == REQUEST_INSTALL){
+            if(checkVimRuntime())
+                startEmulator();
+        }else if (requestCode == REQUEST_OPEN){
+        Log.e(VimTouch.LOG_TAG, "on test1.");
+            if (resultCode == Activity.RESULT_OK) {
+                String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
+                mUrl = filePath;
+        Log.e(VimTouch.LOG_TAG, "on test2."+filePath);
+            }
+        }
     }
 
     @Override
@@ -405,6 +420,12 @@ public class VimTouch extends Activity {
         if(mEmulatorView != null){
             updatePrefs();
             mEmulatorView.onResume();
+
+            if(mUrl != null){
+                Exec.doCommand("new "+mUrl);
+                Exec.updateScreen();
+                mUrl = null;
+            }
         }
     }
 
@@ -429,6 +450,7 @@ public class VimTouch extends Activity {
         
         Exec.doCommand("new "+url);
         Exec.updateScreen();
+        mUrl = null;
     }
 
     @Override
@@ -549,6 +571,15 @@ public class VimTouch extends Activity {
             mSession.write(27);
         } else if (id == R.id.menu_quit) {
             mSession.write(":q!\r");
+        } else if (id == R.id.menu_open) {
+            Intent intent = new Intent(getBaseContext(), VimFileActivity.class);
+            intent.putExtra(FileDialog.START_PATH, "/sdcard");
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                            
+            //can user select directories or not
+            intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
+                                                            
+            startActivity(intent);
         } else if (id == R.id.menu_save) {
             mSession.write(":w\r");
         } else if (id == R.id.menu_keys) {
