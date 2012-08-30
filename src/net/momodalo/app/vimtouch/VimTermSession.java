@@ -115,9 +115,15 @@ public class VimTermSession extends TermSession {
         if (settings.verifyPath()) {
             path = checkPath(path);
         }
-        String[] env = new String[2];
+        String[] env = new String[3];
         env[0] = "TERM=" + settings.getTermType();
         env[1] = "PATH=" + path;
+
+        if(android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED))
+            env[2] = "HOME=/sdcard/";
+        else
+            env[2] = "HOME="+mApp;
+
 
         createSubprocess(processId, settings.getShell(), env);
         mProcId = processId[0];
@@ -158,7 +164,7 @@ public class VimTermSession extends TermSession {
 
     private void createSubprocess(int[] processId, String shell, String[] env) {
 
-        mTermFd = Exec.createSubprocess(mApp, mUrl, null, processId);
+        mTermFd = Exec.createSubprocess(mApp, mUrl, null, env, processId);
     }
 
     private ArrayList<String> parse(String cmd) {

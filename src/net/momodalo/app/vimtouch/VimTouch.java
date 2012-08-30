@@ -563,7 +563,7 @@ public class VimTouch extends Activity {
                 attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN; 
             getWindow().setAttributes(attrs); 
         } else if (id == R.id.menu_vimrc) {
-            Exec.doCommand("new "+getVimrc());
+            Exec.doCommand("new ~/.vimrc");
             Exec.updateScreen();
         } else if (id == R.id.menu_toggle_soft_keyboard) {
             doToggleSoftKeyboard();

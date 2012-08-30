@@ -440,3 +440,5 @@
 #define HAVE_FD_CLOEXEC 1
 
 #define FEAT_GUI_DIALOG 1
+
+#define VIMINFO_FILE "$VIM/.viminfo"

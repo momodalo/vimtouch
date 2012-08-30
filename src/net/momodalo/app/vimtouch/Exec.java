@@ -77,7 +77,7 @@ public class Exec
      *
      */
     public static native FileDescriptor createSubprocess(
-        String cmd, String arg0, String arg1, int[] processId);
+        String cmd, String arg0, String arg1, String[] envp, int[] processId);
         
     /**
      * Set the widow size for a given pty. Allows programs
