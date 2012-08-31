@@ -219,6 +219,10 @@ public class TermSettings {
         return mCursorBlink;
     }
 
+    public void setFontSize(int s) {
+        mFontSize = s;
+    }
+
     public int getFontSize() {
         return mFontSize;
     }

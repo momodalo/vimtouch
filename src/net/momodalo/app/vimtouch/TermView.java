@@ -8,6 +8,7 @@ import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
 import android.graphics.Canvas;
 import android.os.Handler;
+import android.util.Log;
 
 import jackpal.androidterm.emulatorview.ColorScheme;
 import jackpal.androidterm.emulatorview.EmulatorView;
@@ -22,6 +23,7 @@ public class TermView extends EmulatorView implements
     private ScaleGestureDetector mScaleDetector;
     private boolean mSingleTapESC;
     private boolean mTouchGesture;
+    private TermSettings mSettings;
 
     private static final int FLING_REFRESH_PERIOD = 100;
     private static final int SCREEN_CHECK_PERIOD = 1000;
@@ -49,6 +51,8 @@ public class TermView extends EmulatorView implements
         setZoomBottom(settings.getZoomBottom());
         mSingleTapESC = settings.getSingleTapESC();
         mTouchGesture = settings.getTouchGesture();
+
+        mSettings = settings;
     }
 
     public void updatePrefs(TermSettings settings) {
@@ -62,6 +66,7 @@ public class TermView extends EmulatorView implements
     private final Handler mHandler = new Handler();
 
     public void onLongPress(MotionEvent e) {
+        if(mScaleSpan >= 0.0f) return;
         setZoom(true);
         invalidate();
     }
@@ -85,58 +90,26 @@ public class TermView extends EmulatorView implements
     
 
     public boolean onScale(ScaleGestureDetector detector) {
-        try{
-            float span = detector.getCurrentSpan();
-            if(mScaleSpan > span){
-                float diff = mPreviousSpan - span;
-                if( diff > getCharacterHeight()) {
-                    String line = Integer.toString((int)(diff/getCharacterHeight()));
-                    mSession.write(line+"dd");
-                    mPreviousSpan = span;
-                }else if (-diff > getCharacterHeight() ){
-                    String line = Integer.toString((int)(-diff/getCharacterHeight()));
-                    mSession.write(line+"u");
-                    mPreviousSpan = span;
-                }
-            }else{
-                float diff = span - mPreviousSpan;
-                if( diff > getCharacterHeight()) {
-                    String line = Integer.toString((int)(diff/getCharacterHeight()));
-                    mSession.write(line+"p");
-                    mPreviousSpan = span;
-                }else if (-diff > getCharacterHeight() ){
-                    String line = Integer.toString((int)(-diff/getCharacterHeight()));
-                    mSession.write(line+"u");
-                    mPreviousSpan = span;
-                }
-            }
-        } catch (Exception e){
-        }
-        Exec.updateScreen();
+        float span = detector.getCurrentSpan()/mScaleSpan;
+        setScale(span, span, 0.0f, detector.getFocusY());
+        invalidate();
         return true;
     }
 
     public boolean onScaleBegin(ScaleGestureDetector detector){
+        setZoom(false);
+
         mScaleSpan = detector.getCurrentSpan();;
         mPreviousSpan = mScaleSpan;
-        setZoom(false);
         return true;
     }
 
     public void onScaleEnd(ScaleGestureDetector detector){
-        /*
-        try{
-            mSession.write('z');
-            if(mScaleSpan > detector.getCurrentSpan())
-                mSession.write('c');
-            else
-                mSession.write('o');
-            mTermOut.flush();
-        } catch (IOException e){
-        }
-        Exec.updateScreen();
-        */
-        mScaleSpan = (float)-1.0;
+        float span = detector.getCurrentSpan()/mScaleSpan;
+        setScale(1.0f, 1.0f, 0.0f,0.0f);
+        mScaleSpan = -1.0f;
+        mSettings.setFontSize((int)(mSettings.getFontSize()*span));
+        updatePrefs(mSettings);
     }
 
     public boolean onSingleTapUp(MotionEvent ev) {

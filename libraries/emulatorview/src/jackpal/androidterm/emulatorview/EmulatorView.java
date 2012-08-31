@@ -1118,6 +1118,10 @@ public class EmulatorView extends View implements GestureDetector.OnGestureListe
      */
     @Override
     protected void onDraw(Canvas canvas) {
+
+        if(mScaleX != 1.0 || mScaleY != 1.0){
+            canvas.scale(mScaleX,mScaleY,mScalePX,mScalePY);
+        }
         updateSize(false);
 
         if (mEmulator == null) {
@@ -1293,6 +1297,17 @@ public class EmulatorView extends View implements GestureDetector.OnGestureListe
 
     public boolean getZoomBottom() {
         return mZoomBottom;
+    }
+
+    private float mScaleX = 1.0f;
+    private float mScaleY = 1.0f;
+    private float mScalePX;
+    private float mScalePY;
+    public void setScale(float sx, float sy, float px, float py){
+        mScaleX = sx;
+        mScaleY = sy;
+        mScalePX = px;
+        mScalePY = py;
     }
 }
 
