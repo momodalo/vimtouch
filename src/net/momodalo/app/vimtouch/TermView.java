@@ -65,12 +65,6 @@ public class TermView extends EmulatorView implements
      */
     private final Handler mHandler = new Handler();
 
-    public void onLongPress(MotionEvent e) {
-        if(mScaleSpan >= 0.0f) return;
-        setZoom(true);
-        invalidate();
-    }
-
     public boolean onScroll(MotionEvent e1, MotionEvent e2,
             float distanceX, float distanceY) {
         /*
@@ -154,26 +148,35 @@ public class TermView extends EmulatorView implements
 
     // End GestureDetector.OnGestureListener methods
     float mLastY = -1;
+    float mLastX = -1;
     float mLastY2 = -1;
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        if(getSelectingText())
+            return super.onTouchEvent(ev);
         float y = ev.getY();
         float x = ev.getX();
         int action = ev.getAction();
         int fingers = ev.getPointerCount();
+
         if(action == MotionEvent.ACTION_DOWN && fingers == 1){
+            mLastY = y;
+            mLastX = x;
         }else if (action == MotionEvent.ACTION_MOVE && fingers == 1 && mScaleSpan < 0.0){
-            if(mLastY == -1){
-                mLastY = y;
+            if(mLastX != -1 && Math.abs(x-mLastX) > getCharacterWidth() * 5 && !getZoom()){
+                setZoom(true);
+                mLastY = -1;
             } else if(mLastY != -1 && Math.abs(y-mLastY) > getCharacterHeight() && !getZoom()){
                 if(mTouchGesture)Exec.scrollBy((int)((mLastY - y)/getCharacterHeight()));
                 mLastY = y;
+                mLastX = -1;
             }
             Exec.moveCursor( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
             Exec.updateScreen();
         }else if(action == MotionEvent.ACTION_UP){
             mLastY = -1;
+            mLastX = -1;
             setZoom(false);
             invalidate();
         }

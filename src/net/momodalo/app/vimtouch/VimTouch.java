@@ -139,8 +139,9 @@ public class VimTouch extends Activity {
 
     private SharedPreferences mPrefs;
 
-    private final static int COPY_ALL_ID = 0;
-    private final static int PASTE_ID = 1;
+    private final static int SELECT_TEXT_ID = 0;
+    private final static int COPY_ALL_ID = 1;
+    private final static int PASTE_ID = 2;
 
     private String mUrl = null;
 
@@ -596,8 +597,11 @@ public class VimTouch extends Activity {
             ContextMenuInfo menuInfo) {
       super.onCreateContextMenu(menu, v, menuInfo);
       menu.setHeaderTitle(R.string.edit_text);
+
+      menu.add(0, SELECT_TEXT_ID, 0, R.string.select_text);
       menu.add(0, COPY_ALL_ID, 0, R.string.copy_all);
       menu.add(0, PASTE_ID, 0,  R.string.paste);
+
       if (!canPaste()) {
           menu.getItem(PASTE_ID).setEnabled(false);
       }
@@ -606,6 +610,9 @@ public class VimTouch extends Activity {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
           switch (item.getItemId()) {
+          case SELECT_TEXT_ID:
+            mEmulatorView.toggleSelectingText();
+            return true;
           case COPY_ALL_ID:
             doCopyAll();
             return true;
