@@ -322,7 +322,8 @@ public class VimTouch extends Activity {
     }
 
     private void startEmulator() {
-        mSession = new VimTermSession( getApplicationContext().getFilesDir().getPath() ,mUrl, mSettings, "");
+        String appPath = getApplicationContext().getFilesDir().getPath();
+        mSession = new VimTermSession (this, appPath, mUrl, mSettings, "");
         mEmulatorView = createEmulatorView(mSession);
         mMainLayout.addView(mEmulatorView);
 
@@ -363,11 +364,6 @@ public class VimTouch extends Activity {
     @Override
     public void onStop() {
         Log.e(VimTouch.LOG_TAG, "on stop.");
-        if(mEmulatorView != null){
-            InputMethodManager imm = (InputMethodManager)
-                getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow( mEmulatorView.getWindowToken(), 0);
-        }
         /*
         if (mTermFd != null) {
             try{
@@ -435,7 +431,19 @@ public class VimTouch extends Activity {
         Log.e(VimTouch.LOG_TAG, "on pause.");
         super.onPause();
         if(mEmulatorView != null)
+        {
+            hideIme();
             mEmulatorView.onPause();
+        }
+    }
+
+    public void hideIme() {
+        if (mEmulatorView == null)
+            return;
+
+        InputMethodManager imm = (InputMethodManager)
+            getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(mEmulatorView.getWindowToken(), 0);
     }
 
     @Override

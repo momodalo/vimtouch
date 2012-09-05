@@ -51,9 +51,17 @@ extern "C" {
 #include "gpm.h"
 int AndroidMain(int argc, char**argv);
 extern int fake_gpm_fd[2];
+jmp_buf longjmp_env;
 
 void exit(int n){
     pthread_exit(NULL);
+}
+
+void android_exit(int exit_value)
+{
+    // TODO: use exit_value
+    LOGE("android_exit()");
+    longjmp(longjmp_env, 13);
 }
 };
 
@@ -119,7 +127,10 @@ static void *thread_wrapper ( void* value)
         argv[1] = (char*)thread_arg[1];
         argv[2] = NULL;
 
-        AndroidMain(argv[1]?2:1, (char**)argv);
+        int val = setjmp(longjmp_env);
+
+        if (val == 0)
+            AndroidMain(argv[1]?2:1, (char**)argv);
 
         free(thread_arg[0]);
         free(thread_arg[1]);

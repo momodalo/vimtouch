@@ -1226,7 +1226,7 @@ getout(exitval)
 	garbage_collect();
 #endif
 
-    mch_exit(exitval);
+    android_exit(exitval);
 }
 
 #ifndef NO_VIM_MAIN
