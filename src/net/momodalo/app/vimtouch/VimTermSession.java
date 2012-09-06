@@ -35,7 +35,6 @@ public class VimTermSession extends TermSession {
 
     private String mInitialCommand;
 
-    private VimTouch mActivity;
     private String mApp;
     private String mUrl;
 
@@ -65,11 +64,10 @@ public class VimTermSession extends TermSession {
         }
     };
 
-    public VimTermSession(VimTouch activity, String app, String url,
+    public VimTermSession(String app, String url,
                           TermSettings settings, String initialCommand) {
         super();
 
-        mActivity = activity;
         mApp = app;
         mUrl = url;
 
@@ -232,8 +230,6 @@ public class VimTermSession extends TermSession {
     }
 
     private void onProcessExit(int result) {
-        mActivity.hideIme();
-
         if (mSettings.closeWindowOnProcessExit()) {
             finish();
         } else if (mProcessExitMessage != null) {

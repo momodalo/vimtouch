@@ -79,6 +79,7 @@ import android.os.ParcelFileDescriptor;
 
 import jackpal.androidterm.emulatorview.EmulatorView;
 import jackpal.androidterm.emulatorview.ColorScheme;
+import jackpal.androidterm.emulatorview.TermSession;
 import com.lamerman.FileDialog;
 
 /**
@@ -323,7 +324,15 @@ public class VimTouch extends Activity {
 
     private void startEmulator() {
         String appPath = getApplicationContext().getFilesDir().getPath();
-        mSession = new VimTermSession (this, appPath, mUrl, mSettings, "");
+        mSession = new VimTermSession (appPath, mUrl, mSettings, "");
+        mSession.setFinishCallback(new TermSession.FinishCallback () {
+            @Override
+            public void onSessionFinish(TermSession session)
+            {
+                hideIme();
+                finish();
+            }
+        });
         mEmulatorView = createEmulatorView(mSession);
         mMainLayout.addView(mEmulatorView);
 
