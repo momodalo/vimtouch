@@ -437,15 +437,12 @@ static int vimtouch_Exec_waitFor(JNIEnv *env, jobject clazz,
 
 static void vimtouch_Exec_close(JNIEnv *env, jobject clazz, jobject fileDescriptor)
 {
-    int fd;
-    struct winsize sz;
-
-    fd = env->GetIntField(fileDescriptor, field_fileDescriptor_descriptor);
+    int fd = env->GetIntField(fileDescriptor, field_fileDescriptor_descriptor);
 
     if (env->ExceptionOccurred() != NULL) {
         return;
     }
-    
+
     close(fd);
 }
 
