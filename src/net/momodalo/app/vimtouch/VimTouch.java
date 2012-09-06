@@ -123,6 +123,10 @@ public class VimTouch extends Activity {
 
     private LinearLayout mButtonBarLayout;
     private View mButtonBar;
+    private View mTopButtonBar;
+    private View mBottomButtonBar;
+    private View mLeftButtonBar;
+    private View mRightButtonBar;
     private TextView mButtons[];
     private final static int QUICK_BUTTON_SIZE=9;
 
@@ -227,7 +231,11 @@ public class VimTouch extends Activity {
 
         setContentView(R.layout.term_activity);
 
-        mButtonBar = findViewById(R.id.button_bar);
+        mTopButtonBar = findViewById(R.id.top_bar);
+        mBottomButtonBar = findViewById(R.id.bottom_bar);
+        mLeftButtonBar = findViewById(R.id.left_bar);
+        mRightButtonBar = findViewById(R.id.right_bar);
+        mButtonBar = mTopButtonBar;
 
         mButtonBarLayout = (LinearLayout) findViewById(R.id.button_bar_layout);
         TextView button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
@@ -410,6 +418,33 @@ public class VimTouch extends Activity {
         mButtons[6].setText(mPrefs.getString("normal_quick7", res.getString(R.string.default_normal_quick7)));
         mButtons[7].setText(mPrefs.getString("normal_quick8", res.getString(R.string.default_normal_quick8)));
         mButtons[8].setText(mPrefs.getString("normal_quick9", res.getString(R.string.default_normal_quick9)));
+
+        mButtonBar.setVisibility(View.GONE);
+        ((ViewGroup)mButtonBar).removeView(mButtonBarLayout);
+        
+        int pos = mSettings.getQuickbarPosition();
+
+        switch (pos) {
+            case 1:
+                mButtonBar = mBottomButtonBar;
+                mButtonBarLayout.setOrientation(LinearLayout.HORIZONTAL);
+                break;
+            case 2:
+                mButtonBar = mLeftButtonBar;
+                mButtonBarLayout.setOrientation(LinearLayout.VERTICAL);
+                break;
+            case 3:
+                mButtonBar = mRightButtonBar;
+                mButtonBarLayout.setOrientation(LinearLayout.VERTICAL);
+                break;
+            case 0:
+            default:
+                mButtonBar = mTopButtonBar;
+                mButtonBarLayout.setOrientation(LinearLayout.HORIZONTAL);
+                break;
+        }
+        ((ViewGroup)mButtonBar).addView(mButtonBarLayout);
+        mButtonBar.setVisibility(View.VISIBLE);
     }
 
     @Override

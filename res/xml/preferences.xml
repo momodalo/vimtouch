@@ -48,6 +48,7 @@
 
     <PreferenceCategory
             android:title="@string/vim_preferences">
+
         <CheckBoxPreference
                 android:key="touch_gesture"
                 android:defaultValue="@bool/pref_touch_gesture_default"
@@ -108,6 +109,14 @@
 
     <PreferenceCategory
         android:title="@string/normal_quick_buttons">
+        <ListPreference
+                android:key="quickbar_pos"
+                android:defaultValue="@integer/pref_quickbar_pos_default"
+                android:title="@string/title_quickbar_pos_preference"
+                android:summary="@string/summary_quickbar_pos_preference"
+                android:entries="@array/entries_quickbar_pos_preference"
+                android:entryValues="@array/entryvalues_quickbar_pos_preference"
+                android:dialogTitle="@string/dialog_title_quickbar_pos_preference" />
 
         <EditTextPreference
             android:key="normal_quick1"

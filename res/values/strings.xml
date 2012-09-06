@@ -143,4 +143,9 @@
    <string name="quit_file">:q!</string>
    <string name="toggle_fullscreen">Toggle Fullscreen</string>
 
+   <string name="title_quickbar_pos_preference">Quickbar Position</string>
+   <string name="summary_quickbar_pos_preference">Choose position of quickbar</string>
+   <string name="dialog_title_quickbar_pos_preference">Quickbar Position</string>
+
+
 </resources>

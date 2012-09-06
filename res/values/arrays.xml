@@ -216,4 +216,17 @@
         <item>screen</item>
         <item>linux</item>
     </string-array>
+
+    <string-array name="entries_quickbar_pos_preference">
+        <item>top</item>
+        <item>bottom</item>
+        <item>left</item>
+        <item>right</item>
+    </string-array>
+    <string-array name="entryvalues_quickbar_pos_preference">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
 </resources>
