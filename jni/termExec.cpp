@@ -46,6 +46,8 @@
 #include <unistd.h>
 #include <termios.h>
 
+#include <map>
+
 extern "C" {
 #include "vim.h"
 #include "gpm.h"
@@ -69,6 +71,7 @@ static jmethodID method_fileDescriptor_init;
 static jclass class_Exec;
 static jmethodID method_Exec_showDialog;
 static jmethodID method_Exec_getDialogState;
+static std::map<pthread_t, char**> thread_data;
 static int thread_exit_val = 0;
 
 void pth_exit(int n)
@@ -135,10 +138,6 @@ static void *thread_wrapper ( void* value)
         if (val == 0)
             AndroidMain(argv[1]?2:1, (char**)argv);
 
-        free(thread_arg[0]);
-        free(thread_arg[1]);
-        free(thread_arg);
-
     global_vm->DetachCurrentThread();
     LOGE("thread leave");
     pth_exit(0);
@@ -200,6 +199,7 @@ static int create_subprocess(const char *cmd, const char *arg0, const char *arg1
     pthread_create(&thread_id, &attr, thread_wrapper, (void*)thread_arg);
     pthread_attr_destroy(&attr);
     *pProcessId = (int) thread_id;
+    thread_data.insert(std::make_pair(thread_id, thread_arg));
 
     return ptm;
 
@@ -425,6 +425,14 @@ static int vimtouch_Exec_waitFor(JNIEnv *env, jobject clazz, jint procId)
 {
     int* status;
     pthread_join((pthread_t)procId, (void**)&status);
+    std::map<pthread_t, char**>::iterator data = thread_data.find(procId);
+
+    if (data != thread_data.end())
+    {
+        free(data->second[0]);
+        free(data->second[1]);
+        free(data->second);
+    }
 
     return *status;
 }
