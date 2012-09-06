@@ -421,18 +421,12 @@ static void vimtouch_Exec_doCommand(JNIEnv *env, jobject clazz, jstring cmd){
     env->ReleaseStringUTFChars(cmd, str);
 }
 
-static int vimtouch_Exec_waitFor(JNIEnv *env, jobject clazz,
-    jint procId) {
-    int status;
-    //waitpid(procId, &status, 0);
-    void *dummy;
-    pthread_join((pthread_t)procId, &dummy);
-    int result = 1;
-    /*
-    if (WIFEXITED(status)) {
-        result = WEXITSTATUS(status);
-    }*/
-    return result;
+static int vimtouch_Exec_waitFor(JNIEnv *env, jobject clazz, jint procId)
+{
+    int* status;
+    pthread_join((pthread_t)procId, (void**)&status);
+
+    return *status;
 }
 
 static void vimtouch_Exec_close(JNIEnv *env, jobject clazz, jobject fileDescriptor)
