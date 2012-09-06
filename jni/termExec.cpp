@@ -53,10 +53,6 @@ int AndroidMain(int argc, char**argv);
 extern int fake_gpm_fd[2];
 jmp_buf longjmp_env;
 
-void exit(int n){
-    pthread_exit(NULL);
-}
-
 void android_exit(int exit_value)
 {
     // TODO: use exit_value
@@ -73,6 +69,13 @@ static jmethodID method_fileDescriptor_init;
 static jclass class_Exec;
 static jmethodID method_Exec_showDialog;
 static jmethodID method_Exec_getDialogState;
+static int thread_exit_val = 0;
+
+void pth_exit(int n)
+{
+    thread_exit_val = n;
+    pthread_exit(&thread_exit_val);
+}
 
 
 class String8 {
@@ -115,7 +118,7 @@ static void *thread_wrapper ( void* value)
         pts = open(thread_arg[0], O_RDWR);
         if(pts < 0){
             LOGE("PTY open failed");
-            exit(-1);
+            pth_exit(-1);
         }
 
         dup2(pts, 0);
@@ -138,7 +141,7 @@ static void *thread_wrapper ( void* value)
 
     global_vm->DetachCurrentThread();
     LOGE("thread leave");
-    exit(-1);
+    pth_exit(0);
 }
 
 static int create_subprocess(const char *cmd, const char *arg0, const char *arg1, char **envp,
