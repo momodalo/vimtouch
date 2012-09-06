@@ -192,15 +192,14 @@ static int create_subprocess(const char *cmd, const char *arg0, const char *arg1
     else 
         thread_arg[1] = NULL;
 
-    pthread_t mThread;
-    
+    pthread_t thread_id;
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
-    pthread_create(&mThread, &attr, thread_wrapper, (void*)thread_arg);
+    pthread_create(&thread_id, &attr, thread_wrapper, (void*)thread_arg);
     pthread_attr_destroy(&attr);
-    *pProcessId = (int) mThread;
+    *pProcessId = (int) thread_id;
 
     return ptm;
 
