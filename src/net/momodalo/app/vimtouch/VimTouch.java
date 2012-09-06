@@ -118,7 +118,7 @@ public class VimTouch extends Activity {
      */
     private TermView mEmulatorView;
     private VimTermSession mSession;
-    private TermSettings mSettings;
+    private VimSettings mSettings;
     private LinearLayout mMainLayout;
 
     private LinearLayout mButtonBarLayout;
@@ -222,7 +222,7 @@ public class VimTouch extends Activity {
         Log.e(VimTouch.LOG_TAG, "onCreate");
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        mSettings = new TermSettings(getResources(), mPrefs);
+        mSettings = new VimSettings(getResources(), mPrefs);
 
         mUrl = getIntentUrl(getIntent());
 

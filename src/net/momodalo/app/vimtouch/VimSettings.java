@@ -20,10 +20,7 @@ import android.content.res.Resources;
 import android.content.SharedPreferences;
 import android.view.KeyEvent;
 
-/**
- * Terminal emulator settings
- */
-public class TermSettings {
+public class VimSettings {
     private SharedPreferences mPrefs;
 
     private int mActionBarMode;
@@ -133,7 +130,7 @@ public class TermSettings {
     public static final int BACK_KEY_SENDS_TAB = 4;
     private static final int BACK_KEY_MAX = 4;
 
-    public TermSettings(Resources res, SharedPreferences prefs) {
+    public VimSettings(Resources res, SharedPreferences prefs) {
         readDefaultPrefs(res);
         readPrefs(prefs);
     }

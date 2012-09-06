@@ -24,7 +24,7 @@ import net.momodalo.app.vimtouch.compat.FileCompat;
  * talk to the process.
  */
 public class VimTermSession extends TermSession {
-    private TermSettings mSettings;
+    private VimSettings mSettings;
 
     private int mProcId;
     private FileDescriptor mTermFd;
@@ -64,7 +64,7 @@ public class VimTermSession extends TermSession {
         }
     };
 
-    public VimTermSession(String app, String url, TermSettings settings, String initialCommand) {
+    public VimTermSession(String app, String url, VimSettings settings, String initialCommand) {
         super();
 
         mApp = app;
@@ -87,14 +87,14 @@ public class VimTermSession extends TermSession {
         mWatcherThread.setName("Process watcher");
     }
 
-    public void updatePrefs(TermSettings settings) {
+    public void updatePrefs(VimSettings settings) {
         mSettings = settings;
         setColorScheme(new ColorScheme(settings.getColorScheme()));
         setDefaultUTF8Mode(settings.defaultToUTF8Mode());
     }
 
     private void initializeSession() {
-        TermSettings settings = mSettings;
+        VimSettings settings = mSettings;
 
         int[] processId = new int[1];
 

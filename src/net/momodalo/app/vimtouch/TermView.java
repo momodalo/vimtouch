@@ -23,7 +23,7 @@ public class TermView extends EmulatorView implements
     private ScaleGestureDetector mScaleDetector;
     private boolean mSingleTapESC;
     private boolean mTouchGesture;
-    private TermSettings mSettings;
+    private VimSettings mSettings;
 
     private static final int FLING_REFRESH_PERIOD = 100;
     private static final int SCREEN_CHECK_PERIOD = 1000;
@@ -36,7 +36,7 @@ public class TermView extends EmulatorView implements
         mScaleDetector = new ScaleGestureDetector(context, this);
     }
 
-    public void updatePrefs(TermSettings settings, ColorScheme scheme) {
+    public void updatePrefs(VimSettings settings, ColorScheme scheme) {
         if (scheme == null) {
             scheme = new ColorScheme(settings.getColorScheme());
         }
@@ -55,7 +55,7 @@ public class TermView extends EmulatorView implements
         mSettings = settings;
     }
 
-    public void updatePrefs(TermSettings settings) {
+    public void updatePrefs(VimSettings settings) {
         updatePrefs(settings, null);
     }
 
