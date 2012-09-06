@@ -445,7 +445,6 @@ static void vimtouch_Exec_close(JNIEnv *env, jobject clazz, jobject fileDescript
     }
     
     close(fd);
-    getout(0);
 }
 
 extern "C" {
