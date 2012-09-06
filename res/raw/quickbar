@@ -1,0 +1,9 @@
+:w
+dd
+yy
+p
+:q!
+:wq
+G
+zR
+zM

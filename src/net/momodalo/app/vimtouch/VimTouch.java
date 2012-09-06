@@ -27,6 +27,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.List;
+
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -243,74 +247,6 @@ public class VimTouch extends Activity {
         button.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){ doToggleSoftKeyboard(); }
         });
-        /*
-        mButtonBarLayout.addView((View)button);
-
-        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
-        button.setText(R.string.title_esc);
-        button.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View v){ mSession.write(27); }
-        });
-        mButtonBarLayout.addView((View)button);
-        */
-
-        mButtons = new TextView[QUICK_BUTTON_SIZE];
-        Resources res = getResources();
-
-        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
-        button.setText(mPrefs.getString("normal_quick1", res.getString(R.string.default_normal_quick1)));
-        button.setOnClickListener(mClickListener);
-        mButtonBarLayout.addView((View)button);
-        mButtons[0] = button;
-
-        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
-        button.setText(mPrefs.getString("normal_quick2", res.getString(R.string.default_normal_quick2)));
-        Log.e(VimTouch.LOG_TAG, "test quick " + mPrefs.getString("normal_quick2", res.getString(R.string.default_normal_quick2)));
-        button.setOnClickListener(mClickListener);
-        mButtonBarLayout.addView((View)button);
-        mButtons[1] = button;
-
-        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
-        button.setText(mPrefs.getString("normal_quick3", res.getString(R.string.default_normal_quick3)));
-        button.setOnClickListener(mClickListener);
-        mButtonBarLayout.addView((View)button);
-        mButtons[2] = button;
-
-        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
-        button.setText(mPrefs.getString("normal_quick4", res.getString(R.string.default_normal_quick4)));
-        button.setOnClickListener(mClickListener);
-        mButtonBarLayout.addView((View)button);
-        mButtons[3] = button;
-
-        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
-        button.setText(mPrefs.getString("normal_quick5", res.getString(R.string.default_normal_quick5)));
-        button.setOnClickListener(mClickListener);
-        mButtonBarLayout.addView((View)button);
-        mButtons[4] = button;
-
-        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
-        button.setText(mPrefs.getString("normal_quick6", res.getString(R.string.default_normal_quick6)));
-        button.setOnClickListener(mClickListener);
-        mButtonBarLayout.addView((View)button);
-        mButtons[5] = button;
-
-        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
-        button.setText(mPrefs.getString("normal_quick7", res.getString(R.string.default_normal_quick7)));
-        button.setOnClickListener(mClickListener);
-        mButtonBarLayout.addView((View)button);
-        mButtons[6] = button;
-
-        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
-        button.setText(mPrefs.getString("normal_quick8", res.getString(R.string.default_normal_quick8)));
-        button.setOnClickListener(mClickListener);
-        mButtonBarLayout.addView((View)button);
-        mButtons[7] = button;
-
-        button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
-        button.setText(mPrefs.getString("normal_quick9", res.getString(R.string.default_normal_quick9)));
-        button.setOnClickListener(mClickListener);
-        mButtonBarLayout.addView((View)button);
-        mButtons[8] = button;
 
         mMainLayout = (LinearLayout)findViewById(R.id.main_layout);
 
@@ -341,6 +277,10 @@ public class VimTouch extends Activity {
 
     public String getVimrc() {
         return getApplicationContext().getFilesDir()+"/vim/vimrc";
+    }
+
+    public String getQuickbarFile() {
+        return getApplicationContext().getFilesDir()+"/vim/quickbar";
     }
     
     private boolean checkVimRuntime(){
@@ -398,6 +338,53 @@ public class VimTouch extends Activity {
         mSession.write(data);
     }
 
+    private void addQuickbarButton(String text) { 
+        TextView button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
+        button.setText(text);
+        button.setOnClickListener(mClickListener);
+        mButtonBarLayout.addView((View)button);
+    }
+
+    private void defaultButtons(boolean force) {
+        File file = new File(getQuickbarFile());
+
+        if(!force && file.exists()) return;
+
+        try{
+            BufferedInputStream is = new BufferedInputStream(getResources().openRawResource(R.raw.quickbar));
+            FileWriter fout = new FileWriter(file);
+            while(is.available() > 0){
+                fout.write(is.read());
+            }
+            fout.close();
+        } catch(Exception e) { 
+            Log.e(LOG_TAG, "install default quickbar", e); 
+        } 
+
+    }
+
+    private void updateButtons(){
+        defaultButtons(false);
+        try {
+            FileReader fileReader = new FileReader(getQuickbarFile());
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            String line = null;
+            int index = 0;
+            while ((line = bufferedReader.readLine()) != null) {
+                if(line == "")continue;
+                if(index < mButtonBarLayout.getChildCount()){
+                    TextView textview = (TextView)mButtonBarLayout.getChildAt(index);
+                    textview.setText(line);
+                }else{
+                    addQuickbarButton(line);
+                }
+                index++;
+            }
+            bufferedReader.close();
+        }catch (IOException e){
+        }
+    }
+
     private void updatePrefs() {
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -408,19 +395,11 @@ public class VimTouch extends Activity {
 
         mSession.updatePrefs(mSettings);
 
-        Resources res = getResources();
-        mButtons[0].setText(mPrefs.getString("normal_quick1", res.getString(R.string.default_normal_quick1)));
-        mButtons[1].setText(mPrefs.getString("normal_quick2", res.getString(R.string.default_normal_quick2)));
-        mButtons[2].setText(mPrefs.getString("normal_quick3", res.getString(R.string.default_normal_quick3)));
-        mButtons[3].setText(mPrefs.getString("normal_quick4", res.getString(R.string.default_normal_quick4)));
-        mButtons[4].setText(mPrefs.getString("normal_quick5", res.getString(R.string.default_normal_quick5)));
-        mButtons[5].setText(mPrefs.getString("normal_quick6", res.getString(R.string.default_normal_quick6)));
-        mButtons[6].setText(mPrefs.getString("normal_quick7", res.getString(R.string.default_normal_quick7)));
-        mButtons[7].setText(mPrefs.getString("normal_quick8", res.getString(R.string.default_normal_quick8)));
-        mButtons[8].setText(mPrefs.getString("normal_quick9", res.getString(R.string.default_normal_quick9)));
 
         mButtonBar.setVisibility(View.GONE);
         ((ViewGroup)mButtonBar).removeView(mButtonBarLayout);
+
+        updateButtons();
         
         int pos = mSettings.getQuickbarPosition();
 
@@ -600,6 +579,9 @@ public class VimTouch extends Activity {
             getWindow().setAttributes(attrs); 
         } else if (id == R.id.menu_vimrc) {
             Exec.doCommand("new ~/.vimrc");
+            Exec.updateScreen();
+        } else if (id == R.id.menu_quickbar) {
+            Exec.doCommand("new "+getQuickbarFile());
             Exec.updateScreen();
         } else if (id == R.id.menu_toggle_soft_keyboard) {
             doToggleSoftKeyboard();

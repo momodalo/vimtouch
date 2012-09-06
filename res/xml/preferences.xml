@@ -118,59 +118,5 @@
                 android:entryValues="@array/entryvalues_quickbar_pos_preference"
                 android:dialogTitle="@string/dialog_title_quickbar_pos_preference" />
 
-        <EditTextPreference
-            android:key="normal_quick1"
-            android:defaultValue="@string/default_normal_quick1"
-            android:summary="@string/default_normal_quick1"
-            android:title="@string/title_normal_quick1"
-            android:dialogTitle="@string/title_normal_quick1" />
-        <EditTextPreference
-            android:key="normal_quick2"
-            android:defaultValue="@string/default_normal_quick2"
-            android:summary="@string/default_normal_quick2"
-            android:title="@string/title_normal_quick2"
-            android:dialogTitle="@string/title_normal_quick2" />
-        <EditTextPreference
-            android:key="normal_quick3"
-            android:defaultValue="@string/default_normal_quick3"
-            android:summary="@string/default_normal_quick3"
-            android:title="@string/title_normal_quick3"
-            android:dialogTitle="@string/title_normal_quick3" />
-        <EditTextPreference
-            android:key="normal_quick4"
-            android:defaultValue="@string/default_normal_quick4"
-            android:summary="@string/default_normal_quick4"
-            android:title="@string/title_normal_quick4"
-            android:dialogTitle="@string/title_normal_quick4" />
-        <EditTextPreference
-            android:key="normal_quick5"
-            android:defaultValue="@string/default_normal_quick5"
-            android:summary="@string/default_normal_quick5"
-            android:title="@string/title_normal_quick5"
-            android:dialogTitle="@string/title_normal_quick5" />
-        <EditTextPreference
-            android:key="normal_quick6"
-            android:defaultValue="@string/default_normal_quick6"
-            android:summary="@string/default_normal_quick6"
-            android:title="@string/title_normal_quick6"
-            android:dialogTitle="@string/title_normal_quick6" />
-        <EditTextPreference
-            android:key="normal_quick7"
-            android:defaultValue="@string/default_normal_quick7"
-            android:summary="@string/default_normal_quick7"
-            android:title="@string/title_normal_quick7"
-            android:dialogTitle="@string/title_normal_quick7" />
-        <EditTextPreference
-            android:key="normal_quick8"
-            android:defaultValue="@string/default_normal_quick8"
-            android:summary="@string/default_normal_quick8"
-            android:title="@string/title_normal_quick8"
-            android:dialogTitle="@string/title_normal_quick8" />
-        <EditTextPreference
-            android:key="normal_quick9"
-            android:defaultValue="@string/default_normal_quick9"
-            android:summary="@string/default_normal_quick9"
-            android:title="@string/title_normal_quick9"
-            android:dialogTitle="@string/title_normal_quick9" />
     </PreferenceCategory>
 </PreferenceScreen>

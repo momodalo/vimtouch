@@ -46,4 +46,7 @@
         android:showAsAction="always"
         android:icon="@android:drawable/ic_menu_more"
         android:title="@string/more_key" />
+    <item android:id="@+id/menu_quickbar"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/menu_quickbar" />
 </menu>
