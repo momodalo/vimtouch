@@ -57,6 +57,8 @@ void exit(int n){
 }
 };
 
+static pthread_mutex_t global_mutex;
+
 static JNIEnv* global_env;
 static JavaVM* global_vm;
 static jclass class_fileDescriptor;
@@ -66,6 +68,15 @@ static jclass class_Exec;
 static jmethodID method_Exec_showDialog;
 static jmethodID method_Exec_getDialogState;
 
+extern "C" {
+void vimtouch_lock(){
+     pthread_mutex_lock (&global_mutex);
+}
+
+void vimtouch_unlock(){
+     pthread_mutex_unlock (&global_mutex);
+}
+}
 
 class String8 {
 public:
@@ -127,6 +138,7 @@ static void *thread_wrapper ( void* value)
 
     global_vm->DetachCurrentThread();
     LOGE("thread leave");
+    pthread_mutex_destroy(&global_mutex);
     exit(-1);
 }
 
@@ -182,6 +194,7 @@ static int create_subprocess(const char *cmd, const char *arg0, const char *arg1
     
     pthread_attr_t attr;
     pthread_attr_init(&attr);
+    pthread_mutex_init(&global_mutex, NULL);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
     pthread_create(&mThread, &attr, thread_wrapper, (void*)thread_arg);
@@ -333,9 +346,12 @@ static void vimtouch_Exec_setPtyWindowSize(JNIEnv *env, jobject clazz,
     sz.ws_ypixel = ypixel;
     
     ioctl(fd, TIOCSWINSZ, &sz);
+
+    vimtouch_lock();
     out_flush();
     shell_resized_check();
     redraw_later(CLEAR);
+    vimtouch_unlock();
     //update_screen(CLEAR);
     //setcursor();
     //out_flush();
@@ -364,10 +380,12 @@ static void vimtouch_Exec_setPtyUTF8Mode(JNIEnv *env, jobject clazz,
 
 static void updateScreen()
 {
+    vimtouch_lock();
     //redraw_later(NOT_VALID);
     update_screen(0);
     //setcursor();
     out_flush();
+    vimtouch_unlock();
 }
 
 static void vimtouch_Exec_moveCursor(JNIEnv *env, jobject clazz,
@@ -390,7 +408,11 @@ static void vimtouch_Exec_moveCursor(JNIEnv *env, jobject clazz,
 static int vimtouch_Exec_scrollBy(JNIEnv *env, jobject clazz,
     jint line) {
     int do_scroll = line;
+    vimtouch_lock();
     scroll_redraw(do_scroll > 0, do_scroll>0?do_scroll:-do_scroll);
+    update_screen(0);
+    out_flush();
+    vimtouch_unlock();
     return line;
 }
 
@@ -403,7 +425,9 @@ static void vimtouch_Exec_doCommand(JNIEnv *env, jobject clazz, jstring cmd){
     const char* str = env->GetStringUTFChars(cmd, NULL);
     if(!str) return;
 
+    vimtouch_lock();
     do_cmdline_cmd((char_u *)str);
+    vimtouch_unlock();
 
     env->ReleaseStringUTFChars(cmd, str);
 }

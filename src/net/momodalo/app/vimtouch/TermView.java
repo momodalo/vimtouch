@@ -102,7 +102,9 @@ public class TermView extends EmulatorView implements
         float span = detector.getCurrentSpan()/mScaleSpan;
         setScale(1.0f, 1.0f, 0.0f,0.0f);
         mScaleSpan = -1.0f;
-        mSettings.setFontSize((int)(mSettings.getFontSize()*span));
+        int size = (int)(mSettings.getFontSize()*span);
+        if (size < 2) size = 2;
+        mSettings.setFontSize(size);
         updatePrefs(mSettings);
     }
 
@@ -116,7 +118,6 @@ public class TermView extends EmulatorView implements
     private Runnable mFlingRun = new Runnable() {
         public void run() {
             Exec.scrollBy((int)mVelocity);
-            Exec.updateScreen();
             if(mVelocity > 0){
                 mVelocity -= mVelocity>2?2:mVelocity;
             }else{
@@ -142,7 +143,6 @@ public class TermView extends EmulatorView implements
         mHandler.removeCallbacks(mFlingRun);
 
         Exec.moveCursor( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
-        Exec.updateScreen();
         return true;
     }
 
@@ -173,7 +173,6 @@ public class TermView extends EmulatorView implements
                 mLastX = -1;
             }
             Exec.moveCursor( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
-            Exec.updateScreen();
         }else if(action == MotionEvent.ACTION_UP){
             mLastY = -1;
             mLastX = -1;
