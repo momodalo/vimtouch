@@ -19,23 +19,59 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" 
     android:layout_height="match_parent"
-    android:id="@+id/main_layout"
     android:orientation="vertical">
-
-
     <HorizontalScrollView
-        android:id="@+id/button_bar"
+        android:id="@+id/top_bar"
+        android:layout_weight="0"
         android:background="@drawable/bar_bg"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="30sp">
         <LinearLayout
             android:id="@+id/button_bar_layout"
             android:background="@drawable/bar_bg"
-            android:layout_width="match_parent" 
-            android:layout_height="30sp"
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="horizontal">
         </LinearLayout>
     </HorizontalScrollView>
+    <LinearLayout 
+        android:layout_width="match_parent" 
+        android:layout_height="match_parent"
+        android:id="@+id/h_main_layout"
+        android:layout_weight="1"
+        android:orientation="horizontal">
 
+        <HorizontalScrollView
+            android:id="@+id/left_bar"
+            android:visibility="gone"
+            android:layout_weight="0"
+            android:background="@drawable/bar_bg"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+        </HorizontalScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent" 
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:id="@+id/main_layout">
+        </LinearLayout>
+        <HorizontalScrollView
+            android:id="@+id/right_bar"
+            android:visibility="gone"
+            android:layout_weight="0"
+            android:background="@drawable/bar_bg"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+        </HorizontalScrollView>
+    </LinearLayout>
+    <HorizontalScrollView
+        android:id="@+id/bottom_bar"
+        android:visibility="gone"
+        android:layout_weight="0"
+        android:background="@drawable/bar_bg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    </HorizontalScrollView>
 </LinearLayout>

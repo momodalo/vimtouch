@@ -80,27 +80,9 @@
    <string name="default_value_ime_preference">0</string>
    <string name="default_value_shell_preference">/system/bin/sh -</string>
    <string name="default_value_initialcommand_preference">export PATH=/data/local/bin:$PATH</string>
-   
-   <string name="normal_quick_buttons">Normal Mode Quick Buttons</string>
-   <string name="default_normal_quick1">:w</string>
-   <string name="title_normal_quick1">Normal mode 1st button</string>
-   <string name="default_normal_quick2">dd</string>
-   <string name="title_normal_quick2">Normal mode 2st button</string>
-   <string name="default_normal_quick3">yy</string>
-   <string name="title_normal_quick3">Normal mode 3st button</string>
-   <string name="default_normal_quick4">p</string>
-   <string name="title_normal_quick4">Normal mode 4st button</string>
-   <string name="default_normal_quick5">:q!</string>
-   <string name="title_normal_quick5">Normal mode 5st button</string>
-   <string name="default_normal_quick6">:wq</string>
-   <string name="title_normal_quick6">Normal mode 6st button</string>
-   <string name="default_normal_quick7">G</string>
-   <string name="title_normal_quick7">Normal mode 7st button</string>
-   <string name="default_normal_quick8">zR</string>
-   <string name="title_normal_quick8">Normal mode 8st button</string>
-   <string name="default_normal_quick9">zM</string>
-   <string name="title_normal_quick9">Normal mode 9st button</string>
 
+   <string name="normal_quick_buttons">Normal Mode Quick Buttons</string>
+   
    <string name="title_keyboard">key</string>
    <string name="title_esc">ESC</string>
 
@@ -110,6 +92,7 @@
    <string name="message_content_too_big">The content is too big to do preview. Please save it first.</string>
 
    <string name="vimrc">Edit vimrc</string>
+   <string name="menu_quickbar">Edit Quickbar</string>
 
    <string name="title_utf8_by_default_preference">Default to UTF-8</string>
    <string name="summary_utf8_by_default_preference">Whether UTF-8 mode is enabled by default.</string>
@@ -142,5 +125,10 @@
    <string name="save_file">Save</string>
    <string name="quit_file">:q!</string>
    <string name="toggle_fullscreen">Toggle Fullscreen</string>
+
+   <string name="title_quickbar_pos_preference">Quickbar Position</string>
+   <string name="summary_quickbar_pos_preference">Choose position of quickbar</string>
+   <string name="dialog_title_quickbar_pos_preference">Quickbar Position</string>
+
 
 </resources>

@@ -20,10 +20,7 @@ import android.content.res.Resources;
 import android.content.SharedPreferences;
 import android.view.KeyEvent;
 
-/**
- * Terminal emulator settings
- */
-public class TermSettings {
+public class VimSettings {
     private SharedPreferences mPrefs;
 
     private int mActionBarMode;
@@ -47,6 +44,7 @@ public class TermSettings {
     private boolean mTouchGesture;
     private boolean mSingleTapESC;
     private boolean mZoomBottom;
+    private int mQuickbarPos;
 
     private String mPrependPath = null;
     private String mAppendPath = null;
@@ -72,6 +70,7 @@ public class TermSettings {
     private static final String TOUCHGESTURE_KEY = "touch_gesture";
     private static final String SINGLETAPESC_KEY = "single_tap_esc";
     private static final String ZOOMBOTTOM_KEY = "zoombottom";
+    private static final String QUICKBARPOS_KEY = "quickbar_pos";
 
     public static final int WHITE = 0xffffffff;
     public static final int BLACK = 0xff000000;
@@ -131,7 +130,7 @@ public class TermSettings {
     public static final int BACK_KEY_SENDS_TAB = 4;
     private static final int BACK_KEY_MAX = 4;
 
-    public TermSettings(Resources res, SharedPreferences prefs) {
+    public VimSettings(Resources res, SharedPreferences prefs) {
         readDefaultPrefs(res);
         readPrefs(prefs);
     }
@@ -158,6 +157,7 @@ public class TermSettings {
         mTouchGesture = res.getBoolean(R.bool.pref_touch_gesture_default);
         mSingleTapESC = res.getBoolean(R.bool.pref_single_tap_esc_default);
         mZoomBottom = res.getBoolean(R.bool.pref_zoombottom_default);
+        mQuickbarPos = res.getInteger(R.integer.pref_quickbar_pos_default);
     }
 
     public void readPrefs(SharedPreferences prefs) {
@@ -184,6 +184,7 @@ public class TermSettings {
         mTouchGesture = readBooleanPref(TOUCHGESTURE_KEY, mTouchGesture);
         mSingleTapESC = readBooleanPref(SINGLETAPESC_KEY, mSingleTapESC);
         mZoomBottom = readBooleanPref(ZOOMBOTTOM_KEY, mZoomBottom);
+        mQuickbarPos = readIntPref(QUICKBARPOS_KEY, mQuickbarPos,4);
         mPrefs = null;  // we leak a Context if we hold on to this
     }
 
@@ -329,5 +330,9 @@ public class TermSettings {
 
     public boolean getZoomBottom() {
         return mZoomBottom;
+    }
+    
+    public int getQuickbarPosition() {
+        return mQuickbarPos;
     }
 }
