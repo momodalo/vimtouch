@@ -53,6 +53,7 @@
             android:excludeFromRecents="true"
         />
         <activity android:name="InstallProgress"
+                android:theme="@android:style/Theme.Holo.Light"
                 android:launchMode="singleInstance"
         />
     </application>

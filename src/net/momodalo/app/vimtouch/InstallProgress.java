@@ -18,41 +18,59 @@ import java.util.zip.ZipInputStream;
 
 public class InstallProgress extends Activity {
     public static final String LOG_TAG = "VIM Installation";
+    private String mUrl;
 
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        try {
+            mUrl = getIntent().getData().getPath();
+        }catch (Exception e){
+            mUrl = null;
+        }
+
         setContentView(R.layout.installprogress);
         // Start lengthy operation in a background thread
         new Thread(new Runnable() {
             public void run() {
-                installZip(R.raw.vim);
-                installZip(R.raw.terminfo);
+                if(mUrl == null){
 
-                File vimrc = new File(getApplicationContext().getFilesDir()+"/vim/vimrc");
-
-                try{
-                    BufferedInputStream is = new BufferedInputStream(getResources().openRawResource(R.raw.vimrc));
-                    FileWriter fout = new FileWriter(vimrc);
-                    while(is.available() > 0){
-                        fout.write(is.read());
+                    installZip(getResources().openRawResource(R.raw.vim));
+                    installZip(getResources().openRawResource(R.raw.terminfo));
+    
+                    File vimrc = new File(getApplicationContext().getFilesDir()+"/vim/vimrc");
+    
+                    try{
+                        BufferedInputStream is = new BufferedInputStream(getResources().openRawResource(R.raw.vimrc));
+                        FileWriter fout = new FileWriter(vimrc);
+                        while(is.available() > 0){
+                            fout.write(is.read());
+                        }
+                        fout.close();
+                    } catch(Exception e) { 
+                        Log.e(LOG_TAG, "install vimrc", e); 
+                    } 
+    
+                    File tmp = new File(getApplicationContext().getFilesDir()+"/tmp");
+                    tmp.mkdir();
+                }else{
+                    try {
+                        File file = new File(mUrl);
+                        if(file.exists()){
+                            installZip(new FileInputStream(file));
+                        }
+                    }catch (Exception e){
+                        Log.e(LOG_TAG, "install " + mUrl + " error " + e);
                     }
-                    fout.close();
-                } catch(Exception e) { 
-                    Log.e(LOG_TAG, "install vimrc", e); 
-                } 
-
-                File tmp = new File(getApplicationContext().getFilesDir()+"/tmp");
-                tmp.mkdir();
+                }
 
                 finish();
             }
         }).start();
     }
 
-    private void installZip(int resourceId) {
+    private void installZip(InputStream is) {
         try  { 
             String dirname = getApplicationContext().getFilesDir().getPath();
-            InputStream is = this.getResources().openRawResource(resourceId);
             ZipInputStream zin = new ZipInputStream(is); 
             ZipEntry ze = null; 
             while ((ze = zin.getNextEntry()) != null) { 
