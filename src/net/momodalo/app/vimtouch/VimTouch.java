@@ -376,7 +376,7 @@ public class VimTouch extends Activity {
             String line = null;
             int index = 0;
             while ((line = bufferedReader.readLine()) != null) {
-                if(line == "")continue;
+                if(line.length() == 0)continue;
                 if(index < mButtonBarLayout.getChildCount()){
                     TextView textview = (TextView)mButtonBarLayout.getChildAt(index);
                     textview.setText(line);
