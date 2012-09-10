@@ -1,3 +1,6 @@
+" Use Vim settings, rather than Vi settings (much better!).
+" This must be first, because it changes other options as a side effect.
+set nocompatible
 
 let color = "true"
 syntax on
@@ -18,8 +21,6 @@ set ruler
 set cindent
 set autoindent
 set smartindent
-
-set nocompatible
 
 set fileencodings=utf-8,big5,euc-jp,gbk,euc-kr,utf-bom,iso8859-1
 set encoding=utf8
