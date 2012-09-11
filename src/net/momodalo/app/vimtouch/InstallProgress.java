@@ -1,6 +1,9 @@
 package net.momodalo.app.vimtouch;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -69,16 +72,31 @@ public class InstallProgress extends Activity {
         // Start lengthy operation in a background thread
         new Thread(new Runnable() {
             public void run() {
+            Log.e(LOG_TAG, "install " + mUri );
                 if(mUri == null){
                     installDefaultRuntime();
-                }else if (mUri.getScheme() == "file") {
+                }else if (mUri.getScheme().equals("file")) {
                     installLocalFile();
-                }else if (mUri.getScheme() == "http") {
                 }
-
+                showNotification();
                 finish();
             }
         }).start();
+    }
+
+    void showNotification() {
+        NotificationManager nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+
+        CharSequence from = "VimTouch";
+        CharSequence message = "Vim Runtime install finished";
+
+        Notification notif = new Notification(R.drawable.app_vimtouch, message,
+        System.currentTimeMillis());
+
+        notif.setLatestEventInfo(this, from, message, null);
+        notif.defaults = Notification.DEFAULT_ALL;
+
+        nm.notify( 0, notif);
     }
 
     private void installZip(InputStream is) {
