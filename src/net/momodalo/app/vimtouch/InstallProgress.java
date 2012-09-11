@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ProgressBar;
+import android.net.Uri;
 
 import java.io.FileInputStream;
 import java.io.BufferedInputStream;
@@ -18,49 +20,60 @@ import java.util.zip.ZipInputStream;
 
 public class InstallProgress extends Activity {
     public static final String LOG_TAG = "VIM Installation";
-    private String mUrl;
+    private Uri mUri;
+    private ProgressBar mProgressBar;
+
+    private void installDefaultRuntime() {
+        installZip(getResources().openRawResource(R.raw.vim));
+        installZip(getResources().openRawResource(R.raw.terminfo));
+
+        File vimrc = new File(getApplicationContext().getFilesDir()+"/vim/vimrc");
+
+        try{
+            BufferedInputStream is = new BufferedInputStream(getResources().openRawResource(R.raw.vimrc));
+            FileWriter fout = new FileWriter(vimrc);
+            while(is.available() > 0){
+                fout.write(is.read());
+            }
+            fout.close();
+        } catch(Exception e) { 
+            Log.e(LOG_TAG, "install vimrc", e); 
+        } 
+
+        File tmp = new File(getApplicationContext().getFilesDir()+"/tmp");
+        tmp.mkdir();
+    }
+
+    private void installLocalFile() {
+        try {
+            File file = new File(mUri.getPath());
+            if(file.exists()){
+                installZip(new FileInputStream(file));
+            }
+        }catch (Exception e){
+            Log.e(LOG_TAG, "install " + mUri + " error " + e);
+        }
+    }
 
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         try {
-            mUrl = getIntent().getData().getPath();
+            mUri = getIntent().getData();
         }catch (Exception e){
-            mUrl = null;
+            mUri = null;
         }
 
         setContentView(R.layout.installprogress);
+        mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
+
         // Start lengthy operation in a background thread
         new Thread(new Runnable() {
             public void run() {
-                if(mUrl == null){
-
-                    installZip(getResources().openRawResource(R.raw.vim));
-                    installZip(getResources().openRawResource(R.raw.terminfo));
-    
-                    File vimrc = new File(getApplicationContext().getFilesDir()+"/vim/vimrc");
-    
-                    try{
-                        BufferedInputStream is = new BufferedInputStream(getResources().openRawResource(R.raw.vimrc));
-                        FileWriter fout = new FileWriter(vimrc);
-                        while(is.available() > 0){
-                            fout.write(is.read());
-                        }
-                        fout.close();
-                    } catch(Exception e) { 
-                        Log.e(LOG_TAG, "install vimrc", e); 
-                    } 
-    
-                    File tmp = new File(getApplicationContext().getFilesDir()+"/tmp");
-                    tmp.mkdir();
-                }else{
-                    try {
-                        File file = new File(mUrl);
-                        if(file.exists()){
-                            installZip(new FileInputStream(file));
-                        }
-                    }catch (Exception e){
-                        Log.e(LOG_TAG, "install " + mUrl + " error " + e);
-                    }
+                if(mUri == null){
+                    installDefaultRuntime();
+                }else if (mUri.getScheme() == "file") {
+                    installLocalFile();
+                }else if (mUri.getScheme() == "http") {
                 }
 
                 finish();
