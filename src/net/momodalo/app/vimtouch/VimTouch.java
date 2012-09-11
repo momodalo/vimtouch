@@ -80,6 +80,11 @@ import android.widget.TextView;
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
 import android.content.DialogInterface;
 import android.os.ParcelFileDescriptor;
+import android.app.DownloadManager;
+import android.app.DownloadManager.Query;
+import android.app.DownloadManager.Request;
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
 
 import jackpal.androidterm.emulatorview.EmulatorView;
 import jackpal.androidterm.emulatorview.ColorScheme;
@@ -153,6 +158,8 @@ public class VimTouch extends Activity {
     private final static int PASTE_ID = 2;
 
     private String mUrl = null;
+    private long mEnqueue = -1;
+    private DownloadManager mDM;
 
     View.OnClickListener mClickListener = new View.OnClickListener() {
         public void onClick(View v){
@@ -255,6 +262,32 @@ public class VimTouch extends Activity {
             startEmulator();
 
         Exec.vimtouch = this;
+
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
+                    long downloadId = intent.getLongExtra(
+                    DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+                    Query query = new Query();
+                    query.setFilterById(mEnqueue);
+                    Cursor c = mDM.query(query);
+                    if (c.moveToFirst()) {
+                        int columnIndex = c.getColumnIndex(DownloadManager.COLUMN_STATUS);
+                        if (DownloadManager.STATUS_SUCCESSFUL == c.getInt(columnIndex)) {
+                            String uriString = c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
+                            Intent newintent = new Intent(getApplicationContext(), InstallProgress.class);
+                            newintent.setData(Uri.parse(uriString));
+                            startActivity(newintent);
+                        }
+                    }
+                }
+            }
+        };
+         
+        registerReceiver(receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+     
     }
 
     private TermView createEmulatorView(VimTermSession session) {
@@ -603,6 +636,10 @@ public class VimTouch extends Activity {
             mSession.write(27);
         } else if (id == R.id.menu_quit) {
             mSession.write(":q!\r");
+        } else if (id == R.id.menu_full_vim_runtime) {
+            mDM = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+            Request request = new Request(Uri.parse("https://github.com/downloads/momodalo/vimtouch/vim.vrz"));
+            mEnqueue = mDM.enqueue(request);
         } else if (id == R.id.menu_open) {
             Intent intent = new Intent(getBaseContext(), VimFileActivity.class);
             intent.putExtra(FileDialog.START_PATH, "/sdcard");

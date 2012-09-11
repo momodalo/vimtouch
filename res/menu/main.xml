@@ -49,4 +49,7 @@
     <item android:id="@+id/menu_quickbar"
         android:showAsAction="ifRoom|withText"
         android:title="@string/menu_quickbar" />
+    <item android:id="@+id/menu_full_vim_runtime"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/download_full_vim_runtime" />
 </menu>

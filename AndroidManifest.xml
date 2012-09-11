@@ -5,6 +5,7 @@
     android:installLocation="auto"
     >
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application android:icon="@drawable/app_vimtouch"
                 android:label="@string/application_vimtouch">
         <activity android:name="VimTouch"

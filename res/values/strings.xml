@@ -130,5 +130,7 @@
    <string name="summary_quickbar_pos_preference">Choose position of quickbar</string>
    <string name="dialog_title_quickbar_pos_preference">Quickbar Position</string>
 
+   <string name="download_full_vim_runtime">Download Full VIM runtime</string>
+
 
 </resources>
