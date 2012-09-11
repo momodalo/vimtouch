@@ -298,7 +298,6 @@ public class VimTouch extends Activity {
         if(vimrc.exists()) return true;
         
         Intent intent = new Intent(getApplicationContext(), InstallProgress.class);
-        Log.e(VimTouch.LOG_TAG, "on request1.");
         startActivityForResult(intent, REQUEST_INSTALL);
 
         return false;
@@ -309,11 +308,9 @@ public class VimTouch extends Activity {
             if(checkVimRuntime())
                 startEmulator();
         }else if (requestCode == REQUEST_OPEN){
-        Log.e(VimTouch.LOG_TAG, "on test1.");
             if (resultCode == Activity.RESULT_OK) {
                 String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
                 mUrl = filePath;
-        Log.e(VimTouch.LOG_TAG, "on test2."+filePath);
             }
         }
     }
