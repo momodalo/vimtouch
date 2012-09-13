@@ -265,31 +265,6 @@ public class VimTouch extends Activity {
 
         Exec.vimtouch = this;
 
-        BroadcastReceiver receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
-                    long downloadId = intent.getLongExtra(
-                    DownloadManager.EXTRA_DOWNLOAD_ID, 0);
-                    Query query = new Query();
-                    query.setFilterById(mEnqueue);
-                    Cursor c = mDM.query(query);
-                    if (c.moveToFirst()) {
-                        int columnIndex = c.getColumnIndex(DownloadManager.COLUMN_STATUS);
-                        if (DownloadManager.STATUS_SUCCESSFUL == c.getInt(columnIndex)) {
-                            String uriString = c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
-                            Intent newintent = new Intent(getApplicationContext(), InstallProgress.class);
-                            newintent.setData(Uri.parse(uriString));
-                            startActivity(newintent);
-                        }
-                    }
-                }
-            }
-        };
-         
-        registerReceiver(receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-     
     }
 
     private TermView createEmulatorView(VimTermSession session) {
@@ -642,6 +617,40 @@ public class VimTouch extends Activity {
 
     }
 
+    private void downloadFullRuntime() {
+
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                context.unregisterReceiver(this);
+                String action = intent.getAction();
+                if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
+                    long downloadId = intent.getLongExtra(
+                    DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+                    Query query = new Query();
+                    query.setFilterById(mEnqueue);
+                    Cursor c = mDM.query(query);
+                    if (c.moveToFirst()) {
+                        int columnIndex = c.getColumnIndex(DownloadManager.COLUMN_STATUS);
+                        if (DownloadManager.STATUS_SUCCESSFUL == c.getInt(columnIndex)) {
+                            String uriString = c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
+                            Intent newintent = new Intent(getApplicationContext(), InstallProgress.class);
+                            newintent.setData(Uri.parse(uriString));
+                            startActivity(newintent);
+                        }
+                    }
+                }
+            }
+        };
+         
+        registerReceiver(receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+     
+        mDM = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+        Request request = new Request(Uri.parse("https://github.com/downloads/momodalo/vimtouch/vim.vrz"));
+        mEnqueue = mDM.enqueue(request);
+    }
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -661,11 +670,9 @@ public class VimTouch extends Activity {
             mSession.write(27);
         } else if (id == R.id.menu_quit) {
             mSession.write(":q!\r");
-        } else if (id == R.id.menu_full_vim_runtime) {
-            mDM = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-            Request request = new Request(Uri.parse("https://github.com/downloads/momodalo/vimtouch/vim.vrz"));
-            mEnqueue = mDM.enqueue(request);
-        } else if (id == R.id.menu_open) {
+        } else if (id == R.id.menu_full_vim_runtime)  {
+            downloadFullRuntime();
+        }else if (id == R.id.menu_open) {
             Intent intent = new Intent(getBaseContext(), VimFileActivity.class);
             intent.putExtra(FileDialog.START_PATH, "/sdcard");
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
