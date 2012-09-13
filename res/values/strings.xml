@@ -131,6 +131,7 @@
    <string name="dialog_title_quickbar_pos_preference">Quickbar Position</string>
 
    <string name="download_full_vim_runtime">Download Full VIM runtime</string>
+   <string name="extra_downloads">Extra Downloads</string>
 
    <string name="vim_md5">4ca08ccbe3f4cf2caa9443795d324ac2</string>
 

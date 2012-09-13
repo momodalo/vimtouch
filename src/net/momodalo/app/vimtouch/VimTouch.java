@@ -678,8 +678,14 @@ public class VimTouch extends Activity {
             mSession.write(27);
         } else if (id == R.id.menu_quit) {
             mSession.write(":q!\r");
+        } else if (id == R.id.menu_extra_downloads)  {
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setData(Uri.parse("https://github.com/momodalo/vimtouch/downloads"));
+            startActivity(i);
+        /*
         } else if (id == R.id.menu_full_vim_runtime)  {
             downloadFullRuntime();
+        */
         }else if (id == R.id.menu_open) {
             Intent intent = new Intent(getBaseContext(), VimFileActivity.class);
             intent.putExtra(FileDialog.START_PATH, "/sdcard");
