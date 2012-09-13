@@ -629,18 +629,26 @@ public class VimTouch extends Activity {
         return true;
     }
 
+    private void doToggleFullscreen() {
+        WindowManager.LayoutParams attrs = getWindow().getAttributes(); 
+        if((attrs.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN ) != 0) 
+            attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        else
+            attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN; 
+        getWindow().setAttributes(attrs); 
+
+        PackageInfo info;
+        SharedPreferences.Editor editor = mPrefs.edit();
+
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.menu_preferences) {
             doPreferences();
         } else if (id == R.id.menu_fullscreen) {
-            WindowManager.LayoutParams attrs = getWindow().getAttributes(); 
-            if((attrs.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN ) != 0) 
-                attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            else
-                attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN; 
-            getWindow().setAttributes(attrs); 
+            doToggleFullscreen();
         } else if (id == R.id.menu_vimrc) {
             Exec.doCommand("new ~/.vimrc");
             Exec.updateScreen();
