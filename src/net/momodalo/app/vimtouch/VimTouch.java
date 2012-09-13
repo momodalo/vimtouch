@@ -267,6 +267,14 @@ public class VimTouch extends Activity {
 
     }
 
+    public void onDestroy() {
+        super.onDestroy();
+
+        System.runFinalizersOnExit(true);
+
+        System.exit(0);
+    }
+
     private TermView createEmulatorView(VimTermSession session) {
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
