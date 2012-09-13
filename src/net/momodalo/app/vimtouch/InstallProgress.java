@@ -153,7 +153,14 @@ public class InstallProgress extends Activity {
                     installDefaultRuntime();
                 }else if (mUri.getScheme().equals("file")) {
                     installLocalFile();
+                }else if (mUri.getScheme().equals("content")){
+                    try{
+                        InputStream attachment = getContentResolver().openInputStream(mUri);
+                        installZip(attachment);
+                    }catch(Exception e){
+                    }
                 }
+              
                 showNotification();
                 finish();
             }
