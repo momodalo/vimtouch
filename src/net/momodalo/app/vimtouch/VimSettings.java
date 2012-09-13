@@ -45,6 +45,7 @@ public class VimSettings {
     private boolean mSingleTapESC;
     private boolean mZoomBottom;
     private int mQuickbarPos;
+    private long mLastVersionCode;
 
     private String mPrependPath = null;
     private String mAppendPath = null;
@@ -71,6 +72,7 @@ public class VimSettings {
     private static final String SINGLETAPESC_KEY = "single_tap_esc";
     private static final String ZOOMBOTTOM_KEY = "zoombottom";
     private static final String QUICKBARPOS_KEY = "quickbar_pos";
+    public static final String LASTVERSION_KEY = "last_version";
 
     public static final int WHITE = 0xffffffff;
     public static final int BLACK = 0xff000000;
@@ -158,6 +160,7 @@ public class VimSettings {
         mSingleTapESC = res.getBoolean(R.bool.pref_single_tap_esc_default);
         mZoomBottom = res.getBoolean(R.bool.pref_zoombottom_default);
         mQuickbarPos = res.getInteger(R.integer.pref_quickbar_pos_default);
+        mLastVersionCode = 0;
     }
 
     public void readPrefs(SharedPreferences prefs) {
@@ -185,6 +188,7 @@ public class VimSettings {
         mSingleTapESC = readBooleanPref(SINGLETAPESC_KEY, mSingleTapESC);
         mZoomBottom = readBooleanPref(ZOOMBOTTOM_KEY, mZoomBottom);
         mQuickbarPos = readIntPref(QUICKBARPOS_KEY, mQuickbarPos,4);
+        mLastVersionCode = mPrefs.getLong(LASTVERSION_KEY, 0);
         mPrefs = null;  // we leak a Context if we hold on to this
     }
 
@@ -206,6 +210,10 @@ public class VimSettings {
 
     private boolean readBooleanPref(String key, boolean defaultValue) {
         return mPrefs.getBoolean(key, defaultValue);
+    }
+
+    public long getLastVersionCode(){
+        return mLastVersionCode;
     }
 
     public int actionBarMode() {

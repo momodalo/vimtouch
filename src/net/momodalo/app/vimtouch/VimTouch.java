@@ -80,6 +80,8 @@ import android.widget.TextView;
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
 import android.content.DialogInterface;
 import android.os.ParcelFileDescriptor;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageInfo;
 import android.app.DownloadManager;
 import android.app.DownloadManager.Query;
 import android.app.DownloadManager.Request;
@@ -318,17 +320,21 @@ public class VimTouch extends Activity {
         mUrl = null;
     }
 
-    public String getVimrc() {
-        return getApplicationContext().getFilesDir()+"/vim/vimrc";
-    }
-
     public String getQuickbarFile() {
         return getApplicationContext().getFilesDir()+"/vim/quickbar";
     }
     
     private boolean checkVimRuntime(){
-        File vimrc = new File(getVimrc());
-        if(vimrc.exists()) return true;
+        PackageInfo info;
+        try {
+            info = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_META_DATA);
+            if(mSettings.getLastVersionCode() == info.versionCode)
+                return true;
+        } catch (PackageManager.NameNotFoundException e) {
+        }
+
+        if(InstallProgress.isInstalled(this))
+            return true;
         
         Intent intent = new Intent(getApplicationContext(), InstallProgress.class);
         startActivityForResult(intent, REQUEST_INSTALL);
@@ -338,8 +344,19 @@ public class VimTouch extends Activity {
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == REQUEST_INSTALL){
-            if(checkVimRuntime())
+            if(checkVimRuntime()){
+                PackageInfo info;
+                SharedPreferences.Editor editor = mPrefs.edit();
+
+                try {
+                    info = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_META_DATA);
+                    editor.putLong(VimSettings.LASTVERSION_KEY, info.versionCode);
+                    editor.commit();
+                }catch(Exception e){
+                }
+
                 startEmulator();
+            }
         }else if (requestCode == REQUEST_OPEN){
             if (resultCode == Activity.RESULT_OK) {
                 String filePath = data.getStringExtra(FileDialog.RESULT_PATH);

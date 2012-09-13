@@ -132,5 +132,6 @@
 
    <string name="download_full_vim_runtime">Download Full VIM runtime</string>
 
+   <string name="vim_md5">4ca08ccbe3f4cf2caa9443795d324ac2</string>
 
 </resources>

@@ -10,9 +10,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.ProgressBar;
 import android.net.Uri;
+import android.content.SharedPreferences;
 
 import java.io.FileInputStream;
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.BufferedOutputStream;
 import java.io.InputStream;
 import java.io.FileOutputStream;
@@ -20,6 +23,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.security.MessageDigest;
+import java.security.DigestInputStream;
+import java.math.BigInteger;
 
 public class InstallProgress extends Activity {
     public static final String LOG_TAG = "VIM Installation";
@@ -27,13 +33,83 @@ public class InstallProgress extends Activity {
     private ProgressBar mProgressBar;
 
     private void installDefaultRuntime() {
-        installZip(getResources().openRawResource(R.raw.vim));
+        try{
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            InputStream is = new DigestInputStream(getResources().openRawResource(R.raw.vim),md);
+            installZip(is);
+
+
+            // write md5 bytes
+            File md5 = new File(getMD5Filename(this));
+            FileWriter fout = new FileWriter(md5);
+
+            BigInteger bi = new BigInteger(1, md.digest());
+            String result = bi.toString(16);
+            if (result.length() % 2 != 0) 
+                result = "0"+result;
+            Log.e(LOG_TAG, "compute md5 "+result);
+            fout.write(result);
+            fout.close();
+        } catch(Exception e) { 
+            Log.e(LOG_TAG, "install vim runtime or compute md5 error", e); 
+        }
+
         installZip(getResources().openRawResource(R.raw.terminfo));
 
-        File vimrc = new File(getApplicationContext().getFilesDir()+"/vim/vimrc");
+        installSysVimrc(this);
+
+    }
+
+    private static String getVimrc(Activity activity) {
+        return activity.getApplicationContext().getFilesDir()+"/vim/vimrc";
+    }
+
+    private static String getMD5Filename( Activity activity) {
+        return activity.getApplicationContext().getFilesDir()+"/vim.md5";
+    }
+
+    private static boolean checkMD5(Activity activity){
+        File md5 = new File(getMD5Filename(activity));
+        InputStream ris = activity.getResources().openRawResource(R.raw.vim);
+
+        if(!md5.exists()) return false;
+
+        // read md5 
+        try{
+            BufferedReader reader = new BufferedReader(new FileReader(md5));
+
+            String saved = reader.readLine();
+            if(saved.equals(activity.getResources().getString(R.string.vim_md5))) return true;
+        }catch(Exception e){
+        }
+
+        return false;
+
+    }
+
+    public static boolean isInstalled(Activity activity){
+        File vimrc = new File(getVimrc(activity));
+        if(vimrc.exists()){
+            // Compare size to make sure the sys vimrc doesn't change
+            try{
+                if(vimrc.getTotalSpace() != activity.getResources().openRawResource(R.raw.vimrc).available()){
+                    installSysVimrc(activity);
+                }
+            }catch(Exception e){
+                installSysVimrc(activity);
+            }
+            return checkMD5(activity);
+        }
+        
+        return false;
+    }
+
+    public static void installSysVimrc(Activity activity) {
+
+        File vimrc = new File(activity.getApplicationContext().getFilesDir()+"/vim/vimrc");
 
         try{
-            BufferedInputStream is = new BufferedInputStream(getResources().openRawResource(R.raw.vimrc));
+            BufferedInputStream is = new BufferedInputStream(activity.getResources().openRawResource(R.raw.vimrc));
             FileWriter fout = new FileWriter(vimrc);
             while(is.available() > 0){
                 fout.write(is.read());
@@ -43,7 +119,7 @@ public class InstallProgress extends Activity {
             Log.e(LOG_TAG, "install vimrc", e); 
         } 
 
-        File tmp = new File(getApplicationContext().getFilesDir()+"/tmp");
+        File tmp = new File(activity.getApplicationContext().getFilesDir()+"/tmp");
         tmp.mkdir();
     }
 
@@ -127,6 +203,13 @@ public class InstallProgress extends Activity {
                 } 
 
             } 
+
+            byte[] buf = new byte[2048];
+            while(is.available() > 0){
+                is.read(buf);
+            }
+            buf = null;
+
             zin.close(); 
         } catch(Exception e) { 
             Log.e(LOG_TAG, "unzip", e); 
