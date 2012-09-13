@@ -167,8 +167,8 @@ public class VimTouch extends Activity {
         public void onClick(View v){
             TextView textview = (TextView)v;
             CharSequence cmd = textview.getText();
-            if(cmd.charAt(0) == ':'){
-                mSession.write(cmd.toString()+"\r");
+            if(cmd.charAt(0) == ':' && cmd.length() > 1){
+                Exec.doCommand(cmd.subSequence(1,cmd.length()).toString());
             }else
                 mSession.write(cmd.toString());
             Exec.updateScreen();
