@@ -92,33 +92,6 @@ void vimtouch_unlock(){
 }
 }
 
-class String8 {
-public:
-    String8() {
-        mString = 0;
-    }
-    
-    ~String8() {
-        if (mString) {
-            free(mString);
-        }
-    }
-
-    void set(const uint16_t* o, size_t numChars) {
-        mString = (char*) malloc(numChars + 1);
-        for (size_t i = 0; i < numChars; i++) {
-            mString[i] = (char) o[i];
-        }
-        mString[numChars] = '\0';
-    }
-    
-    const char* string() {
-        return mString;
-    }
-private:
-    char* mString;
-};
-
 static void *thread_wrapper ( void* value)
 {
     LOGE("thread wrapper");
@@ -261,58 +234,65 @@ static int throwOutOfMemoryError(JNIEnv *env, const char *message)
 static jobject vimtouch_Exec_createSubProcess(JNIEnv *env, jobject clazz,
     jstring cmd, jstring arg0, jstring arg1, jobjectArray envVars, jintArray processIdArray)
 {
-    const jchar* str = cmd ? env->GetStringCritical(cmd, 0) : 0;
-    String8 cmd_8;
-    if (str) {
-        cmd_8.set(str, env->GetStringLength(cmd));
-        env->ReleaseStringCritical(cmd, str);
-    }
+    char const* cmd_str = cmd ? env->GetStringUTFChars(cmd, NULL) : NULL;
+    char const* arg0_str = arg0 ? env->GetStringUTFChars(arg0, NULL) : NULL;
+    char const* arg1_str = arg1 ? env->GetStringUTFChars(arg1, NULL) : NULL;
+    LOGI("cmd_str = '%s'", cmd_str);
+    LOGI("arg0_str = '%s'", arg0_str);
+    LOGI("arg1_str = '%s'", arg1_str);
 
-    str = arg0 ? env->GetStringCritical(arg0, 0) : 0;
-    const char* arg0Str = 0;
-    String8 arg0_8;
-    if (str) {
-        arg0_8.set(str, env->GetStringLength(arg0));
-        env->ReleaseStringCritical(arg0, str);
-        arg0Str = arg0_8.string();
-    }
-
-    str = arg1 ? env->GetStringCritical(arg1, 0) : 0;
-    const char* arg1Str = 0;
-    String8 arg1_8;
-    if (str) {
-        arg1_8.set(str, env->GetStringLength(arg1));
-        env->ReleaseStringCritical(arg1, str);
-        arg1Str = arg1_8.string();
-    }
-
-    int size = envVars ? env->GetArrayLength(envVars) : 0;
+    int num_env_vars = envVars ? env->GetArrayLength(envVars) : 0;
     char **envp = NULL;
-    String8 tmp_8;
-    if (size > 0) {
-        envp = (char **)malloc((size+1)*sizeof(char *));
-        if (!envp) {
+    char const* tmp = NULL;
+
+    if (num_env_vars > 0)
+    {
+        envp = (char **)malloc((num_env_vars + 1) * sizeof(char*));
+
+        if (!envp)
+        {
             throwOutOfMemoryError(env, "Couldn't allocate envp array");
             return NULL;
         }
-        for (int i = 0; i < size; ++i) {
-            jstring var = reinterpret_cast<jstring>(env->GetObjectArrayElement(envVars, i));
-            str = env->GetStringCritical(var, 0);
-            if (!str) {
+
+        for (int i = 0; i < num_env_vars; ++i)
+        {
+            jobject obj = env->GetObjectArrayElement(envVars, i);
+            jstring env_var = reinterpret_cast<jstring>(obj);
+            tmp = env->GetStringUTFChars(env_var, 0);
+
+            if (tmp == NULL)
+            {
                 throwOutOfMemoryError(env, "Couldn't get env var from array");
                 return NULL;
             }
-            tmp_8.set(str, env->GetStringLength(var));
-            env->ReleaseStringCritical(var, str);
-            envp[i] = strdup(tmp_8.string());
+
+            envp[i] = strdup(tmp);
+
+            if (env[i] == NULL)
+            {
+                throwOutOfMemoryError(env, "Couldn't strdup() env var");
+                return NULL;
+            }
+
+            env->ReleaseStringUTFChars(env_var, tmp);
         }
-        envp[size] = NULL;
+
+        envp[num_env_vars] = NULL;
     }
 
-
     int procId;
-    int ptm = create_subprocess(cmd_8.string(), arg0Str, arg1Str, envp, &procId);
-    
+    int ptm = create_subprocess(cmd_str, arg0_str, arg1_str, envp, &procId);
+
+    env->ReleaseStringUTFChars(cmd, cmd_str);
+    env->ReleaseStringUTFChars(arg0, arg0_str);
+    env->ReleaseStringUTFChars(arg1, arg1_str);
+
+    for (int i = 0; i < num_env_vars; ++i)
+        free(envp[i]);
+
+    free(envp);
+
     if (processIdArray) {
         int procIdLen = env->GetArrayLength(processIdArray);
         if (procIdLen > 0) {
