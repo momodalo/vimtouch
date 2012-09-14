@@ -168,13 +168,14 @@ public class InstallProgress extends Activity {
     }
 
     void showNotification() {
-        NotificationManager nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        String svc = NOTIFICATION_SERVICE;
+        NotificationManager nm = (NotificationManager)getSystemService(svc);
 
         CharSequence from = "VimTouch";
         CharSequence message = "Vim Runtime install finished";
 
         Notification notif = new Notification(R.drawable.app_vimtouch, message,
-        System.currentTimeMillis());
+                                              System.currentTimeMillis());
 
         // The PendingIntent to launch our activity if the user selects this
         // notification
