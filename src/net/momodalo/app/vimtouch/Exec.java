@@ -61,6 +61,10 @@ public class Exec
         vimtouch.showDialog(type,title, message, buttons, default_button, textfield);
     }
 
+    public static void quit() {
+        vimtouch.finish();
+    }
+
     /**
      * Create a subprocess. Differs from java.lang.ProcessBuilder in
      * that a pty is used to communicate with the subprocess.
