@@ -32,8 +32,11 @@ Before starting, you need the following prerequisites:
 -   Android SDK: http://developer.android.com/sdk/index.html
 -   Android NDK: http://developer.android.com/tools/sdk/ndk/index.html
 -   Apache ant: http://ant.apache.org/
+
     (Use `sudo apt-get install ant` on a proper OS)
+
 -   Git: http://git-scm.com/
+
     (Use `sudo apt-get install git-core` on a proper OS)
 
 Get the source code:
