@@ -160,7 +160,7 @@ public class InstallProgress extends Activity {
                     }catch(Exception e){
                     }
                 }
-              
+
                 showNotification();
                 finish();
             }
@@ -192,18 +192,18 @@ public class InstallProgress extends Activity {
     }
 
     private void installZip(InputStream is) {
-        try  { 
+        try  {
             String dirname = getApplicationContext().getFilesDir().getPath();
-            ZipInputStream zin = new ZipInputStream(is); 
-            ZipEntry ze = null; 
-            while ((ze = zin.getNextEntry()) != null) { 
-                Log.e(LOG_TAG, "Unzipping " + ze.getName()); 
+            ZipInputStream zin = new ZipInputStream(is);
+            ZipEntry ze = null;
+            while ((ze = zin.getNextEntry()) != null) {
+                Log.e(LOG_TAG, "Unzipping " + ze.getName());
 
-                if(ze.isDirectory()) { 
+                if(ze.isDirectory()) {
                     File file = new File(dirname+"/"+ze.getName());
                     if(!file.isDirectory())
                         file.mkdirs();
-                } else { 
+                } else {
                     int size;
                     byte[] buffer = new byte[2048];
 
@@ -214,11 +214,10 @@ public class InstallProgress extends Activity {
                     }
 
                     bufferOut.flush();
-                    bufferOut.close(); 
-                    zin.closeEntry(); 
-                } 
-
-            } 
+                    bufferOut.close();
+                    zin.closeEntry();
+                }
+            }
 
             byte[] buf = new byte[2048];
             while(is.available() > 0){
@@ -226,9 +225,9 @@ public class InstallProgress extends Activity {
             }
             buf = null;
 
-            zin.close(); 
-        } catch(Exception e) { 
-            Log.e(LOG_TAG, "unzip", e); 
-        } 
+            zin.close();
+        } catch(Exception e) {
+            Log.e(LOG_TAG, "unzip", e);
+        }
     }
 }
