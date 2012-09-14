@@ -29,19 +29,22 @@ https://github.com/momodalo/vimtouch/issues
 ## Developer
 ### How to compile the source code?
 Before starting, you need the following prerequisites:
-- Android SDK: http://developer.android.com/sdk/index.html
-- Android NDK: http://developer.android.com/tools/sdk/ndk/index.html
-- Apache ant: http://ant.apache.org/
-  (Use `sudo apt-get install ant` on a proper OS)
-- Git: http://git-scm.com/
-  (Use `sudo apt-get install git-core` on a proper OS)
+-   Android SDK: http://developer.android.com/sdk/index.html
+-   Android NDK: http://developer.android.com/tools/sdk/ndk/index.html
+-   Apache ant: http://ant.apache.org/
+    (Use `sudo apt-get install ant` on a proper OS)
+-   Git: http://git-scm.com/
+    (Use `sudo apt-get install git-core` on a proper OS)
 
 Get the source code:
+
     git clone git://github.com/momodalo/vimtouch.git && cd vimtouch
 
 Now prepare the development environment:
+
     ANDROID_SDK_HOME=~/path/to/android/sdk && ./prepare-clean-checkout.sh
 
 You're ready to compile it!
+
     ~/path/to/android/ndk/ndk-build
     ant debug
