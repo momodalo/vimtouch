@@ -176,10 +176,18 @@ public class InstallProgress extends Activity {
         Notification notif = new Notification(R.drawable.app_vimtouch, message,
         System.currentTimeMillis());
 
-        notif.setLatestEventInfo(this, from, message, null);
-        notif.defaults = Notification.DEFAULT_ALL;
+        // The PendingIntent to launch our activity if the user selects this
+        // notification
+        Intent intent = new Intent(this, VimTouch.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
+                                                                intent, 0);
 
-        nm.notify( 0, notif);
+        notif.setLatestEventInfo(this, from, message, contentIntent);
+        notif.defaults = Notification.DEFAULT_SOUND
+                         | Notification.DEFAULT_LIGHTS;
+        notif.flags |= Notification.FLAG_AUTO_CANCEL;
+
+        nm.notify(0, notif);
     }
 
     private void installZip(InputStream is) {
