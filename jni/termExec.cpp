@@ -53,14 +53,6 @@ extern "C" {
 #include "gpm.h"
 int AndroidMain(int argc, char**argv);
 extern int fake_gpm_fd[2];
-jmp_buf longjmp_env;
-
-void android_exit(int exit_value)
-{
-    // TODO: use exit_value
-    LOGE("android_exit()");
-    longjmp(longjmp_env, 13);
-}
 };
 
 static pthread_mutex_t global_mutex;
@@ -73,8 +65,16 @@ static jmethodID method_fileDescriptor_init;
 static jclass class_Exec;
 static jmethodID method_Exec_showDialog;
 static jmethodID method_Exec_getDialogState;
+static jmethodID method_Exec_quit;
 static std::map<pthread_t, char**> thread_data;
 static int thread_exit_val = 0;
+
+extern "C" void android_exit(int exit_value)
+{
+    // XXX: should we use exit_value somehow?
+    LOGI("android_exit(%d)", exit_value);
+    global_env->CallStaticVoidMethod(class_Exec, method_Exec_quit);
+}
 
 void pth_exit(int n)
 {
@@ -144,10 +144,7 @@ static void *thread_wrapper ( void* value)
         argv[1] = (char*)thread_arg[1];
         argv[2] = NULL;
 
-        int val = setjmp(longjmp_env);
-
-        if (val == 0)
-            AndroidMain(argv[1]?2:1, (char**)argv);
+        AndroidMain(argv[1] ? 2 : 1, (char**)argv);
 
     global_vm->DetachCurrentThread();
     LOGE("thread leave");
@@ -604,6 +601,11 @@ static int registerNatives(JNIEnv* env)
     method_Exec_getDialogState = env->GetStaticMethodID(class_Exec, "getDialogState", "()I");
     if (method_Exec_getDialogState == NULL) {
         LOGE("Can't find Exec.getDialogState");
+        return -1;
+    }
+    method_Exec_quit = env->GetStaticMethodID(class_Exec, "quit", "()V");
+    if (method_Exec_quit == NULL) {
+        LOGE("Can't find Exec.quit");
         return -1;
     }
 

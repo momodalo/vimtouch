@@ -27,11 +27,8 @@ cd ..
 android_platform=`ls -1 $SDK/platforms | sort -t- -k2n | tail -1`
 echo $android_platform
 
-$SDK/tools/android update lib-project -p libraries/emulatorview/
-$SDK/tools/android update lib-project -p libraries/FileExplorer/
-
+$SDK/tools/android update lib-project -p libraries/emulatorview/ -t $android_platform
+$SDK/tools/android update lib-project -p libraries/FileExplorer/ -t $android_platform
 $SDK/tools/android update project -p . -t $android_platform
-echo "android.library.reference.1=libraries/emulatorview/" >> project.properties
-echo "android.library.reference.2=libraries/FileExplorer/" >> project.properties
 
 # You're now ready to `$NDK/ndk-build` and `ant debug`
