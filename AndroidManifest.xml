@@ -9,7 +9,7 @@
     <application android:icon="@drawable/app_vimtouch"
                 android:label="@string/application_vimtouch">
         <activity android:name="VimTouch"
-                android:theme="@android:style/Theme.Holo"
+                android:theme="@style/VimTheme"
                 android:launchMode="singleInstance"
                 android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
                 android:windowSoftInputMode="adjustResize|stateHidden">
@@ -54,7 +54,7 @@
             android:excludeFromRecents="true"
         />
         <activity android:name="InstallProgress"
-                android:theme="@android:style/Theme.Holo.Light"
+                android:theme="@style/VimTheme"
                 android:launchMode="singleInstance"
         >
             <intent-filter>

@@ -160,7 +160,7 @@ public class InstallProgress extends Activity {
                     }catch(Exception e){
                     }
                 }
-              
+
                 showNotification();
                 finish();
             }
@@ -168,33 +168,42 @@ public class InstallProgress extends Activity {
     }
 
     void showNotification() {
-        NotificationManager nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        String svc = NOTIFICATION_SERVICE;
+        NotificationManager nm = (NotificationManager)getSystemService(svc);
 
         CharSequence from = "VimTouch";
         CharSequence message = "Vim Runtime install finished";
 
         Notification notif = new Notification(R.drawable.app_vimtouch, message,
-        System.currentTimeMillis());
+                                              System.currentTimeMillis());
 
-        notif.setLatestEventInfo(this, from, message, null);
-        notif.defaults = Notification.DEFAULT_ALL;
+        // The PendingIntent to launch our activity if the user selects this
+        // notification
+        Intent intent = new Intent(this, VimTouch.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
+                                                                intent, 0);
 
-        nm.notify( 0, notif);
+        notif.setLatestEventInfo(this, from, message, contentIntent);
+        notif.defaults = Notification.DEFAULT_SOUND
+                         | Notification.DEFAULT_LIGHTS;
+        notif.flags |= Notification.FLAG_AUTO_CANCEL;
+
+        nm.notify(0, notif);
     }
 
     private void installZip(InputStream is) {
-        try  { 
+        try  {
             String dirname = getApplicationContext().getFilesDir().getPath();
-            ZipInputStream zin = new ZipInputStream(is); 
-            ZipEntry ze = null; 
-            while ((ze = zin.getNextEntry()) != null) { 
-                Log.e(LOG_TAG, "Unzipping " + ze.getName()); 
+            ZipInputStream zin = new ZipInputStream(is);
+            ZipEntry ze = null;
+            while ((ze = zin.getNextEntry()) != null) {
+                Log.e(LOG_TAG, "Unzipping " + ze.getName());
 
-                if(ze.isDirectory()) { 
+                if(ze.isDirectory()) {
                     File file = new File(dirname+"/"+ze.getName());
                     if(!file.isDirectory())
                         file.mkdirs();
-                } else { 
+                } else {
                     int size;
                     byte[] buffer = new byte[2048];
 
@@ -205,11 +214,10 @@ public class InstallProgress extends Activity {
                     }
 
                     bufferOut.flush();
-                    bufferOut.close(); 
-                    zin.closeEntry(); 
-                } 
-
-            } 
+                    bufferOut.close();
+                    zin.closeEntry();
+                }
+            }
 
             byte[] buf = new byte[2048];
             while(is.available() > 0){
@@ -217,9 +225,9 @@ public class InstallProgress extends Activity {
             }
             buf = null;
 
-            zin.close(); 
-        } catch(Exception e) { 
-            Log.e(LOG_TAG, "unzip", e); 
-        } 
+            zin.close();
+        } catch(Exception e) {
+            Log.e(LOG_TAG, "unzip", e);
+        }
     }
 }
