@@ -23,41 +23,25 @@ VimTouch is a open source VIM port on Android. It supports full vim syntax and f
 ![Screenshot](https://raw.github.com/momodalo/vimtouch/master/images/device-2012-08-28-191757.png)
 ![Screenshot](https://raw.github.com/momodalo/vimtouch/master/images/device-2012-08-28-191719.png)
 
-## Issue
+## Issues
 https://github.com/momodalo/vimtouch/issues
 
 ## Developer
 ### How to compile the source code?
-The project is compiling with the Android source tree. Please setup the AOSP repo first. http://source.android.com/source/index.html (Please use gingerbread or above)
+Before starting, you need the following prerequisites:
+- Android SDK: http://developer.android.com/sdk/index.html
+- Android NDK: http://developer.android.com/tools/sdk/ndk/index.html
+- Apache ant: http://ant.apache.org/
+  (Use `sudo apt-get install ant` on a proper OS)
+- Git: http://git-scm.com/
+  (Use `sudo apt-get install git-core` on a proper OS)
 
-Get the source code
+Get the source code:
+    git clone git://github.com/momodalo/vimtouch.git && cd vimtouch
 
-<pre><code>git clone https://code.google.com/p/vimtouch/</code></pre>
+Now prepare the development environment:
+    ANDROID_SDK_HOME=~/path/to/android/sdk && ./prepare-clean-checkout.sh
 
-Get the vim source code from http://www.vim.org/sources.php and extract it under vimtouch/jni/vim
-
-<pre><code>cd vimtouch/jni
-wget ftp://ftp.vim.org/pub/vim/unix/vim-7.3.tar.bz2
-tar jxvf vim-7.3.tar.bz2
-mv vim73 vim
-rm vim/src/auto/config.h
-rm vim/src/feature.h
-wget http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz
-mv libiconv-1.14 libiconv
-</code></pre>
-
-Get the libncurses under vimtouch/jni/libncurses
-
-<pre><code>git clone https://github.com/CyanogenMod/android_external_libncurses.git libncurses
-</code></pre>
-
-Setup the Android NDK and SDK build environment
-<pre><code>cd [path to vimtouch]
-android update project -p .
-</code></pre>
-
-Compile it!
-<pre><code>cd [path to vimtouch]
-ndk-build
-ant debug
-</code></pre>
+You're ready to compile it!
+    ~/path/to/android/ndk/ndk-build
+    ant debug
