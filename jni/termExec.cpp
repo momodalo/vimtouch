@@ -269,7 +269,7 @@ static jobject vimtouch_Exec_createSubProcess(JNIEnv *env, jobject clazz,
 
             envp[i] = strdup(tmp);
 
-            if (env[i] == NULL)
+            if (envp[i] == NULL)
             {
                 throwOutOfMemoryError(env, "Couldn't strdup() env var");
                 return NULL;
