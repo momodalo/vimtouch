@@ -16,7 +16,6 @@
 
 <resources>
     <style name="VimTheme" parent="@android:style/Theme.Holo">
-        <item name="android:windowNoTitle">true</item>
         <item name="android:windowFrame">@null</item>
     </style>
 </resources>
