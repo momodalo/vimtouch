@@ -47,15 +47,15 @@
         </activity>
         <activity android:name="VimTouchPreferences"/>
         <activity android:name=".VimFileActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
-            android:excludeFromRecents="true"
+                  android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
+                  android:excludeFromRecents="true"
         />
         <activity android:name=".VimFileDialog"
-            android:excludeFromRecents="true"
+                  android:excludeFromRecents="true"
         />
         <activity android:name="InstallProgress"
-                android:theme="@style/VimTheme"
-                android:launchMode="singleInstance"
+                  android:theme="@style/VimTheme"
+                  android:launchMode="singleInstance"
         >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -69,7 +69,7 @@
             </intent-filter>
         </activity>
     </application>
-    <uses-sdk android:minSdkVersion="9" 
+    <uses-sdk android:minSdkVersion="9"
               android:targetSdkVersion="14"
     />
-</manifest> 
+</manifest>
