@@ -56,7 +56,18 @@
         <activity android:name="InstallProgress"
                   android:theme="@style/VimTheme"
                   android:launchMode="singleInstance"
-        />
+        >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.EDIT" />
+                <action android:name="android.intent.action.PICK" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/octet-stream" />
+                <data android:scheme="file" />
+                <data android:mimeType="*/*" />
+                <data android:pathPattern=".*\\.vrz" />
+            </intent-filter>
+        </activity>
     </application>
     <uses-sdk android:minSdkVersion="9"
               android:targetSdkVersion="14"
