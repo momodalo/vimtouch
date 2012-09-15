@@ -135,4 +135,6 @@
 
    <string name="vim_md5">4ca08ccbe3f4cf2caa9443795d324ac2</string>
 
+   <string name="install_activity">Install Vim Runtime</string>
+
 </resources>

@@ -56,6 +56,7 @@
         <activity android:name="InstallProgress"
                 android:theme="@style/VimTheme"
                 android:launchMode="singleInstance"
+                android:label="@string/install_activity"
         >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
