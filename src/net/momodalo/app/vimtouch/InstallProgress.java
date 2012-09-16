@@ -66,11 +66,6 @@ public class InstallProgress extends Activity {
 
     }
 
-    public void onDestroy() {
-        context.unregisterReceiver(this);
-        super.onDestroy();
-    }
-
     private static String getVimrc(Activity activity) {
         return activity.getApplicationContext().getFilesDir()+"/vim/vimrc";
     }
