@@ -11,6 +11,12 @@ import android.util.Log;
 import android.widget.ProgressBar;
 import android.net.Uri;
 import android.content.SharedPreferences;
+import android.app.DownloadManager;
+import android.app.DownloadManager.Query;
+import android.app.DownloadManager.Request;
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
+import android.database.Cursor;
 
 import java.io.FileInputStream;
 import java.io.BufferedInputStream;
@@ -151,18 +157,24 @@ public class InstallProgress extends Activity {
             Log.e(LOG_TAG, "install " + mUri );
                 if(mUri == null){
                     installDefaultRuntime();
+                }else if (mUri.getScheme().equals("http") || 
+                          mUri.getScheme().equals("https") ||
+                          mUri.getScheme().equals("ftp")) {
+                    downloadRuntime(mUri);
                 }else if (mUri.getScheme().equals("file")) {
                     installLocalFile();
+                    showNotification();
+                    finish();
                 }else if (mUri.getScheme().equals("content")){
                     try{
                         InputStream attachment = getContentResolver().openInputStream(mUri);
                         installZip(attachment);
+                        showNotification();
                     }catch(Exception e){
                     }
+                    finish();
                 }
 
-                showNotification();
-                finish();
             }
         }).start();
     }
@@ -229,5 +241,43 @@ public class InstallProgress extends Activity {
         } catch(Exception e) {
             Log.e(LOG_TAG, "unzip", e);
         }
+    }
+
+    private DownloadManager mDM;
+    private long mEnqueue = -1;
+
+    private void downloadRuntime(Uri uri) {
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                context.unregisterReceiver(this);
+                String action = intent.getAction();
+                if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
+                    long downloadId = intent.getLongExtra(
+                    DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+                    Query query = new Query();
+                    query.setFilterById(mEnqueue);
+                    Cursor c = mDM.query(query);
+                    if (c.moveToFirst()) {
+                        int columnIndex = c.getColumnIndex(DownloadManager.COLUMN_STATUS);
+                        if (DownloadManager.STATUS_SUCCESSFUL == c.getInt(columnIndex)) {
+                            String uriString = c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
+                            try {
+                                InputStream attachment = getContentResolver().openInputStream(Uri.parse(uriString));
+                                installZip(attachment);
+                                showNotification();
+                            }catch(Exception e){}
+                            finish();
+                        }
+                    }
+                }
+            }
+        };
+         
+        registerReceiver(receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+     
+        mDM = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+        Request request = new Request(uri);
+        mEnqueue = mDM.enqueue(request);
     }
 }
