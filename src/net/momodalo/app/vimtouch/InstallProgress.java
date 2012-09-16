@@ -157,6 +157,7 @@ public class InstallProgress extends Activity {
             Log.e(LOG_TAG, "install " + mUri );
                 if(mUri == null){
                     installDefaultRuntime();
+                    finish();
                 }else if (mUri.getScheme().equals("http") || 
                           mUri.getScheme().equals("https") ||
                           mUri.getScheme().equals("ftp")) {
