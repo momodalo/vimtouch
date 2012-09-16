@@ -406,6 +406,7 @@ static int vimtouch_Exec_scrollBy(JNIEnv *env, jobject clazz,
     return line;
 }
 
+/*
 static void vimtouch_Exec_lineReplace(JNIEnv *env, jobject clazz
     ) {
     ml_replace(curwin->w_cursor.lnum,(char_u*)"TEST", TRUE);
@@ -415,6 +416,7 @@ static void vimtouch_Exec_lineReplace(JNIEnv *env, jobject clazz
     //LOGE("HAHAH %s",ml_get_curline());
     out_flush();
 }
+*/
 
 static void vimtouch_Exec_updateScreen(JNIEnv *env, jobject clazz) {
     updateScreen();
@@ -531,8 +533,10 @@ static JNINativeMethod method_table[] = {
         (void*) vimtouch_Exec_moveCursor},
     { "scrollBy", "(I)I",
         (void*) vimtouch_Exec_scrollBy},
+    /*
     { "lineReplace", "()V",
         (void*) vimtouch_Exec_lineReplace},
+        */
     { "updateScreen", "()V",
         (void*) vimtouch_Exec_updateScreen},
     { "doCommand", "(Ljava/lang/String;)V",
