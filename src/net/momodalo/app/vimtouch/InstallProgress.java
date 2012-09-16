@@ -245,12 +245,15 @@ public class InstallProgress extends Activity {
 
     private DownloadManager mDM;
     private long mEnqueue = -1;
+    private BroadcastReceiver mReceiver = null;
 
     private void downloadRuntime(Uri uri) {
-        BroadcastReceiver receiver = new BroadcastReceiver() {
+        if(mReceiver == null) {
+            mReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 context.unregisterReceiver(this);
+                mReceiver = null;
                 String action = intent.getAction();
                 if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
                     long downloadId = intent.getLongExtra(
@@ -272,12 +275,19 @@ public class InstallProgress extends Activity {
                     }
                 }
             }
-        };
+            };
          
-        registerReceiver(receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+            registerReceiver(mReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        }
      
         mDM = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
         Request request = new Request(uri);
         mEnqueue = mDM.enqueue(request);
+    }
+
+    public void onDestroy() {
+        if(mReceiver != null)
+            unregisterReceiver(mReceiver);
+        super.onDestroy();
     }
 }
