@@ -60,12 +60,12 @@
         >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.EDIT" />
-                <action android:name="android.intent.action.PICK" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="application/octet-stream" />
-                <data android:scheme="file" />
-                <data android:mimeType="*/*" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:scheme="ftp" />
+                <data android:host="*" />
                 <data android:pathPattern=".*\\.vrz" />
             </intent-filter>
         </activity>

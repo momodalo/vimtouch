@@ -677,7 +677,7 @@ public class VimTouch extends Activity {
         } else if (id == R.id.menu_ESC) {
             mSession.write(27);
         } else if (id == R.id.menu_quit) {
-            mSession.write(":q!\r");
+            Exec.doCommand("q!");
         } else if (id == R.id.menu_extra_downloads)  {
             Intent i = new Intent(Intent.ACTION_VIEW);
             i.setData(Uri.parse("https://github.com/momodalo/vimtouch/downloads"));
@@ -696,7 +696,7 @@ public class VimTouch extends Activity {
                                                             
             startActivity(intent);
         } else if (id == R.id.menu_save) {
-            mSession.write(":w\r");
+            Exec.doCommand("w");
         } else if (id == R.id.menu_keys) {
             if(mButtonBarLayout.isShown())
                 mButtonBar.setVisibility(View.GONE);

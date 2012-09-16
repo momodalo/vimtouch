@@ -114,5 +114,6 @@ public class Exec
     public static native void doCommand(String cmd);
 
     public static native void moveCursor(int row, int col);
+
 }
 
