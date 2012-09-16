@@ -115,6 +115,5 @@ public class Exec
 
     public static native void moveCursor(int row, int col);
 
-    public static native void lineReplace();
 }
 
