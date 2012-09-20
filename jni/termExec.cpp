@@ -52,6 +52,7 @@ extern "C" {
 #include "vim.h"
 #include "gpm.h"
 int AndroidMain(int argc, char**argv);
+void android_mch_exit(int);
 extern int fake_gpm_fd[2];
 };
 
@@ -71,6 +72,9 @@ static int thread_exit_val = 0;
 
 extern "C" void android_exit(int exit_value)
 {
+    // simulate mch_exit first
+    android_mch_exit(exit_value);
+
     // XXX: should we use exit_value somehow?
     LOGI("android_exit(%d)", exit_value);
     global_env->CallStaticVoidMethod(class_Exec, method_Exec_quit);
