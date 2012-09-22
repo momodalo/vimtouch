@@ -62,6 +62,7 @@ public class Exec
     }
 
     public static void quit() {
+        vimtouch.hideIme();
         vimtouch.finish();
     }
 
