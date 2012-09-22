@@ -678,6 +678,7 @@ public class VimTouch extends Activity {
             mSession.write(27);
         } else if (id == R.id.menu_quit) {
             Exec.doCommand("q!");
+            Exec.updateScreen();
         } else if (id == R.id.menu_extra_downloads)  {
             Intent i = new Intent(Intent.ACTION_VIEW);
             i.setData(Uri.parse("http://code.google.com/p/vimtouch/downloads/list?can=2&q=label=VRZ"));
