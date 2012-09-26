@@ -619,10 +619,6 @@ public class VimTouch extends Activity {
         else
             attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN; 
         getWindow().setAttributes(attrs); 
-
-        PackageInfo info;
-        SharedPreferences.Editor editor = mPrefs.edit();
-
     }
 
     private void downloadFullRuntime() {
