@@ -145,6 +145,7 @@ public class VimTouch extends Activity {
             }else
                 mSession.write(cmd.toString());
             Exec.updateScreen();
+            mEmulatorView.lateCheckInserted();
         }
     };
 
@@ -644,9 +645,13 @@ public class VimTouch extends Activity {
             doToggleSoftKeyboard();
         } else if (id == R.id.menu_ESC) {
             mSession.write(27);
+            Exec.updateScreen();
+            mEmulatorView.lateCheckInserted();
         } else if (id == R.id.menu_quit) {
             Exec.doCommand("q!");
             Exec.updateScreen();
+        } else if (id == R.id.menu_ime_composing) {
+            mEmulatorView.toggleIMEComposing();
         } else if (id == R.id.menu_extra_downloads)  {
             Intent i = new Intent(Intent.ACTION_VIEW);
             i.setData(Uri.parse("http://code.google.com/p/vimtouch/downloads/list?can=2&q=label=VRZ"));

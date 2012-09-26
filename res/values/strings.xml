@@ -137,4 +137,6 @@
 
    <string name="install_activity">Install Vim Runtime</string>
 
+   <string name="ime_composing">Toggle IME Composing</string>
+
 </resources>

@@ -409,17 +409,40 @@ static int vimtouch_Exec_scrollBy(JNIEnv *env, jobject clazz,
     return line;
 }
 
-/*
-static void vimtouch_Exec_lineReplace(JNIEnv *env, jobject clazz
-    ) {
-    ml_replace(curwin->w_cursor.lnum,(char_u*)"TEST", TRUE);
+static int vimtouch_Exec_getState(JNIEnv *env, jobject clazz) {
+    return State;
+}
+
+static int vimtouch_Exec_getCursorCol(JNIEnv *env, jobject clazz) {
+    return curwin->w_cursor.col;
+}
+
+static void vimtouch_Exec_setCursorCol(JNIEnv *env, jobject clazz, int col) {
+    curwin->w_cursor.col = col;
+    setcursor();
+}
+
+static jstring vimtouch_Exec_getCurrentLine(JNIEnv *env, jobject clazz, int size) {
+    u_char* line = ml_get_curline();
+    if(size <= 0)
+        return env->NewStringUTF((const char*)line);
+
+    char* buf = strndup((const char*)line, size);
+    jstring result = env->NewStringUTF((const char*)buf);
+    free(buf);
+    return result;
+}
+
+static void vimtouch_Exec_lineReplace(JNIEnv *env, jobject clazz,
+    jstring line) {
+    const char* str = line?env->GetStringUTFChars(line, NULL):NULL;
+    if(!str) return;
+    ml_replace(curwin->w_cursor.lnum,(char_u*)str, TRUE);
     changed_lines(curwin->w_cursor.lnum, 0, curwin->w_cursor.lnum, 1L);
     updateScreen();
     setcursor();
-    //LOGE("HAHAH %s",ml_get_curline());
     out_flush();
 }
-*/
 
 static void vimtouch_Exec_updateScreen(JNIEnv *env, jobject clazz) {
     updateScreen();
@@ -536,10 +559,16 @@ static JNINativeMethod method_table[] = {
         (void*) vimtouch_Exec_moveCursor},
     { "scrollBy", "(I)I",
         (void*) vimtouch_Exec_scrollBy},
-    /*
-    { "lineReplace", "()V",
+    { "setCursorCol", "(I)V",
+        (void*) vimtouch_Exec_setCursorCol}, 
+    { "getCursorCol", "()I",
+        (void*) vimtouch_Exec_getCursorCol}, 
+    { "getState", "()I",
+        (void*) vimtouch_Exec_getState}, 
+    { "getCurrentLine", "(I)Ljava/lang/String;",
+        (void*) vimtouch_Exec_getCurrentLine}, 
+    { "lineReplace", "(Ljava/lang/String;)V",
         (void*) vimtouch_Exec_lineReplace},
-        */
     { "updateScreen", "()V",
         (void*) vimtouch_Exec_updateScreen},
     { "doCommand", "(Ljava/lang/String;)V",

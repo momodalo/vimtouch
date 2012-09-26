@@ -9,7 +9,15 @@ import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
 import android.graphics.Canvas;
 import android.os.Handler;
 import android.util.Log;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
+import android.text.InputType;
+import android.view.inputmethod.BaseInputConnection;
+import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputMethodManager;
+import android.view.KeyEvent;
 
+import java.lang.Runnable;
 import jackpal.androidterm.emulatorview.ColorScheme;
 import jackpal.androidterm.emulatorview.EmulatorView;
 import jackpal.androidterm.emulatorview.TermSession;
@@ -24,6 +32,11 @@ public class TermView extends EmulatorView implements
     private boolean mSingleTapESC;
     private boolean mTouchGesture;
     private VimSettings mSettings;
+    private boolean mInserted = false;
+    private Runnable mCheckRunnable;
+    private Handler mCheckHandler;
+    private VimInputConnection mInputConnection = null;
+    private boolean mIMEComposing = false;
 
     private static final int FLING_REFRESH_PERIOD = 100;
     private static final int SCREEN_CHECK_PERIOD = 1000;
@@ -34,6 +47,19 @@ public class TermView extends EmulatorView implements
         mSession = session;
         mGestureDetector = new GestureDetector(this);
         mScaleDetector = new ScaleGestureDetector(context, this);
+
+        mCheckRunnable = new Runnable() {
+            public void run() {
+                boolean b = Exec.isInsertMode();
+                if (b != mInserted){
+                    Context context = getContext();
+                    InputMethodManager imm = (InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.restartInput(TermView.this);
+                    mInserted = b;
+                }
+            }
+        };
+        mCheckHandler = new Handler();
     }
 
     public ScaleGestureDetector getScaleDetector ()
@@ -128,7 +154,10 @@ public class TermView extends EmulatorView implements
             }else{
                 mVelocity -= mVelocity<-2?-2:mVelocity;
             }
-            if(mVelocity == 0) return;
+            if(mVelocity == 0){
+                if(mInputConnection!=null)mInputConnection.notifyTextChange();
+                return;
+            }
             mHandler.postDelayed(this, FLING_REFRESH_PERIOD);
         }
     };
@@ -158,6 +187,8 @@ public class TermView extends EmulatorView implements
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        lateCheckInserted();
+
         if(getSelectingText())
             return super.onTouchEvent(ev);
         float y = ev.getY();
@@ -173,7 +204,10 @@ public class TermView extends EmulatorView implements
                 setZoom(true);
                 mLastY = -1;
             } else if(mLastY != -1 && Math.abs(y-mLastY) > getCharacterHeight() && !getZoom()){
-                if(mTouchGesture)Exec.scrollBy((int)((mLastY - y)/getCharacterHeight()));
+                if(mTouchGesture){
+                    Exec.scrollBy((int)((mLastY - y)/getCharacterHeight()));
+                    if(mInputConnection!=null)mInputConnection.notifyTextChange();
+                }
                 mLastY = y;
                 mLastX = -1;
             }
@@ -183,9 +217,48 @@ public class TermView extends EmulatorView implements
             mLastX = -1;
             setZoom(false);
             invalidate();
+            if(mInputConnection!=null)mInputConnection.notifyTextChange();
         }
         if (mTouchGesture && mScaleSpan < 0.0) 
             mGestureDetector.onTouchEvent(ev);
         return mScaleDetector.onTouchEvent(ev);
     }
+
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        boolean b = super.onKeyUp(keyCode,event);
+        lateCheckInserted();
+        return b;
+    }
+
+    public void lateCheckInserted(){
+        //FIXME check the vim State change lately
+        mCheckHandler.removeCallbacks(mCheckRunnable);
+        mCheckHandler.postDelayed(mCheckRunnable, 500);
+    }
+
+    public InputConnection onCreateInputConnection (EditorInfo outAttrs) {
+        if(!Exec.isInsertMode() || !mIMEComposing){
+            mInputConnection = null;
+            return null;
+        }
+        outAttrs.actionLabel = null;
+        outAttrs.inputType = InputType.TYPE_CLASS_TEXT;
+        outAttrs.imeOptions = EditorInfo.IME_ACTION_NONE;
+        mInputConnection = new VimInputConnection(this);
+        return mInputConnection;
+    }
+
+    public boolean toggleIMEComposing(){
+        mIMEComposing = mIMEComposing?false:true;
+        Context context = getContext();
+        InputMethodManager imm = (InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.restartInput(TermView.this);
+        return mIMEComposing;
+    }
+
+
+    /*
+    public boolean onCheckIsTextEditor () {
+        return true;
+    }*/
 }
