@@ -36,6 +36,11 @@ public class TermView extends EmulatorView implements
         mScaleDetector = new ScaleGestureDetector(context, this);
     }
 
+    public ScaleGestureDetector getScaleDetector ()
+    {
+        return mScaleDetector;
+    }
+
     public void updatePrefs(VimSettings settings, ColorScheme scheme) {
         if (scheme == null) {
             scheme = new ColorScheme(settings.getColorScheme());

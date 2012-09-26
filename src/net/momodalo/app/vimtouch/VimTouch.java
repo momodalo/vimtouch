@@ -711,6 +711,10 @@ public class VimTouch extends Activity {
     public void onCreateContextMenu(ContextMenu menu, View v,
             ContextMenuInfo menuInfo) {
       super.onCreateContextMenu(menu, v, menuInfo);
+
+      if (mEmulatorView.getScaleDetector ().isInProgress ())
+          return;
+
       menu.setHeaderTitle(R.string.edit_text);
 
       menu.add(0, SELECT_TEXT_ID, 0, R.string.select_text);
