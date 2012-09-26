@@ -16,21 +16,14 @@
 
 package net.momodalo.app.vimtouch;
 
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.io.FileOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.List;
-
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -38,17 +31,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -56,30 +39,20 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.text.ClipboardManager;
-import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.GestureDetector;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.inputmethod.BaseInputConnection;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
-import android.view.ScaleGestureDetector;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
 import android.content.DialogInterface;
-import android.os.ParcelFileDescriptor;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageInfo;
 import android.app.DownloadManager;
@@ -264,7 +237,6 @@ public class VimTouch extends Activity {
             startEmulator();
 
         Exec.vimtouch = this;
-
     }
 
     public void onDestroy() {
@@ -619,10 +591,6 @@ public class VimTouch extends Activity {
         else
             attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN; 
         getWindow().setAttributes(attrs); 
-
-        PackageInfo info;
-        SharedPreferences.Editor editor = mPrefs.edit();
-
     }
 
     private void downloadFullRuntime() {
@@ -711,6 +679,10 @@ public class VimTouch extends Activity {
     public void onCreateContextMenu(ContextMenu menu, View v,
             ContextMenuInfo menuInfo) {
       super.onCreateContextMenu(menu, v, menuInfo);
+
+      if (mEmulatorView.getScaleDetector ().isInProgress ())
+          return;
+
       menu.setHeaderTitle(R.string.edit_text);
 
       menu.add(0, SELECT_TEXT_ID, 0, R.string.select_text);

@@ -21,3 +21,6 @@ local.properties
 jni/libiconv/
 jni/libncurses/
 jni/vim/
+
+# Vim session file
+vim-session

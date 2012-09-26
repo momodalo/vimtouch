@@ -1,0 +1,19 @@
+#!/bin/bash
+
+SDK=`grep sdk.dir local.properties | tr '=' '\n' | tail -1`
+
+function build {
+    set -e
+    ant debug
+    ant installd
+    $SDK/platform-tools/adb shell am start -n net.momodalo.app.vimtouch/.VimTouch
+}
+
+if [ $# -eq 0 ] ; then
+    build
+    exit
+fi
+
+if [ $1 == "lint" ] ; then
+    $SDK/tools/lint .
+fi
