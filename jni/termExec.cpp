@@ -133,8 +133,6 @@ static int create_subprocess(const char *cmd, const char *arg0, const char *arg1
     int* pProcessId)
 {
     char *devname;
-    int ptm;
-    pid_t pid;
     char tmpdir[PATH_MAX];
     char terminfodir[PATH_MAX];
 
@@ -145,8 +143,9 @@ static int create_subprocess(const char *cmd, const char *arg0, const char *arg1
 
     pipe(fake_gpm_fd);
 
-    ptm = open("/dev/ptmx", O_RDWR); // | O_NOCTTY);
-    if(ptm < 0){
+    int ptm = open("/dev/ptmx", O_RDWR);
+    if (ptm < 0)
+    {
         LOGE("[ cannot open /dev/ptmx - %s ]\n",strerror(errno));
         return -1;
     }
