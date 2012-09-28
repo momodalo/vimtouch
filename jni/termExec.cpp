@@ -340,14 +340,12 @@ static void vimtouch_Exec_setPtyWindowSize(JNIEnv *env, jobject clazz,
     
     ioctl(fd, TIOCSWINSZ, &sz);
 
+    //block updateScreen here
     vimtouch_lock();
     out_flush();
     shell_resized_check();
     redraw_later(CLEAR);
     vimtouch_unlock();
-    //update_screen(CLEAR);
-    //setcursor();
-    //out_flush();
 }
 
 static void vimtouch_Exec_setPtyUTF8Mode(JNIEnv *env, jobject clazz,
@@ -373,12 +371,9 @@ static void vimtouch_Exec_setPtyUTF8Mode(JNIEnv *env, jobject clazz,
 
 static void updateScreen()
 {
-    vimtouch_lock();
-    //redraw_later(NOT_VALID);
-    update_screen(0);
-    //setcursor();
-    out_flush();
-    vimtouch_unlock();
+    VimEvent e;
+    e.type = VIM_EVENT_TYPE_UPDATE;
+    write(fake_gpm_fd[1],(void*)&e, sizeof(e));
 }
 
 static void vimtouch_Exec_moveCursor(JNIEnv *env, jobject clazz,
@@ -402,12 +397,11 @@ static void vimtouch_Exec_moveCursor(JNIEnv *env, jobject clazz,
 
 static int vimtouch_Exec_scrollBy(JNIEnv *env, jobject clazz,
     jint line) {
-    int do_scroll = line;
-    vimtouch_lock();
-    scroll_redraw(do_scroll > 0, do_scroll>0?do_scroll:-do_scroll);
-    update_screen(0);
-    out_flush();
-    vimtouch_unlock();
+    VimEvent e;
+    e.type = VIM_EVENT_TYPE_SCROLL;
+    e.event.num = line;
+    write(fake_gpm_fd[1],(void*)&e, sizeof(e));
+    updateScreen();
     return line;
 }
 
@@ -420,8 +414,10 @@ static int vimtouch_Exec_getCursorCol(JNIEnv *env, jobject clazz) {
 }
 
 static void vimtouch_Exec_setCursorCol(JNIEnv *env, jobject clazz, int col) {
-    curwin->w_cursor.col = col;
-    setcursor();
+    VimEvent e;
+    e.type = VIM_EVENT_TYPE_SETCOL;
+    e.event.num = col;
+    write(fake_gpm_fd[1],(void*)&e, sizeof(e));
 }
 
 static jstring vimtouch_Exec_getCurrentLine(JNIEnv *env, jobject clazz, int size) {
@@ -439,11 +435,12 @@ static void vimtouch_Exec_lineReplace(JNIEnv *env, jobject clazz,
     jstring line) {
     const char* str = line?env->GetStringUTFChars(line, NULL):NULL;
     if(!str) return;
-    ml_replace(curwin->w_cursor.lnum,(char_u*)str, TRUE);
-    changed_lines(curwin->w_cursor.lnum, 0, curwin->w_cursor.lnum, 1L);
+    
+    VimEvent e;
+    e.type = VIM_EVENT_TYPE_RELINE;
+    strcpy(e.event.cmd,str);
+    write(fake_gpm_fd[1],(void*)&e, sizeof(e));
     updateScreen();
-    setcursor();
-    out_flush();
 }
 
 static void vimtouch_Exec_updateScreen(JNIEnv *env, jobject clazz) {
