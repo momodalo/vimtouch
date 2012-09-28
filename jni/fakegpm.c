@@ -2,6 +2,7 @@
 #include "gpm.h"
 #include <unistd.h>
 #include <fcntl.h>
+#include <vim.h>
 
 int gpm_flag = 0;
 int gpm_fd = 0;
@@ -20,8 +21,13 @@ int Gpm_Close(){
 }
 
 int Gpm_GetEvent(Gpm_Event *e){
-    if(read(gpm_fd, (void*)e, sizeof(Gpm_Event)) == sizeof(Gpm_Event)){
+    VimEvent event;
+    int n = read(gpm_fd, (void*)&event, sizeof(VimEvent));
+    if(event.type == VIM_EVENT_TYPE_GPM) {
+        memcpy(e, (void*)&event.event.gpm, sizeof(Gpm_Event));
         return 1;
+    }else if(event.type == VIM_EVENT_TYPE_CMD) {
+        do_cmdline_cmd((char_u *) event.event.cmd);
     }
     return 0;
 }

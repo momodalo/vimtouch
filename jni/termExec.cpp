@@ -384,17 +384,19 @@ static void updateScreen()
 static void vimtouch_Exec_moveCursor(JNIEnv *env, jobject clazz,
     jint row, jint col) {
     //windgoto(row, col);
-    Gpm_Event e;
-    e.x = col;
-    e.y = row;
-    e.type = GPM_DOWN;
-    e.buttons = GPM_B_LEFT;
-    e.clicks = 0;
-    e.modifiers = 0;
+    VimEvent e;
+    e.type = VIM_EVENT_TYPE_GPM;
+    Gpm_Event* gpm = &e.event.gpm;
+    gpm->x = col;
+    gpm->y = row;
+    gpm->type = GPM_DOWN;
+    gpm->buttons = GPM_B_LEFT;
+    gpm->clicks = 0;
+    gpm->modifiers = 0;
 
     write(fake_gpm_fd[1],(void*)&e, sizeof(e));
-    e.type = GPM_UP;
-    e.buttons = GPM_B_LEFT;
+    gpm->type = GPM_UP;
+    gpm->buttons = GPM_B_LEFT;
     write(fake_gpm_fd[1],(void*)&e, sizeof(e));
 }
 
@@ -453,9 +455,10 @@ static void vimtouch_Exec_doCommand(JNIEnv *env, jobject clazz, jstring cmd){
     const char* str = env->GetStringUTFChars(cmd, NULL);
     if(!str) return;
 
-    vimtouch_lock();
-    do_cmdline_cmd((char_u *)str);
-    vimtouch_unlock();
+    VimEvent e;
+    e.type = VIM_EVENT_TYPE_CMD;
+    strcpy(e.event.cmd, str);
+    write(fake_gpm_fd[1],(void*)&e, sizeof(e));
 
     env->ReleaseStringUTFChars(cmd, str);
 }

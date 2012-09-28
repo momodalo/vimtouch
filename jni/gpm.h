@@ -170,6 +170,19 @@ extern int Gpm_Callback(int eventmask, int (*fun)(Gpm_Event *));
 extern int Gpm_Wgetch();
 #define Gpm_Getch() (Gpm_Wgetch(NULL))
 
+#define VIM_EVENT_TYPE_GPM 0
+#define VIM_EVENT_TYPE_CMD 1
+
+#include "vim.h"
+
+typedef struct VimEvnet{
+    int type;
+    union {
+        Gpm_Event gpm;
+        char cmd[MAXPATHL];
+    }event;
+} VimEvent;
+
 #endif /* _GPM_H_ */
 
 
