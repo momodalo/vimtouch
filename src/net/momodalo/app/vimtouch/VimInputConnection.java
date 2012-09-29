@@ -67,10 +67,22 @@ public class VimInputConnection extends BaseInputConnection
             return true;
         }
         Editable editable = getEditable();
+
+        if(!editable.toString().equals(Exec.getCurrentLine(0))) {
+            setEditable(Exec.getCurrentLine(0));
+        }
+
+        int end = Selection.getSelectionEnd(editable);
+        int col = Exec.getCursorCol()>0?Exec.getCurrentLine(Exec.getCursorCol()).length():0;
+
+        if(col != end){
+            setSelection(col,col);
+        }
+
         int start = getComposingSpanStart(editable);
-        int end = getComposingSpanEnd(editable);
+        end = getComposingSpanEnd(editable);
         if (start < 0 || end < 0) {
-            int col = Exec.getCursorCol()>0?Exec.getCurrentLine(Exec.getCursorCol()).length():0;
+            col = Exec.getCursorCol()>0?Exec.getCurrentLine(Exec.getCursorCol()).length():0;
             setSelection(col,col);
             //start = Selection.getSelectionStart(editable);
             //end = Selection.getSelectionEnd(editable);
@@ -148,24 +160,6 @@ public class VimInputConnection extends BaseInputConnection
         boolean result = super.setComposingRegion(start, end);
         return result;
     }
-
-    public CharSequence getTextBeforeCursor(int length, int flags) {
-        if(!Exec.isInsertMode()){
-            resetIME();
-            return null;
-        }
-        return super.getTextBeforeCursor(length, flags);
-
-    }
-
-    public CharSequence getTextAfterCursor(int length, int flags) {
-        if(!Exec.isInsertMode()){
-            resetIME();
-            return null;
-        }
-        return super.getTextAfterCursor(length, flags);
-    }
-
 
     private ExtractedTextRequest mUpdateRequest;
     private final ExtractedText mUpdateExtract = new ExtractedText();
@@ -261,5 +255,34 @@ public class VimInputConnection extends BaseInputConnection
 
         imm.updateExtractedText(mView, mUpdateRequest.token, mUpdateExtract);
    }
+
+    public CharSequence getTextBeforeCursor(int length, int flags) {
+        if(!Exec.isInsertMode()){
+            resetIME();
+            return null;
+        }
+        int col = Exec.getCursorCol();
+        if(col == 0) return "";
+        String line = Exec.getCurrentLine(col);
+        if(line.length() == 0) return "";
+        if(length > line.length()) return line;
+        else return line.subSequence(line.length() - length, line.length());
+    }
+
+    public CharSequence getTextAfterCursor(int length, int flags) {
+        if(!Exec.isInsertMode()){
+            resetIME();
+            return null;
+        }
+        String line = Exec.getCurrentLine(0);
+        if(line.length() == 0) return "";
+
+        String before = Exec.getCurrentLine(Exec.getCursorCol());
+
+        String after = line.substring(before.length());
+        if(length > after.length()) return after;
+        return after.subSequence(0 , length);
+
+    }
 }
 
