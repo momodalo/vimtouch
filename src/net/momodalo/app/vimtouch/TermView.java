@@ -239,7 +239,7 @@ public class TermView extends EmulatorView implements
     public InputConnection onCreateInputConnection (EditorInfo outAttrs) {
         if(!Exec.isInsertMode() || !mIMEComposing){
             mInputConnection = null;
-            return null;
+            return super.onCreateInputConnection(outAttrs);
         }
         outAttrs.actionLabel = null;
         outAttrs.inputType = InputType.TYPE_CLASS_TEXT;
