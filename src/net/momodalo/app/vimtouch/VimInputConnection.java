@@ -60,12 +60,7 @@ public class VimInputConnection extends BaseInputConnection
         return true;
     }
 
-    @Override
-    public boolean setComposingText(CharSequence text, int newCursorPosition) {
-        if(!Exec.isInsertMode()){
-            resetIME();
-            return true;
-        }
+    private void syncEditable() {
         Editable editable = getEditable();
 
         if(!editable.toString().equals(Exec.getCurrentLine(0))) {
@@ -78,11 +73,23 @@ public class VimInputConnection extends BaseInputConnection
         if(col != end){
             setSelection(col,col);
         }
+    }
+
+    @Override
+    public boolean setComposingText(CharSequence text, int newCursorPosition) {
+        if(!Exec.isInsertMode()){
+            resetIME();
+            return true;
+        }
+
+        Editable editable = getEditable();
+
+        syncEditable();
 
         int start = getComposingSpanStart(editable);
-        end = getComposingSpanEnd(editable);
+        int end = getComposingSpanEnd(editable);
         if (start < 0 || end < 0) {
-            col = Exec.getCursorCol()>0?Exec.getCurrentLine(Exec.getCursorCol()).length():0;
+            int col = Exec.getCursorCol()>0?Exec.getCurrentLine(Exec.getCursorCol()).length():0;
             setSelection(col,col);
             //start = Selection.getSelectionStart(editable);
             //end = Selection.getSelectionEnd(editable);
@@ -121,6 +128,8 @@ public class VimInputConnection extends BaseInputConnection
             return true;
         }
         Editable editable = getEditable();
+
+        syncEditable();
 
         boolean res = super.deleteSurroundingText(leftLength, rightLength);
 
@@ -179,16 +188,7 @@ public class VimInputConnection extends BaseInputConnection
         if ((flags & GET_EXTRACTED_TEXT_MONITOR) != 0)
             mUpdateRequest = req;
 
-        if(!content.toString().equals(Exec.getCurrentLine(0))) {
-            setEditable(Exec.getCurrentLine(0));
-        }
-
-        int end = Selection.getSelectionEnd(content);
-        int col = Exec.getCursorCol()>0?Exec.getCurrentLine(Exec.getCursorCol()).length():0;
-
-        if(col != end){
-            setSelection(col,col);
-        }
+        syncEditable();
 
         ExtractedText extract = new ExtractedText();
         extract.flags = 0;
@@ -261,6 +261,8 @@ public class VimInputConnection extends BaseInputConnection
             resetIME();
             return null;
         }
+        syncEditable();
+
         int col = Exec.getCursorCol();
         if(col == 0) return "";
         String line = Exec.getCurrentLine(col);
@@ -274,6 +276,8 @@ public class VimInputConnection extends BaseInputConnection
             resetIME();
             return null;
         }
+        syncEditable();
+
         String line = Exec.getCurrentLine(0);
         if(line.length() == 0) return "";
 
