@@ -288,8 +288,8 @@ static jobject vimtouch_Exec_createSubProcess(JNIEnv *env, jobject clazz,
     int ptm = create_subprocess(cmd_str, arg0_str, arg1_str, envp, &procId);
 
     env->ReleaseStringUTFChars(cmd, cmd_str);
-    env->ReleaseStringUTFChars(arg0, arg0_str);
-    env->ReleaseStringUTFChars(arg1, arg1_str);
+    if(arg0 != NULL) env->ReleaseStringUTFChars(arg0, arg0_str);
+    if(arg1 != NULL) env->ReleaseStringUTFChars(arg1, arg1_str);
 
     for (int i = 0; i < num_env_vars; ++i)
         free(envp[i]);
