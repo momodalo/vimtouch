@@ -112,8 +112,6 @@ public class TermView extends EmulatorView implements
     }
 
     float mScaleSpan = (float)-1.0;
-    float mPreviousSpan = (float)-1.0;
-    
 
     public boolean onScale(ScaleGestureDetector detector) {
         float span = detector.getCurrentSpan()/mScaleSpan;
@@ -126,7 +124,6 @@ public class TermView extends EmulatorView implements
         setZoom(false);
 
         mScaleSpan = detector.getCurrentSpan();;
-        mPreviousSpan = mScaleSpan;
         return true;
     }
 
