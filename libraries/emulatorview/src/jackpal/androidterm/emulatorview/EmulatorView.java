@@ -780,6 +780,7 @@ public class EmulatorView extends View implements GestureDetector.OnGestureListe
      */
     public void setTextSize(int fontSize) {
         mTextSize = (int) (fontSize * mDensity);
+        if(mTextSize < 10) mTextSize = 10;
         updateText();
     }
 
