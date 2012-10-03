@@ -56,6 +56,19 @@ void android_mch_exit(int);
 extern int fake_gpm_fd[2];
 };
 
+
+#define DEF_JNI(func, ...) \
+    vimtouch_Exec_ ## func (JNIEnv *env, jobject clazz, __VA_ARGS__)
+
+// Need a separate version without arguments, since __VA_ARGS__ can't handle
+// zero args for some reason:
+#define DEF_JNI0(func) \
+    vimtouch_Exec_ ## func (JNIEnv *env, jobject clazz)
+
+#define DECL_JNI(func, sign) \
+    { #func, sign, (void*) vimtouch_Exec_ ## func }
+
+
 static pthread_mutex_t global_mutex;
 
 static JNIEnv* global_env;
@@ -234,8 +247,9 @@ static int throwOutOfMemoryError(JNIEnv *env, const char *message)
 }
 
 
-static jobject vimtouch_Exec_createSubProcess(JNIEnv *env, jobject clazz,
-    jstring cmd, jstring arg0, jstring arg1, jobjectArray envVars, jintArray processIdArray)
+static jobject DEF_JNI(createSubprocess,
+                       jstring cmd, jstring arg0, jstring arg1,
+                       jobjectArray envVars, jintArray processIdArray)
 {
     char const* cmd_str = cmd ? env->GetStringUTFChars(cmd, NULL) : NULL;
     char const* arg0_str = arg0 ? env->GetStringUTFChars(arg0, NULL) : NULL;
@@ -321,8 +335,9 @@ static jobject vimtouch_Exec_createSubProcess(JNIEnv *env, jobject clazz,
     return result;
 }
 
-static void vimtouch_Exec_setPtyWindowSize(JNIEnv *env, jobject clazz,
-    jobject fileDescriptor, jint row, jint col, jint xpixel, jint ypixel)
+static void DEF_JNI(setPtyWindowSize,
+                    jobject fileDescriptor, jint row, jint col,
+                    jint xpixel, jint ypixel)
 {
     int fd;
     struct winsize sz;
@@ -348,8 +363,7 @@ static void vimtouch_Exec_setPtyWindowSize(JNIEnv *env, jobject clazz,
     vimtouch_unlock();
 }
 
-static void vimtouch_Exec_setPtyUTF8Mode(JNIEnv *env, jobject clazz,
-    jobject fileDescriptor, jboolean utf8Mode)
+static void DEF_JNI(setPtyUTF8Mode, jobject fileDescriptor, jboolean utf8Mode)
 {
     int fd;
     struct termios tios;
@@ -376,8 +390,8 @@ static void updateScreen()
     write(fake_gpm_fd[1],(void*)&e, sizeof(e));
 }
 
-static void vimtouch_Exec_moveCursor(JNIEnv *env, jobject clazz,
-    jint row, jint col) {
+static void DEF_JNI(moveCursor, jint row, jint col)
+{
     //windgoto(row, col);
     VimEvent e;
     e.type = VIM_EVENT_TYPE_GPM;
@@ -395,8 +409,8 @@ static void vimtouch_Exec_moveCursor(JNIEnv *env, jobject clazz,
     write(fake_gpm_fd[1],(void*)&e, sizeof(e));
 }
 
-static int vimtouch_Exec_scrollBy(JNIEnv *env, jobject clazz,
-    jint line) {
+static int DEF_JNI(scrollBy, jint line)
+{
     VimEvent e;
     e.type = VIM_EVENT_TYPE_SCROLL;
     e.event.num = line;
@@ -405,22 +419,26 @@ static int vimtouch_Exec_scrollBy(JNIEnv *env, jobject clazz,
     return line;
 }
 
-static int vimtouch_Exec_getState(JNIEnv *env, jobject clazz) {
+static int DEF_JNI0(getState)
+{
     return State;
 }
 
-static int vimtouch_Exec_getCursorCol(JNIEnv *env, jobject clazz) {
+static int DEF_JNI0(getCursorCol)
+{
     return curwin->w_cursor.col;
 }
 
-static void vimtouch_Exec_setCursorCol(JNIEnv *env, jobject clazz, int col) {
+static void DEF_JNI(setCursorCol, int col)
+{
     VimEvent e;
     e.type = VIM_EVENT_TYPE_SETCOL;
     e.event.num = col;
     write(fake_gpm_fd[1],(void*)&e, sizeof(e));
 }
 
-static jstring vimtouch_Exec_getCurrentLine(JNIEnv *env, jobject clazz, int size) {
+static jstring DEF_JNI(getCurrentLine, int size)
+{
     u_char* line = ml_get_curline();
     if(size <= 0)
         return env->NewStringUTF((const char*)line);
@@ -431,8 +449,8 @@ static jstring vimtouch_Exec_getCurrentLine(JNIEnv *env, jobject clazz, int size
     return result;
 }
 
-static void vimtouch_Exec_lineReplace(JNIEnv *env, jobject clazz,
-    jstring line) {
+static void DEF_JNI(lineReplace, jstring line)
+{
     const char* str = line?env->GetStringUTFChars(line, NULL):NULL;
     if(!str) return;
     
@@ -443,11 +461,13 @@ static void vimtouch_Exec_lineReplace(JNIEnv *env, jobject clazz,
     updateScreen();
 }
 
-static void vimtouch_Exec_updateScreen(JNIEnv *env, jobject clazz) {
+static void DEF_JNI0(updateScreen)
+{
     updateScreen();
 }
 
-static void vimtouch_Exec_doCommand(JNIEnv *env, jobject clazz, jstring cmd){
+static void DEF_JNI(doCommand, jstring cmd)
+{
     if(!cmd) return;
     const char* str = env->GetStringUTFChars(cmd, NULL);
     if(!str) return;
@@ -460,7 +480,7 @@ static void vimtouch_Exec_doCommand(JNIEnv *env, jobject clazz, jstring cmd){
     env->ReleaseStringUTFChars(cmd, str);
 }
 
-static int vimtouch_Exec_waitFor(JNIEnv *env, jobject clazz, jint procId)
+static int DEF_JNI(waitFor, jint procId)
 {
     int* status;
     pthread_join((pthread_t)procId, (void**)&status);
@@ -476,7 +496,7 @@ static int vimtouch_Exec_waitFor(JNIEnv *env, jobject clazz, jint procId)
     return *status;
 }
 
-static void vimtouch_Exec_close(JNIEnv *env, jobject clazz, jobject fileDescriptor)
+static void DEF_JNI(close, jobject fileDescriptor)
 {
     int fd = env->GetIntField(fileDescriptor, field_fileDescriptor_descriptor);
 
@@ -549,34 +569,20 @@ static int register_FileDescriptor(JNIEnv *env)
 static const char *classPathName = "net/momodalo/app/vimtouch/Exec";
 
 static JNINativeMethod method_table[] = {
-    { "createSubprocess", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[I)Ljava/io/FileDescriptor;",
-        (void*) vimtouch_Exec_createSubProcess },
-    { "setPtyWindowSize", "(Ljava/io/FileDescriptor;IIII)V",
-        (void*) vimtouch_Exec_setPtyWindowSize},
-    { "setPtyUTF8Mode", "(Ljava/io/FileDescriptor;Z)V",
-        (void*) vimtouch_Exec_setPtyUTF8Mode},
-    { "moveCursor", "(II)V",
-        (void*) vimtouch_Exec_moveCursor},
-    { "scrollBy", "(I)I",
-        (void*) vimtouch_Exec_scrollBy},
-    { "setCursorCol", "(I)V",
-        (void*) vimtouch_Exec_setCursorCol}, 
-    { "getCursorCol", "()I",
-        (void*) vimtouch_Exec_getCursorCol}, 
-    { "getState", "()I",
-        (void*) vimtouch_Exec_getState}, 
-    { "getCurrentLine", "(I)Ljava/lang/String;",
-        (void*) vimtouch_Exec_getCurrentLine}, 
-    { "lineReplace", "(Ljava/lang/String;)V",
-        (void*) vimtouch_Exec_lineReplace},
-    { "updateScreen", "()V",
-        (void*) vimtouch_Exec_updateScreen},
-    { "doCommand", "(Ljava/lang/String;)V",
-        (void*) vimtouch_Exec_doCommand},
-    { "waitFor", "(I)I",
-        (void*) vimtouch_Exec_waitFor},
-    { "close", "(Ljava/io/FileDescriptor;)V",
-        (void*) vimtouch_Exec_close}
+    DECL_JNI(createSubprocess, "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[I)Ljava/io/FileDescriptor;"),
+    DECL_JNI(setPtyWindowSize, "(Ljava/io/FileDescriptor;IIII)V"),
+    DECL_JNI(setPtyUTF8Mode, "(Ljava/io/FileDescriptor;Z)V"),
+    DECL_JNI(moveCursor, "(II)V"),
+    DECL_JNI(scrollBy, "(I)I"),
+    DECL_JNI(setCursorCol, "(I)V"),
+    DECL_JNI(getCursorCol, "()I"),
+    DECL_JNI(getState, "()I"),
+    DECL_JNI(getCurrentLine, "(I)Ljava/lang/String;"),
+    DECL_JNI(lineReplace, "(Ljava/lang/String;)V"),
+    DECL_JNI(updateScreen, "()V"),
+    DECL_JNI(doCommand, "(Ljava/lang/String;)V"),
+    DECL_JNI(waitFor, "(I)I"),
+    DECL_JNI(close, "(Ljava/io/FileDescriptor;)V"),
 };
 
 /*
