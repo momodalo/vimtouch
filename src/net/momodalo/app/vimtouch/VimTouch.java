@@ -748,7 +748,7 @@ public class VimTouch extends Activity {
     private void doCopyAll() {
         ClipboardManager clip = (ClipboardManager)
              getSystemService(Context.CLIPBOARD_SERVICE);
-        clip.setText(mSession.getTranscriptText().trim());
+        clip.setText(Exec.getCurrBuffer());
     }
 
     private void doPaste() {

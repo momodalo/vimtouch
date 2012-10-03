@@ -47,6 +47,7 @@
 #include <termios.h>
 
 #include <map>
+#include <string>
 
 extern "C" {
 #include "vim.h"
@@ -507,6 +508,20 @@ static void DEF_JNI(close, jobject fileDescriptor)
     close(fd);
 }
 
+static jstring DEF_JNI0(getCurrBuffer)
+{
+    std::string result;
+
+    // line numbers are 1-based in Vim buffers
+    for (int lnum = 1; lnum <= curbuf->b_ml.ml_line_count; ++lnum)
+    {
+        result += (char const*) ml_get_buf(curbuf, lnum, FALSE);
+        result += "\n";
+    }
+
+    return env->NewStringUTF(result.c_str());
+}
+
 extern "C" {
 
 int vimtouch_Exec_getDialogState() 
@@ -583,6 +598,7 @@ static JNINativeMethod method_table[] = {
     DECL_JNI(doCommand, "(Ljava/lang/String;)V"),
     DECL_JNI(waitFor, "(I)I"),
     DECL_JNI(close, "(Ljava/io/FileDescriptor;)V"),
+    DECL_JNI(getCurrBuffer, "()Ljava/lang/String;"),
 };
 
 /*

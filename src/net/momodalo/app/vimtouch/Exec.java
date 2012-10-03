@@ -122,6 +122,7 @@ public class Exec
     public static native int getCursorCol();
     public static native void setCursorCol(int col);
     public static native int getState();
+    public static native String getCurrBuffer();
 
     public static boolean isInsertMode(){
         return (Exec.getState() & 0x10) != 0;
