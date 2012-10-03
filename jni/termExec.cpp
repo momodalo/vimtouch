@@ -340,20 +340,17 @@ static void DEF_JNI(setPtyWindowSize,
                     jobject fileDescriptor, jint row, jint col,
                     jint xpixel, jint ypixel)
 {
-    int fd;
-    struct winsize sz;
-
-    fd = env->GetIntField(fileDescriptor, field_fileDescriptor_descriptor);
+    int fd = env->GetIntField(fileDescriptor, field_fileDescriptor_descriptor);
 
     if (env->ExceptionOccurred() != NULL) {
         return;
     }
-    
+
+    struct winsize sz;
     sz.ws_row = row;
     sz.ws_col = col;
     sz.ws_xpixel = xpixel;
     sz.ws_ypixel = ypixel;
-    
     ioctl(fd, TIOCSWINSZ, &sz);
 
     //block updateScreen here
