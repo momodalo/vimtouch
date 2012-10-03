@@ -1,8 +1,7 @@
 #include "vim.h"
 #include <gui.h>
-#include <common.h>
-
 #define LOG_TAG "GUI_VIM"
+#include <common.h>
 
 #if defined( FEAT_BROWSE ) || defined( PROTO )
 /*

@@ -1,6 +1,10 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#ifndef LOG_TAG
+#define LOG_TAG "VimTouch-native"
+#endif
+
 #include <android/log.h>
 
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
