@@ -35,3 +35,7 @@ fi
 if [ $1 == "lint" ] ; then
     $SDK/tools/lint .
 fi
+
+if [ $1 == "rm" ] ; then
+    $SDK/platform-tools/adb uninstall net.momodalo.app.vimtouch
+fi
