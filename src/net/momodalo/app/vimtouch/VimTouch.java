@@ -728,27 +728,10 @@ public class VimTouch extends Activity {
         startActivity(new Intent(this, VimTouchPreferences.class));
     }
 
-    private void doResetTerminal() {
-        restart();
-    }
-
-    private void doEmailTranscript() {
-        // Don't really want to supply an address, but
-        // currently it's required, otherwise we get an
-        // exception.
-        String addr = "user@example.com";
-        Intent intent =
-                new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"
-                        + addr));
-
-        intent.putExtra("body", mSession.getTranscriptText().trim());
-        startActivity(intent);
-    }
-
     private void doCopyAll() {
         ClipboardManager clip = (ClipboardManager)
              getSystemService(Context.CLIPBOARD_SERVICE);
-        clip.setText(mSession.getTranscriptText().trim());
+        clip.setText(Exec.getCurrBuffer());
     }
 
     private void doPaste() {

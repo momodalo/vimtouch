@@ -1,9 +1,27 @@
 #!/bin/bash
 
+NDK=$ANDROID_NDK_ROOT
 SDK=`grep sdk.dir local.properties | tr '=' '\n' | tail -1`
+
+if ! [ -f $NDK/ndk-build ] ; then
+    # If ANDROID_NDK_ROOT is not set, try this heuristics: look up all the
+    # siblings of SDK that start with 'android-ndk*', sort them by revision and
+    # pick the latest one
+    parent=$(dirname $SDK)
+    all_ndks=`find $parent -maxdepth 1 -type d -name android-ndk* -printf '%f\n'`
+    latest_ndk=`echo $all_ndks | tr ' ' '\n' | sort -t'r' -k3n | tail -1`
+    NDK=$(dirname $SDK)/$latest_ndk
+
+    # If still nothing, well, then bark and quit
+    if ! [ -f $NDK/ndk-build ] ; then
+        echo Android NDK not found. Please export ANDROID_NDK_ROOT. Exiting.
+        exit
+    fi
+fi
 
 function build {
     set -e
+    $NDK/ndk-build -j`grep -c ^processor /proc/cpuinfo`
     ant debug
     ant installd
     $SDK/platform-tools/adb shell am start -n net.momodalo.app.vimtouch/.VimTouch
@@ -16,4 +34,8 @@ fi
 
 if [ $1 == "lint" ] ; then
     $SDK/tools/lint .
+fi
+
+if [ $1 == "rm" ] ; then
+    $SDK/platform-tools/adb uninstall net.momodalo.app.vimtouch
 fi
