@@ -21,7 +21,7 @@ fi
 
 function build {
     set -e
-    $NDK/ndk-build
+    $NDK/ndk-build -j`grep -c ^processor /proc/cpuinfo`
     ant debug
     ant installd
     $SDK/platform-tools/adb shell am start -n net.momodalo.app.vimtouch/.VimTouch
