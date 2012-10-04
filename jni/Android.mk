@@ -30,6 +30,7 @@ $(shell if [ ! -f $(LOCAL_PATH)/libiconv/lib/config.h ]; then cp $(LOCAL_PATH)/i
 $(shell if [ ! -f $(LOCAL_PATH)/libiconv/libcharset/config.h ]; then cp $(LOCAL_PATH)/iconv_h/libcharset/config.h $(LOCAL_PATH)/libiconv/libcharset/config.h; fi )
 $(shell if [ ! -f $(LOCAL_PATH)/libiconv/libcharset/include/localcharset.h ]; then cp $(LOCAL_PATH)/iconv_h/libcharset/include/localcharset.h $(LOCAL_PATH)/libiconv/libcharset/include/localcharset.h; fi )
 
+
 # All of the source files that we will compile.
 LOCAL_SRC_FILES:= \
   termExec.cpp \
@@ -108,7 +109,7 @@ LOCAL_C_INCLUDES += $(LOCAL_PATH)/libiconv/include \
 
 # No special compiler flags.
 LOCAL_CFLAGS += -I$(LOCAL_PATH) -I$(LOCAL_PATH)/vim/src/ -I$(LOCAL_PATH)/vim/src/proto -I$(LOCAL_PATH)/libncurses/include -DUNIX -DHAVE_CONFIG_H
-LOCAL_CFLAGS += -DLIBDIR=\"\"
+LOCAL_CFLAGS += -DLIBDIR=\"\" -DTARGET_ARCH_ABI=\"$(TARGET_ARCH_ABI)\"
 
 # Don't prelink this library.  For more efficient code, you may want
 # to add this library to the prelink map and set this to true. However,

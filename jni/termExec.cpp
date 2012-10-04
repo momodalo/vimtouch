@@ -182,6 +182,9 @@ static int create_subprocess(const char *cmd, const char *arg0, const char *arg1
         }
     }
 
+    char path[PATH_MAX];
+    sprintf(path, "%s/bin/"TARGET_ARCH_ABI"/:%s", cmd, getenv("PATH"));
+    setenv("PATH", path, 1);
 
     char** thread_arg = (char**)malloc(sizeof(char*)*2);
     thread_arg[0] = strdup(devname);

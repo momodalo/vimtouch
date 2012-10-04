@@ -216,11 +216,16 @@ public class InstallProgress extends Activity {
                     File file = new File(dirname+"/"+ze.getName());
                     if(!file.isDirectory())
                         file.mkdirs();
+                    if(ze.getName().startsWith("bin/")) {
+                        file.setExecutable(true, false);
+                        file.setReadable(true, false);
+                    }
                 } else {
                     int size;
                     byte[] buffer = new byte[2048];
 
-                    FileOutputStream fout = new FileOutputStream(dirname+"/"+ze.getName());
+                    File file = new File(dirname+"/"+ze.getName());
+                    FileOutputStream fout = new FileOutputStream(file);
                     BufferedOutputStream bufferOut = new BufferedOutputStream(fout, buffer.length);
                     while((size = zin.read(buffer, 0, buffer.length)) != -1) {
                         bufferOut.write(buffer, 0, size);
@@ -228,6 +233,10 @@ public class InstallProgress extends Activity {
 
                     bufferOut.flush();
                     bufferOut.close();
+                    if(ze.getName().startsWith("bin/")) {
+                        file.setExecutable(true, false);
+                        file.setReadable(true, false);
+                    }
                     zin.closeEntry();
                 }
             }
