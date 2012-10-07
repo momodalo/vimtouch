@@ -12,10 +12,16 @@
     android:orientation="vertical">
     <ProgressBar
         android:id="@+id/progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|center_vertical"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_margin="3dp" />
+    <TextView
+        android:id="@+id/progress_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center|center_vertical"
-        style="@android:style/Widget.ProgressBar.Large"
-        android:layout_margin="15dp" />
+        android:text="@string/installing" />
 </LinearLayout>
 </LinearLayout>

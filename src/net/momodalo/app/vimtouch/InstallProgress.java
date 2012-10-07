@@ -17,6 +17,9 @@ import android.app.DownloadManager.Request;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.widget.TextView;
+import android.os.Handler;
+import android.os.Message;
 
 import java.io.FileInputStream;
 import java.io.BufferedInputStream;
@@ -37,6 +40,7 @@ public class InstallProgress extends Activity {
     public static final String LOG_TAG = "VIM Installation";
     private Uri mUri;
     private ProgressBar mProgressBar;
+    private TextView mProgressText;
 
     private void installDefaultRuntime() {
         try{
@@ -140,6 +144,18 @@ public class InstallProgress extends Activity {
         }
     }
 
+    static final int MSG_SET_TEXT = 1;
+    private Handler mHandler = new Handler() {
+        @Override public void handleMessage(Message msg) {
+            switch (msg.what) {
+            case MSG_SET_TEXT:
+                String res = (String)msg.obj;
+                mProgressText.setText(res);
+                break;
+            }
+        }
+    };
+
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         try {
@@ -150,6 +166,7 @@ public class InstallProgress extends Activity {
 
         setContentView(R.layout.installprogress);
         mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        mProgressText = (TextView) findViewById(R.id.progress_text);
 
         // Start lengthy operation in a background thread
         new Thread(new Runnable() {
@@ -185,7 +202,7 @@ public class InstallProgress extends Activity {
         NotificationManager nm = (NotificationManager)getSystemService(svc);
 
         CharSequence from = "VimTouch";
-        CharSequence message = "Vim Runtime install finished";
+        CharSequence message = getString(R.string.install_finish);
 
         Notification notif = new Notification(R.drawable.app_vimtouch, message,
                                               System.currentTimeMillis());
@@ -206,6 +223,11 @@ public class InstallProgress extends Activity {
 
     private void installZip(InputStream is) {
         try  {
+            int total = is.available();
+            int progress = 0;
+            mProgressBar.setProgress(0);
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_SET_TEXT, getString(R.string.installing)));
+            mProgressBar.setMax(total);
             String dirname = getApplicationContext().getFilesDir().getPath();
             ZipInputStream zin = new ZipInputStream(is);
             ZipEntry ze = null;
@@ -239,11 +261,13 @@ public class InstallProgress extends Activity {
                     }
                     zin.closeEntry();
                 }
+                mProgressBar.setProgress(total-is.available());
             }
 
             byte[] buf = new byte[2048];
             while(is.available() > 0){
                 is.read(buf);
+                mProgressBar.setProgress(total-is.available());
             }
             buf = null;
 
@@ -264,23 +288,27 @@ public class InstallProgress extends Activity {
             public void onReceive(Context context, Intent intent) {
                 context.unregisterReceiver(this);
                 mReceiver = null;
+
                 String action = intent.getAction();
                 if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
-                    long downloadId = intent.getLongExtra(
-                    DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+                    long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
                     Query query = new Query();
                     query.setFilterById(mEnqueue);
                     Cursor c = mDM.query(query);
                     if (c.moveToFirst()) {
                         int columnIndex = c.getColumnIndex(DownloadManager.COLUMN_STATUS);
                         if (DownloadManager.STATUS_SUCCESSFUL == c.getInt(columnIndex)) {
-                            String uriString = c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
-                            try {
-                                InputStream attachment = getContentResolver().openInputStream(Uri.parse(uriString));
-                                installZip(attachment);
-                                showNotification();
-                            }catch(Exception e){}
-                            finish();
+                            mUri = Uri.parse(c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)));
+                            new Thread(new Runnable() {
+                                public void run() {
+                                    try {
+                                        InputStream attachment = getContentResolver().openInputStream(mUri);
+                                        installZip(attachment);
+                                        showNotification();
+                                    }catch(Exception e){}
+                                    finish();
+                                }
+                            }).start();
                         }
                     }
                 }
@@ -293,6 +321,28 @@ public class InstallProgress extends Activity {
         mDM = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
         Request request = new Request(uri);
         mEnqueue = mDM.enqueue(request);
+        
+        mProgressBar.setProgress(0);
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_SET_TEXT, getString(R.string.downloading)));
+
+        while(mReceiver != null){
+            Query query = new Query();
+            query.setFilterById(mEnqueue);
+            Cursor c = mDM.query(query);
+            if (c.moveToFirst()) {
+                int columnIndex = c.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES);
+                int total = c.getInt(columnIndex);
+                columnIndex = c.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR);
+                int bytes = c.getInt(columnIndex);
+                if(total != mProgressBar.getMax()) mProgressBar.setMax(total);
+                mProgressBar.setProgress(bytes);
+                try{
+                    Thread.sleep(500);
+                }catch(Exception e){
+                }
+            }
+            c.close();
+        }
     }
 
     public void onDestroy() {

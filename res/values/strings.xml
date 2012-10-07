@@ -86,7 +86,8 @@
    <string name="title_keyboard">key</string>
    <string name="title_esc">ESC</string>
 
-   <string name="loading">VIM runtime is installing and may take around 5 mins to finish. Please wait...</string>
+   <string name="installing">Installing Vim Runtime...</string>
+   <string name="downloading">Downloading Vim Runtime...</string>
    
    <string name="dialog_title_content_error">Content Error</string>
    <string name="message_content_too_big">The content is too big to do preview. Please save it first.</string>
@@ -138,5 +139,7 @@
    <string name="install_activity">Install Vim Runtime</string>
 
    <string name="ime_composing">Toggle Word-based IME</string>
+
+   <string name="install_finish">Install finished. Please restart VimTouch to effect</string>
 
 </resources>
