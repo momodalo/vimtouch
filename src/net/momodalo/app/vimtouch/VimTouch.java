@@ -493,8 +493,10 @@ public class VimTouch extends Activity {
         super.onConfigurationChanged(newConfig);
 
         Log.e(VimTouch.LOG_TAG, "on configuration changed");
-        mEmulatorView.updateSize(true);
-        mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_UPDATE), 500);
+        if(mEmulatorView != null){
+            mEmulatorView.updateSize(true);
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_UPDATE), 500);
+        }
     }
 
     private final int MSG_DIALOG = 1;
