@@ -222,17 +222,21 @@ public class InstallProgress extends Activity {
     }
 
     private void installZip(InputStream is) {
+        String dirname = getApplicationContext().getFilesDir().getPath();
+        int progress = 0;
+        mProgressBar.setProgress(0);
+        String msgText = getString(R.string.installing);
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_SET_TEXT, msgText));
+        ZipInputStream zin = new ZipInputStream(new BufferedInputStream(is));
+        ZipEntry ze = null;
+        int size;
+        byte[] buffer = new byte[8192];
+
         try  {
             int total = is.available();
-            int progress = 0;
-            mProgressBar.setProgress(0);
-            mHandler.sendMessage(mHandler.obtainMessage(MSG_SET_TEXT, getString(R.string.installing)));
             mProgressBar.setMax(total);
-            String dirname = getApplicationContext().getFilesDir().getPath();
-            ZipInputStream zin = new ZipInputStream(is);
-            ZipEntry ze = null;
             while ((ze = zin.getNextEntry()) != null) {
-                Log.e(LOG_TAG, "Unzipping " + ze.getName());
+                Log.i(LOG_TAG, "Unzipping " + ze.getName());
 
                 if(ze.isDirectory()) {
                     File file = new File(dirname+"/"+ze.getName());
@@ -243,9 +247,6 @@ public class InstallProgress extends Activity {
                         file.setReadable(true, false);
                     }
                 } else {
-                    int size;
-                    byte[] buffer = new byte[2048];
-
                     File file = new File(dirname+"/"+ze.getName());
                     FileOutputStream fout = new FileOutputStream(file);
                     BufferedOutputStream bufferOut = new BufferedOutputStream(fout, buffer.length);
@@ -259,7 +260,6 @@ public class InstallProgress extends Activity {
                         file.setExecutable(true, false);
                         file.setReadable(true, false);
                     }
-                    zin.closeEntry();
                 }
                 mProgressBar.setProgress(total-is.available());
             }
