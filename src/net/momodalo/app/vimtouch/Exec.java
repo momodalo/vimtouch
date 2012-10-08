@@ -115,6 +115,7 @@ public class Exec
     public static native void doCommand(String cmd);
 
     public static native void moveCursor(int row, int col);
+    public static native void mouseUp(int row, int col);
 
     public static native void lineReplace(String line);
 

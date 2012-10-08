@@ -38,7 +38,7 @@ public class TermView extends EmulatorView implements
     private VimInputConnection mInputConnection = null;
     private boolean mIMEComposing = false;
 
-    private static final int FLING_REFRESH_PERIOD = 100;
+    private static final int FLING_REFRESH_PERIOD = 50;
     private static final int SCREEN_CHECK_PERIOD = 1000;
     private static final int CURSOR_BLINK_PERIOD = 1000;
 
@@ -162,10 +162,14 @@ public class TermView extends EmulatorView implements
 
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
             float velocityY) {
+        Exec.mouseUp( mDownY, mDownX);
         mVelocity = -velocityY/(10*getCharacterHeight());
         mHandler.postDelayed(mFlingRun, FLING_REFRESH_PERIOD);
         return true;
     }
+
+    int mDownX;
+    int mDownY;
 
     public boolean onDown(MotionEvent ev) {
         float y = ev.getY();
@@ -174,7 +178,6 @@ public class TermView extends EmulatorView implements
         mLastY = y;
         mHandler.removeCallbacks(mFlingRun);
 
-        Exec.moveCursor( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
         return true;
     }
 
@@ -197,20 +200,34 @@ public class TermView extends EmulatorView implements
         if(action == MotionEvent.ACTION_DOWN && fingers == 1){
             mLastY = y;
             mLastX = x;
+            mDownX = (int)(x/getCharacterWidth());
+            mDownY = (int)(y/getCharacterHeight());
+
+            Exec.moveCursor( mDownY, mDownX);
         }else if (action == MotionEvent.ACTION_MOVE && fingers == 1 && mScaleSpan < 0.0){
             if(mLastX != -1 && Math.abs(x-mLastX) > getCharacterWidth() * 5 && !getZoom()){
                 setZoom(true);
                 mLastY = -1;
-            } else if(mLastY != -1 && Math.abs(y-mLastY) > getCharacterHeight() && !getZoom()){
+                Exec.mouseUp( mDownY, mDownX);
+                Exec.moveCursor( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
+                Exec.mouseUp( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
+            } else if(mLastY != -1 && Math.abs(y-mLastY) > getCharacterHeight() * 2 && !getZoom()){
                 if(mTouchGesture){
+                    Exec.moveCursor( mDownY, mDownX);
                     Exec.scrollBy((int)((mLastY - y)/getCharacterHeight()));
                     if(mInputConnection!=null)mInputConnection.notifyTextChange();
                 }
                 mLastY = y;
                 mLastX = -1;
+            }else if (getZoom()){
+                Exec.moveCursor( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
+                Exec.mouseUp( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
             }
-            Exec.moveCursor( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
         }else if(action == MotionEvent.ACTION_UP){
+            if(getZoom())
+                Exec.mouseUp( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
+            else
+                Exec.mouseUp( mDownY, mDownX);
             mLastY = -1;
             mLastX = -1;
             setZoom(false);

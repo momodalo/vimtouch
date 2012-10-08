@@ -403,8 +403,16 @@ static void DEF_JNI(moveCursor, jint row, jint col)
     gpm->buttons = GPM_B_LEFT;
     gpm->clicks = 0;
     gpm->modifiers = 0;
-
     write(fake_gpm_fd[1],(void*)&e, sizeof(e));
+}
+
+static void DEF_JNI(mouseUp, jint row, jint col)
+{
+    VimEvent e;
+    e.type = VIM_EVENT_TYPE_GPM;
+    Gpm_Event* gpm = &e.event.gpm;
+    gpm->x = col;
+    gpm->y = row;
     gpm->type = GPM_UP;
     gpm->buttons = GPM_B_LEFT;
     write(fake_gpm_fd[1],(void*)&e, sizeof(e));
@@ -588,6 +596,7 @@ static JNINativeMethod method_table[] = {
     DECL_JNI(setPtyWindowSize, "(Ljava/io/FileDescriptor;IIII)V"),
     DECL_JNI(setPtyUTF8Mode, "(Ljava/io/FileDescriptor;Z)V"),
     DECL_JNI(moveCursor, "(II)V"),
+    DECL_JNI(mouseUp, "(II)V"),
     DECL_JNI(scrollBy, "(I)I"),
     DECL_JNI(setCursorCol, "(I)V"),
     DECL_JNI(getCursorCol, "()I"),
