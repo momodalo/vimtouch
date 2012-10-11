@@ -41,6 +41,7 @@ public class TermView extends EmulatorView implements
     private static final int FLING_REFRESH_PERIOD = 50;
     private static final int SCREEN_CHECK_PERIOD = 1000;
     private static final int CURSOR_BLINK_PERIOD = 1000;
+    private static final int VISUAL_MODE_PERIOD = 1000;
 
     public TermView(Context context, TermSession session, DisplayMetrics metrics) {
         super(context, session, metrics);
@@ -185,10 +186,42 @@ public class TermView extends EmulatorView implements
     float mLastY = -1;
     float mLastX = -1;
     float mLastY2 = -1;
+    int mVisualMode = 0;
+    
+    private void toggleVisualMode() {
+        if(!Exec.isInsertMode()){
+            switch(mVisualMode){
+                case 0:
+                    mVisualMode = 1;
+                    mSession.write("v");
+                    break;
+                case 1:
+                    mVisualMode = 2;
+                    mSession.write((char) ('v' - 'a' + '\001'));
+                    break;
+                case 2:
+                    mVisualMode = 1;
+                    mSession.write("v");
+                    break;
+                default:
+                    mVisualMode = 1;
+                    mSession.write("v");
+                    break;
+            }
+        }
+    }
+
+    private Runnable mVisualRun = new Runnable() {
+        public void run() {
+            toggleVisualMode();
+        }
+    };
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         lateCheckInserted();
+
+        mHandler.removeCallbacks(mVisualRun);
 
         if(getSelectingText())
             return super.onTouchEvent(ev);
@@ -203,25 +236,35 @@ public class TermView extends EmulatorView implements
             mDownX = (int)(x/getCharacterWidth());
             mDownY = (int)(y/getCharacterHeight());
 
-            Exec.moveCursor( mDownY, mDownX);
+            Exec.mouseDown( mDownY, mDownX);
         }else if (action == MotionEvent.ACTION_MOVE && fingers == 1 && mScaleSpan < 0.0){
             if(mLastX != -1 && Math.abs(x-mLastX) > getCharacterWidth() * 5 && !getZoom()){
                 setZoom(true);
                 mLastY = -1;
                 Exec.mouseUp( mDownY, mDownX);
-                Exec.moveCursor( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
+                Exec.mouseDown( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
                 Exec.mouseUp( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
             } else if(mLastY != -1 && Math.abs(y-mLastY) > getCharacterHeight() * 2 && !getZoom()){
                 if(mTouchGesture){
-                    Exec.moveCursor( mDownY, mDownX);
+                    Exec.mouseDown( mDownY, mDownX);
                     Exec.scrollBy((int)((mLastY - y)/getCharacterHeight()));
                     if(mInputConnection!=null)mInputConnection.notifyTextChange();
                 }
                 mLastY = y;
                 mLastX = -1;
             }else if (getZoom()){
-                Exec.moveCursor( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
-                Exec.mouseUp( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
+                long time = ev.getEventTime();
+                int state = Exec.getState();
+
+                if(mVisualMode > 0){
+                    Exec.mouseDrag( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
+                    Exec.mouseDown( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
+                }else{
+                    Exec.mouseDown( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
+                    Exec.mouseUp( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
+                }
+                Exec.updateScreen();
+                mHandler.postDelayed(mVisualRun, VISUAL_MODE_PERIOD);
             }
         }else if(action == MotionEvent.ACTION_UP){
             if(getZoom())
@@ -232,6 +275,7 @@ public class TermView extends EmulatorView implements
             mLastX = -1;
             setZoom(false);
             invalidate();
+            mVisualMode = 0;
             if(mInputConnection!=null)mInputConnection.notifyTextChange();
         }
         if (mTouchGesture && mScaleSpan < 0.0) 

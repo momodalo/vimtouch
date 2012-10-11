@@ -1090,6 +1090,9 @@
 # define FEAT_MOUSE		/* include generic mouse support */
 #endif
 
+#define FEAT_MOUSE_TTY
+#define FEAT_MOUSE
+
 /*
  * +clipboard		Clipboard support.  Always used for the GUI.
  * +xterm_clipboard	Unix only: Include code for handling the clipboard
