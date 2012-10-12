@@ -29,7 +29,7 @@ import java.util.TimerTask;
 
 public class VimInputConnection extends BaseInputConnection
 {
-
+    private boolean DEBUG = false;
     protected static final String LOGTAG = "VimInputConnection";
 
     private TermView mView;
@@ -77,6 +77,7 @@ public class VimInputConnection extends BaseInputConnection
 
     @Override
     public boolean setComposingText(CharSequence text, int newCursorPosition) {
+        if(DEBUG) Log.e(LOGTAG, "setComposingText " + text);
         if(!Exec.isInsertMode()){
             resetIME();
             return true;
@@ -112,6 +113,7 @@ public class VimInputConnection extends BaseInputConnection
 
     @Override
     public boolean commitText(CharSequence text, int newCursorPosition) {
+        if(DEBUG) Log.e(LOGTAG, "commitText " + text);
         if(!Exec.isInsertMode()) {
             resetIME();
             return true;
@@ -123,6 +125,7 @@ public class VimInputConnection extends BaseInputConnection
 
     @Override
     public boolean deleteSurroundingText(int leftLength, int rightLength) {
+        if(DEBUG) Log.e(LOGTAG, "deleteSurroundingText " + leftLength +" "+ rightLength);
         if(!Exec.isInsertMode()){
             resetIME();
             return true;
@@ -174,6 +177,7 @@ public class VimInputConnection extends BaseInputConnection
     private final ExtractedText mUpdateExtract = new ExtractedText();
     @Override
     public ExtractedText getExtractedText(ExtractedTextRequest req, int flags) {
+        if(DEBUG) Log.e(LOGTAG, "getExtractedText");
         if(!Exec.isInsertMode()) {
             resetIME();
             return null;
@@ -208,6 +212,7 @@ public class VimInputConnection extends BaseInputConnection
                   + " end: " + Selection.getSelectionEnd(content));
             return null;
         }
+        if(DEBUG) Log.e(LOGTAG, "getExtractedText result " + extract);
         return extract;
     }
 
@@ -257,6 +262,7 @@ public class VimInputConnection extends BaseInputConnection
    }
 
     public CharSequence getTextBeforeCursor(int length, int flags) {
+        if(DEBUG) Log.e(LOGTAG, "getTextBeforeCursor " + length);
         if(!Exec.isInsertMode()){
             resetIME();
             return null;
@@ -267,11 +273,14 @@ public class VimInputConnection extends BaseInputConnection
         if(col == 0) return "";
         String line = Exec.getCurrentLine(col);
         if(line.length() == 0) return "";
+        if(DEBUG) Log.e(LOGTAG, "getTextBeforeCursor result " + line);
+
         if(length > line.length()) return line;
         else return line.subSequence(line.length() - length, line.length());
     }
 
     public CharSequence getTextAfterCursor(int length, int flags) {
+        if(DEBUG) Log.e(LOGTAG, "getTextAfterCursor " + length);
         if(!Exec.isInsertMode()){
             resetIME();
             return null;
@@ -284,6 +293,7 @@ public class VimInputConnection extends BaseInputConnection
         String before = Exec.getCurrentLine(Exec.getCursorCol());
 
         String after = line.substring(before.length());
+        if(DEBUG) Log.e(LOGTAG, "getTextAfterCursor result " + after);
         if(length > after.length()) return after;
         return after.subSequence(0 , length);
 
