@@ -7,7 +7,7 @@
 int gpm_flag = 0;
 int gpm_fd = 0;
 
-int fake_gpm_fd[2];
+int fake_gpm_fd[2] = {-1,-1};
 
 int Gpm_Open(Gpm_Connect *c, int a){
     gpm_fd = fake_gpm_fd[0];
@@ -44,6 +44,12 @@ int Gpm_GetEvent(Gpm_Event *e){
     }else if(event.type == VIM_EVENT_TYPE_SCROLL){
         int do_scroll = event.event.num;
         scroll_redraw(do_scroll > 0, do_scroll>0?do_scroll:-do_scroll);
+    }else if(event.type == VIM_EVENT_TYPE_RESIZE){
+        out_flush();
+        shell_resized_check();
+        redraw_later(CLEAR);
+        update_screen(CLEAR);
+        out_flush();
     }
     return 0;
 }

@@ -150,10 +150,12 @@ public class VimTermSession extends TermSession {
     public void initializeEmulator(int columns, int rows) {
         super.initializeEmulator(columns, rows);
 
+        Exec.setPtyWindowSize(mTermFd, rows, columns, 0, 0);
         Exec.setPtyUTF8Mode(mTermFd, getUTF8Mode());
         setUTF8ModeUpdateCallback(mUTF8ModeNotify);
 
         mWatcherThread.start();
+        Exec.startVim();
         //sendInitialCommand(mInitialCommand);
     }
 

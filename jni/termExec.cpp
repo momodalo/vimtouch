@@ -109,6 +109,12 @@ void vimtouch_unlock(){
 }
 }
 
+static int vimStart = 0;
+static void vimtouch_Exec_startVim (JNIEnv *env, jobject clazz)
+{
+    vimStart = 1;
+}
+
 static void *thread_wrapper ( void* value)
 {
     LOGE("thread wrapper");
@@ -134,6 +140,7 @@ static void *thread_wrapper ( void* value)
         argv[1] = (char*)thread_arg[1];
         argv[2] = NULL;
 
+        while(!vimStart){usleep(100000);}
         AndroidMain(argv[1] ? 2 : 1, (char**)argv);
 
     global_vm->DetachCurrentThread();
@@ -356,11 +363,15 @@ static void DEF_JNI(setPtyWindowSize,
     ioctl(fd, TIOCSWINSZ, &sz);
 
     //block updateScreen here
+    /*
     vimtouch_lock();
-    out_flush();
-    shell_resized_check();
-    redraw_later(CLEAR);
     vimtouch_unlock();
+    */
+
+    if(fake_gpm_fd[1] < 0) return;
+    VimEvent e;
+    e.type = VIM_EVENT_TYPE_RESIZE;
+    write(fake_gpm_fd[1],(void*)&e, sizeof(e));
 }
 
 static void DEF_JNI(setPtyUTF8Mode, jobject fileDescriptor, jboolean utf8Mode)
@@ -385,6 +396,8 @@ static void DEF_JNI(setPtyUTF8Mode, jobject fileDescriptor, jboolean utf8Mode)
 
 static void updateScreen()
 {
+    if(fake_gpm_fd[1] < 0) return;
+
     VimEvent e;
     e.type = VIM_EVENT_TYPE_UPDATE;
     write(fake_gpm_fd[1],(void*)&e, sizeof(e));
@@ -392,6 +405,7 @@ static void updateScreen()
 
 static void DEF_JNI(mouseDrag, jint row, jint col)
 {
+    if(fake_gpm_fd[1] < 0) return;
     //windgoto(row, col);
     VimEvent e;
     e.type = VIM_EVENT_TYPE_GPM;
@@ -407,6 +421,7 @@ static void DEF_JNI(mouseDrag, jint row, jint col)
 
 static void DEF_JNI(mouseDown, jint row, jint col)
 {
+    if(fake_gpm_fd[1] < 0) return;
     //windgoto(row, col);
     VimEvent e;
     e.type = VIM_EVENT_TYPE_GPM;
@@ -422,6 +437,8 @@ static void DEF_JNI(mouseDown, jint row, jint col)
 
 static void DEF_JNI(mouseUp, jint row, jint col)
 {
+    if(fake_gpm_fd[1] < 0) return;
+
     VimEvent e;
     e.type = VIM_EVENT_TYPE_GPM;
     Gpm_Event* gpm = &e.event.gpm;
@@ -434,6 +451,8 @@ static void DEF_JNI(mouseUp, jint row, jint col)
 
 static int DEF_JNI(scrollBy, jint line)
 {
+    if(fake_gpm_fd[1] < 0) return 0;
+
     VimEvent e;
     e.type = VIM_EVENT_TYPE_SCROLL;
     e.event.num = line;
@@ -444,16 +463,21 @@ static int DEF_JNI(scrollBy, jint line)
 
 static int DEF_JNI0(getState)
 {
+    if(fake_gpm_fd[1] < 0) return 0;
+
     return State;
 }
 
 static int DEF_JNI0(getCursorCol)
 {
+    if(fake_gpm_fd[1] < 0) return 0;
+
     return curwin->w_cursor.col;
 }
 
 static void DEF_JNI(setCursorCol, int col)
 {
+    if(fake_gpm_fd[1] < 0) return;
     VimEvent e;
     e.type = VIM_EVENT_TYPE_SETCOL;
     e.event.num = col;
@@ -462,6 +486,8 @@ static void DEF_JNI(setCursorCol, int col)
 
 static jstring DEF_JNI(getCurrentLine, int size)
 {
+    if(fake_gpm_fd[1] < 0) return NULL;
+
     u_char* line = ml_get_curline();
     if(size <= 0)
         return env->NewStringUTF((const char*)line);
@@ -474,6 +500,8 @@ static jstring DEF_JNI(getCurrentLine, int size)
 
 static void DEF_JNI(lineReplace, jstring line)
 {
+    if(fake_gpm_fd[1] < 0) return ;
+
     const char* str = line?env->GetStringUTFChars(line, NULL):NULL;
     if(!str) return;
     
@@ -491,6 +519,8 @@ static void DEF_JNI0(updateScreen)
 
 static void DEF_JNI(doCommand, jstring cmd)
 {
+    if(fake_gpm_fd[1] < 0) return ;
+
     if(!cmd) return;
     const char* str = env->GetStringUTFChars(cmd, NULL);
     if(!str) return;
@@ -623,6 +653,7 @@ static JNINativeMethod method_table[] = {
     DECL_JNI(waitFor, "(I)I"),
     DECL_JNI(close, "(Ljava/io/FileDescriptor;)V"),
     DECL_JNI(getCurrBuffer, "()Ljava/lang/String;"),
+    DECL_JNI(startVim, "()V"),
 };
 
 /*

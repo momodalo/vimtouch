@@ -272,7 +272,7 @@ public class VimTouch extends Activity {
         mMainLayout.addView(mEmulatorView);
 
         mEmulatorView.updateSize(true);
-        Exec.updateScreen();
+        //Exec.updateScreen();
         mUrl = null;
     }
 
