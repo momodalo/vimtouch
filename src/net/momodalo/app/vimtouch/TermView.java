@@ -217,6 +217,17 @@ public class TermView extends EmulatorView implements
         }
     };
 
+    public void onLongPress(MotionEvent ev) {
+        float y = ev.getY();
+        float x = ev.getX();
+        setZoom(true);
+        mLastY = -1;
+        Exec.mouseUp( mDownY, mDownX);
+        Exec.mouseDown( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
+        Exec.mouseUp( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
+    }
+
+
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         lateCheckInserted();
