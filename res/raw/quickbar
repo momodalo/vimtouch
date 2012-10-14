@@ -3,8 +3,11 @@
 dd
 yy
 p
+"*p
+"*yy
+"*dd
 :q!
 :wq
+:m+1
+:m-1
 G
-zR
-zM
