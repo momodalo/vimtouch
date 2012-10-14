@@ -16,6 +16,8 @@
 
 package net.momodalo.app.vimtouch;
 
+import android.content.Context;
+import android.text.ClipboardManager;
 import java.io.FileDescriptor;
 import android.util.Log;
 
@@ -64,6 +66,21 @@ public class Exec
     public static void quit() {
         vimtouch.hideIme();
         vimtouch.finish();
+    }
+
+    public static void setClipText(String text){
+        vimtouch.setClipText(text);
+    }
+
+    public static String getClipText(){
+        vimtouch.syncClipText();
+        while(vimtouch.getClipText() == null){
+            try{
+                Thread.sleep(100);
+            }catch(Exception e){
+            }
+        }
+        return vimtouch.getClipText();
     }
 
     /**

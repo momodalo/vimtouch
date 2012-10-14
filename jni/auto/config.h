@@ -442,3 +442,6 @@
 #define FEAT_GUI_DIALOG 1
 
 #define VIMINFO_FILE "$VIM/.viminfo"
+
+#define FEAT_CLIPBOARD
+

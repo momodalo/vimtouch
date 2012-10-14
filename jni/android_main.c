@@ -255,11 +255,6 @@ int AndroidMain (argc, argv)
      */
     early_arg_scan(&params);
 
-#ifdef FEAT_CLIPBOARD
-    clip_init(FALSE);		/* Initialise clipboard stuff */
-    TIME_MSG("clipboard setup");
-#endif
-
     /*
      * Check if we have an interactive window.
      * On the Amiga: If there is no window, we open one with a newcli command
@@ -410,6 +405,13 @@ int AndroidMain (argc, argv)
 	screen_start();		/* don't know where cursor is now */
 	TIME_MSG("Termcap init");
     }
+
+#ifdef FEAT_CLIPBOARD
+    // init clipboard after termcapinit to overwrite it
+    clip_init(TRUE);		/* Initialise clipboard stuff */
+    TIME_MSG("clipboard setup");
+#endif
+
 
     /*
      * Set the default values for the options that use Rows and Columns.

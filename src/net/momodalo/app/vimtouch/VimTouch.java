@@ -501,6 +501,8 @@ public class VimTouch extends Activity {
 
     private final int MSG_DIALOG = 1;
     private final int MSG_UPDATE = 2;
+    private final int MSG_SYNCCLIP = 3;
+    private final int MSG_SETCLIP = 4;
     private class DialogObj {
         public int type;
         public String title;
@@ -520,6 +522,19 @@ public class VimTouch extends Activity {
                 DialogObj obj = (DialogObj)msg.obj;
                 realShowDialog(obj.type, obj.title, obj.message, obj.buttons, obj.def_button, obj.textfield);
                 break;
+            case MSG_SYNCCLIP:
+                mClipText = null;
+                try{
+                    ClipboardManager clip = (ClipboardManager) getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                    mClipText = clip.getText().toString();
+                }catch (Exception e){
+                }
+                break;
+            case MSG_SETCLIP:
+                mClipText = (String)msg.obj;
+                ClipboardManager clip = (ClipboardManager) getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                clip.setText(mClipText);
+                break;
             default:
                 super.handleMessage(msg);
             }
@@ -535,6 +550,20 @@ public class VimTouch extends Activity {
         obj.def_button = def_button;
         obj.textfield = textfield;
         mHandler.sendMessage(mHandler.obtainMessage(MSG_DIALOG, obj));
+    }
+
+    private String mClipText;
+
+    public void syncClipText() {
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_SYNCCLIP));
+    }
+
+    public String getClipText() {
+        return mClipText;
+    }
+
+    public void setClipText(String text) {
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_SETCLIP, text));
     }
 
     private AlertDialog.Builder actionBuilder;

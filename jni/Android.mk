@@ -37,6 +37,7 @@ LOCAL_SRC_FILES:= \
   android_main.c\
   fakegpm.c\
   gui_android.c\
+  clipboard.c\
   exit.c\
   misc.c\
   libiconv/lib/iconv.c \

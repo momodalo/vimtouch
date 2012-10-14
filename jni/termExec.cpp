@@ -80,10 +80,14 @@ static jclass class_Exec;
 static jmethodID method_Exec_showDialog;
 static jmethodID method_Exec_getDialogState;
 static jmethodID method_Exec_quit;
+static jmethodID method_Exec_getClipText;
+static jmethodID method_Exec_setClipText;
 static std::map<pthread_t, char**> thread_data;
 static int thread_exit_val = 0;
 
-extern "C" void android_exit(int exit_value)
+extern "C" {
+
+void android_exit(int exit_value)
 {
     // simulate mch_exit first
     android_mch_exit(exit_value);
@@ -91,6 +95,39 @@ extern "C" void android_exit(int exit_value)
     // XXX: should we use exit_value somehow?
     LOGI("android_exit(%d)", exit_value);
     global_env->CallStaticVoidMethod(class_Exec, method_Exec_quit);
+}
+
+void android_clip_request_selection (VimClipboard *cbd)
+{
+    jstring text = (jstring) global_env->CallStaticObjectMethod(class_Exec, method_Exec_getClipText);
+    char* clip_text = text?(char*)global_env->GetStringUTFChars(text, NULL):NULL;
+    int clip_length = clip_text?strlen(clip_text):0;
+    if(clip_text && clip_length > 0)clip_yank_selection( MLINE, (char_u*)clip_text, clip_length, cbd );
+}
+
+void android_clip_set_selection (VimClipboard *cbd)
+{
+    int type;
+    long_u  len;
+    char_u *str = NULL;
+
+    /* Prevent recursion from clip_get_selection() */
+    if( cbd->owned == TRUE )
+	return;
+
+    cbd->owned = TRUE;
+    clip_get_selection( cbd );
+    cbd->owned = FALSE;
+
+    type = clip_convert_selection( &str, &len, cbd );
+    if(str){
+        jstring result = global_env->NewStringUTF((const char*)str);
+        global_env->CallStaticVoidMethod(class_Exec, method_Exec_setClipText, result);
+
+    }
+    vim_free( str );
+}
+
 }
 
 void pth_exit(int n)
@@ -711,6 +748,16 @@ static int registerNatives(JNIEnv* env)
     method_Exec_quit = env->GetStaticMethodID(class_Exec, "quit", "()V");
     if (method_Exec_quit == NULL) {
         LOGE("Can't find Exec.quit");
+        return -1;
+    }
+    method_Exec_getClipText = env->GetStaticMethodID(class_Exec, "getClipText", "()Ljava/lang/String;");
+    if (method_Exec_getClipText == NULL) {
+        LOGE("Can't find Exec.getClipText");
+        return -1;
+    }
+    method_Exec_setClipText = env->GetStaticMethodID(class_Exec, "setClipText", "(Ljava/lang/String;)V");
+    if (method_Exec_setClipText == NULL) {
+        LOGE("Can't find Exec.setClipText");
         return -1;
     }
 
