@@ -721,10 +721,9 @@ static int registerNatives(JNIEnv* env)
 {
     static const char *classPathName = "net/momodalo/app/vimtouch/Exec";
 
-    if (!registerNativeMethods(env, classPathName, method_table, 
-                 sizeof(method_table) / sizeof(method_table[0]))) {
+    if (!registerNativeMethods(env, classPathName, method_table,
+                               ARRLEN(method_table)))
         return JNI_FALSE;
-    }
 
     /* get class */
     jclass clazz = env->FindClass(classPathName);
