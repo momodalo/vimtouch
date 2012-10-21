@@ -670,8 +670,6 @@ static int register_FileDescriptor(JNIEnv *env)
 }
 
 
-static const char *classPathName = "net/momodalo/app/vimtouch/Exec";
-
 static JNINativeMethod method_table[] = {
     DECL_JNI(createSubprocess, "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[I)Ljava/io/FileDescriptor;"),
     DECL_JNI(setPtyWindowSize, "(Ljava/io/FileDescriptor;IIII)V"),
@@ -721,11 +719,12 @@ static int registerNativeMethods(JNIEnv* env, const char* className,
  */
 static int registerNatives(JNIEnv* env)
 {
-    if (!registerNativeMethods(env, classPathName, method_table, 
-                 sizeof(method_table) / sizeof(method_table[0]))) {
+    static const char *classPathName = "net/momodalo/app/vimtouch/Exec";
+
+    if (!registerNativeMethods(env, classPathName, method_table,
+                               ARRLEN(method_table)))
         return JNI_FALSE;
-    }
-  
+
     /* get class */
     jclass clazz = env->FindClass(classPathName);
 
