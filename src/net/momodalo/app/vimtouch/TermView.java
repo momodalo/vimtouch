@@ -185,7 +185,6 @@ public class TermView extends EmulatorView implements
     // End GestureDetector.OnGestureListener methods
     float mLastY = -1;
     float mLastX = -1;
-    float mLastY2 = -1;
     int mVisualMode = 0;
     
     private void toggleVisualMode() {
@@ -226,7 +225,6 @@ public class TermView extends EmulatorView implements
         Exec.mouseDown( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
         Exec.mouseUp( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
     }
-
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {

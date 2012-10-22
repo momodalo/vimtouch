@@ -29,7 +29,7 @@ public class VimFileActivity extends Activity{
             if (resultCode == Activity.RESULT_OK) {
                 String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
                 Intent intent = new Intent(getBaseContext(), VimTouch.class);
-                File file = new File(filePath);
+                File file = new File(filePath.replace(" ", "\\ "));
                 intent.setData(Uri.fromFile(file));
                 startActivity(intent);
             }
