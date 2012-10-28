@@ -35,6 +35,7 @@ public class TermView extends EmulatorView implements
     private boolean mInserted = false;
     private Runnable mCheckRunnable;
     private Handler mCheckHandler;
+    private int mCheckCount = 0;
     private VimInputConnection mInputConnection = null;
     private boolean mIMEComposing = false;
 
@@ -42,6 +43,18 @@ public class TermView extends EmulatorView implements
     private static final int SCREEN_CHECK_PERIOD = 1000;
     private static final int CURSOR_BLINK_PERIOD = 1000;
     private static final int VISUAL_MODE_PERIOD = 1000;
+
+    public boolean checkInsertMode() {
+        boolean b = Exec.isInsertMode();
+        if (b != mInserted){
+            Context context = getContext();
+            InputMethodManager imm = (InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.restartInput(TermView.this);
+            mInserted = b;
+            return true;
+        }
+        return false;
+    }
 
     public TermView(Context context, TermSession session, DisplayMetrics metrics) {
         super(context, session, metrics);
@@ -51,13 +64,9 @@ public class TermView extends EmulatorView implements
 
         mCheckRunnable = new Runnable() {
             public void run() {
-                boolean b = Exec.isInsertMode();
-                if (b != mInserted){
-                    Context context = getContext();
-                    InputMethodManager imm = (InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.restartInput(TermView.this);
-                    mInserted = b;
-                }
+                if(!checkInsertMode() && mCheckCount < 10)
+                    mCheckHandler.postDelayed(mCheckRunnable, 100);
+                mCheckCount++;
             }
         };
         mCheckHandler = new Handler();
@@ -228,7 +237,7 @@ public class TermView extends EmulatorView implements
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        lateCheckInserted();
+        checkInsertMode();
 
         mHandler.removeCallbacks(mVisualRun);
 
@@ -292,8 +301,8 @@ public class TermView extends EmulatorView implements
         return mScaleDetector.onTouchEvent(ev);
     }
 
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        boolean b = super.onKeyUp(keyCode,event);
+    public boolean dispatchKeyEvent(KeyEvent event){
+        boolean b = super.dispatchKeyEvent(event);
         lateCheckInserted();
         return b;
     }
@@ -301,7 +310,10 @@ public class TermView extends EmulatorView implements
     public void lateCheckInserted(){
         //FIXME check the vim State change lately
         mCheckHandler.removeCallbacks(mCheckRunnable);
-        mCheckHandler.postDelayed(mCheckRunnable, 500);
+        if(!checkInsertMode()){
+            mCheckCount = 0;
+            mCheckHandler.postDelayed(mCheckRunnable, 100);
+        }
     }
 
     public InputConnection onCreateInputConnection (EditorInfo outAttrs) {
