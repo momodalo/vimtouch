@@ -90,7 +90,7 @@ public class TermView extends EmulatorView implements
         setBackKeyCharacter(settings.getBackKeyCharacter());
         setControlKeyCode(settings.getControlKeyCode());
         setFnKeyCode(settings.getFnKeyCode());
-        setZoomBottom(settings.getZoomBottom());
+        //setZoomBottom(settings.getZoomBottom());
         mSingleTapESC = settings.getSingleTapESC();
         mTouchGesture = settings.getTouchGesture();
 
@@ -225,10 +225,24 @@ public class TermView extends EmulatorView implements
         }
     };
 
+    boolean mZoom = false;
+    float mZoomX = 0.0f;
+    float mZoomY = 0.0f;
+    public void setZoom(boolean z){
+        mZoom = z;
+    }
+
+    public boolean getZoom(){
+        return mZoom;
+    }
+
     public void onLongPress(MotionEvent ev) {
         float y = ev.getY();
         float x = ev.getX();
         setZoom(true);
+        mZoomX = x;
+        mZoomY = y;
+
         mLastY = -1;
         Exec.mouseUp( mDownY, mDownX);
         Exec.mouseDown( (int)(y/getCharacterHeight()), (int)(x/getCharacterWidth()));
@@ -256,6 +270,9 @@ public class TermView extends EmulatorView implements
 
             Exec.mouseDown( mDownY, mDownX);
         }else if (action == MotionEvent.ACTION_MOVE && fingers == 1 && mScaleSpan < 0.0){
+            mZoomX = x;
+            mZoomY = y;
+
             if(mLastX != -1 && Math.abs(x-mLastX) > getCharacterWidth() * 5 && !getZoom()){
                 setZoom(true);
                 mLastY = -1;
@@ -341,4 +358,36 @@ public class TermView extends EmulatorView implements
     public boolean onCheckIsTextEditor () {
         return true;
     }*/
+
+    private float mScaleX = 1.0f;
+    private float mScaleY = 1.0f;
+    private float mScalePX;
+    private float mScalePY;
+
+    public void setScale(float sx, float sy, float px, float py){
+        mScaleX = sx;
+        mScaleY = sy;
+        mScalePX = px;
+        mScalePY = py;
+    }
+ 
+    protected void onDraw(Canvas canvas) {
+
+        if(mScaleX != 1.0 || mScaleY != 1.0){
+            canvas.scale(mScaleX,mScaleY,mScalePX,mScalePY);
+        }
+
+        super.onDraw(canvas);
+        if(mZoom){
+            float h = getCharacterHeight()*2;
+            canvas.scale(3.0f,3.0f,mZoomX, mZoomY);
+            if(mZoomY > getVisibleHeight()/2){
+                canvas.translate(0.0f, (-mZoomY)/3 + h);
+            }else{
+                canvas.translate(0.0f, (getVisibleHeight()-mZoomY)/3 - h);
+            }
+            canvas.clipRect(mZoomX - mZoomX/3+5, mZoomY-h, mZoomX+(getVisibleWidth()-mZoomX)/3-5,mZoomY+h);
+            super.onDraw(canvas);
+        }
+    }
 }
