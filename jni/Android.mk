@@ -106,7 +106,8 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/libiconv/include \
                    $(LOCAL_PATH)/libiconv/libcharset \
-                   $(LOCAL_PATH)/libiconv/libcharset/include
+                   $(LOCAL_PATH)/libiconv/libcharset/include \
+                   $(LOCAL_PATH)/../gen
 
 # No special compiler flags.
 LOCAL_CFLAGS += -I$(LOCAL_PATH) -I$(LOCAL_PATH)/vim/src/ -I$(LOCAL_PATH)/vim/src/proto -I$(LOCAL_PATH)/libncurses/include -DUNIX -DHAVE_CONFIG_H

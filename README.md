@@ -49,5 +49,10 @@ Now prepare the development environment:
 
 You're ready to compile it!
 
-    ~/path/to/android/ndk/ndk-build
     ant debug
+
+(Note: the build script uses some magic to discover NDK and call `ndk-build`.
+Since magic is prone to failures, your build might fail with complaints about
+Android NDK. If that happens, make sure you export `ANDROID_NDK_ROOT`
+environment variable or read the `run` script to discover what heuristics it
+uses to deduce your NDK location.)

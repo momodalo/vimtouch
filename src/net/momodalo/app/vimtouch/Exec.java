@@ -16,10 +16,7 @@
 
 package net.momodalo.app.vimtouch;
 
-import android.content.Context;
-import android.text.ClipboardManager;
 import java.io.FileDescriptor;
-import android.util.Log;
 
 /**
  * Utility methods for creating and managing a subprocess.

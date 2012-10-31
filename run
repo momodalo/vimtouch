@@ -21,10 +21,30 @@ fi
 
 function build {
     set -e
-    $NDK/ndk-build -j`grep -c ^processor /proc/cpuinfo`
     ant debug
     ant installd
     $SDK/platform-tools/adb shell am start -n net.momodalo.app.vimtouch/.VimTouch
+}
+
+function build_native {
+    set -e
+    gen_signatures
+    $NDK/ndk-build -j`grep -c ^processor /proc/cpuinfo`
+}
+
+function gen_signatures {
+    signatures="./gen/signatures.h"
+    echo "#ifndef SIGNATURES_H__" > $signatures
+    echo "#define SIGNATURES_H__" >> $signatures
+    echo "" >> $signatures
+
+    class="./bin/classes/net/momodalo/app/vimtouch/Exec.class"
+    javap -s $class \
+        | awk '/native/,/Signature/{ print };' \
+        | awk '/Signature/{ print "\011\042"$2"\042;\n"; next }{ split($5,a1,/\(/); print "char const* jni_signature_"a1[1]" = " };' \
+        >> $signatures
+
+    echo "#endif // SIGNATURES_H__" >> $signatures
 }
 
 if [ $# -eq 0 ] ; then
@@ -49,5 +69,8 @@ case $1 in
     "adb")
         shift
         $SDK/platform-tools/adb $*
+        ;;
+    "buildnative")
+        build_native
         ;;
 esac
