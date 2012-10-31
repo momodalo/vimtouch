@@ -21,10 +21,14 @@ fi
 
 function build {
     set -e
-    $NDK/ndk-build -j`grep -c ^processor /proc/cpuinfo`
     ant debug
     ant installd
     $SDK/platform-tools/adb shell am start -n net.momodalo.app.vimtouch/.VimTouch
+}
+
+function build_native {
+    set -e
+    $NDK/ndk-build -j`grep -c ^processor /proc/cpuinfo`
 }
 
 if [ $# -eq 0 ] ; then
@@ -49,5 +53,8 @@ case $1 in
     "adb")
         shift
         $SDK/platform-tools/adb $*
+        ;;
+    "buildnative")
+        build_native
         ;;
 esac
