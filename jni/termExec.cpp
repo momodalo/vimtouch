@@ -34,6 +34,7 @@
 
 #include <jni.h>
 #include "common.h"
+#include "signatures.h"
 #include <linux/threads.h>
 #include <pthread.h>
 
@@ -65,8 +66,8 @@ extern int fake_gpm_fd[2];
 #define DEF_JNI0(func) \
     vimtouch_Exec_ ## func (JNIEnv *env, jobject clazz)
 
-#define DECL_JNI(func, sign) \
-    { #func, sign, (void*) vimtouch_Exec_ ## func }
+#define DECL_JNI(func) \
+    { #func, jni_signature_ ## func, (void*) vimtouch_Exec_ ## func }
 
 
 static pthread_mutex_t global_mutex;
@@ -671,24 +672,24 @@ static int register_FileDescriptor(JNIEnv *env)
 
 
 static JNINativeMethod method_table[] = {
-    DECL_JNI(createSubprocess, "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[I)Ljava/io/FileDescriptor;"),
-    DECL_JNI(setPtyWindowSize, "(Ljava/io/FileDescriptor;IIII)V"),
-    DECL_JNI(setPtyUTF8Mode, "(Ljava/io/FileDescriptor;Z)V"),
-    DECL_JNI(mouseDown, "(II)V"),
-    DECL_JNI(mouseDrag, "(II)V"),
-    DECL_JNI(mouseUp, "(II)V"),
-    DECL_JNI(scrollBy, "(I)I"),
-    DECL_JNI(setCursorCol, "(I)V"),
-    DECL_JNI(getCursorCol, "()I"),
-    DECL_JNI(getState, "()I"),
-    DECL_JNI(getCurrentLine, "(I)Ljava/lang/String;"),
-    DECL_JNI(lineReplace, "(Ljava/lang/String;)V"),
-    DECL_JNI(updateScreen, "()V"),
-    DECL_JNI(doCommand, "(Ljava/lang/String;)V"),
-    DECL_JNI(waitFor, "(I)I"),
-    DECL_JNI(close, "(Ljava/io/FileDescriptor;)V"),
-    DECL_JNI(getCurrBuffer, "()Ljava/lang/String;"),
-    DECL_JNI(startVim, "()V"),
+    DECL_JNI(createSubprocess),
+    DECL_JNI(setPtyWindowSize),
+    DECL_JNI(setPtyUTF8Mode),
+    DECL_JNI(mouseDown),
+    DECL_JNI(mouseDrag),
+    DECL_JNI(mouseUp),
+    DECL_JNI(scrollBy),
+    DECL_JNI(setCursorCol),
+    DECL_JNI(getCursorCol),
+    DECL_JNI(getState),
+    DECL_JNI(getCurrentLine),
+    DECL_JNI(lineReplace),
+    DECL_JNI(updateScreen),
+    DECL_JNI(doCommand),
+    DECL_JNI(waitFor),
+    DECL_JNI(close),
+    DECL_JNI(getCurrBuffer),
+    DECL_JNI(startVim),
 };
 
 /*
