@@ -121,8 +121,9 @@ void android_clip_set_selection (VimClipboard *cbd)
 
     int type = clip_convert_selection(&str, &len, cbd);
 
-    if (str)
+    if (type >= 0 && str)
     {
+        str[len] = '\0';
         jstring result = global_env->NewStringUTF((const char*)str);
         global_env->CallStaticVoidMethod(class_Exec, method_Exec_setClipText, result);
     }
