@@ -2,6 +2,7 @@
 
 NDK=$ANDROID_NDK_ROOT
 SDK=`grep sdk.dir local.properties | tr '=' '\n' | tail -1`
+package="net.momodalo.app.vimtouch"
 
 if ! [ -f $NDK/ndk-build ] ; then
     # If ANDROID_NDK_ROOT is not set, try this heuristics: look up all the
@@ -23,7 +24,7 @@ function build {
     set -e
     ant debug
     ant installd
-    $SDK/platform-tools/adb shell am start -n net.momodalo.app.vimtouch/.VimTouch
+    $SDK/platform-tools/adb shell am start -n $package/.VimTouch
 }
 
 function build_native {
@@ -38,7 +39,7 @@ function gen_signatures {
     echo "#define SIGNATURES_H__" >> $signatures
     echo "" >> $signatures
 
-    class="./bin/classes/net/momodalo/app/vimtouch/Exec.class"
+    class="./bin/classes/`echo $package | tr '.' '/'`/Exec.class"
     javap -s $class \
         | awk '/native/,/Signature/{ print };' \
         | awk '/Signature/{ print "\011\042"$2"\042;\n"; next }{ split($5,a1,/\(/); print "char const* jni_signature_"a1[1]" = " };' \
@@ -61,7 +62,7 @@ case $1 in
         $SDK/tools/lint .
         ;;
     "rm")
-        $SDK/platform-tools/adb uninstall net.momodalo.app.vimtouch
+        $SDK/platform-tools/adb uninstall $package
         ;;
     "log")
         $SDK/platform-tools/adb logcat

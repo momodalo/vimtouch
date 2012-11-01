@@ -108,25 +108,27 @@ void android_clip_request_selection (VimClipboard *cbd)
 
 void android_clip_set_selection (VimClipboard *cbd)
 {
-    int type;
     long_u  len;
     char_u *str = NULL;
 
     /* Prevent recursion from clip_get_selection() */
-    if( cbd->owned == TRUE )
-	return;
+    if (cbd->owned == TRUE)
+        return;
 
     cbd->owned = TRUE;
-    clip_get_selection( cbd );
+    clip_get_selection(cbd);
     cbd->owned = FALSE;
 
-    type = clip_convert_selection( &str, &len, cbd );
-    if(str){
+    int type = clip_convert_selection(&str, &len, cbd);
+
+    if (type >= 0 && str)
+    {
+        str[len] = '\0';
         jstring result = global_env->NewStringUTF((const char*)str);
         global_env->CallStaticVoidMethod(class_Exec, method_Exec_setClipText, result);
-
     }
-    vim_free( str );
+
+    vim_free(str);
 }
 
 }

@@ -69,15 +69,16 @@ public class Exec
         vimtouch.setClipText(text);
     }
 
-    public static String getClipText(){
+    public static String getClipText() throws InterruptedException {
         vimtouch.syncClipText();
-        while(vimtouch.getClipText() == null){
-            try{
-                Thread.sleep(100);
-            }catch(Exception e){
-            }
+        String clipText = vimtouch.getClipText();
+
+        while (clipText == null) {
+            Thread.sleep(100);
+            clipText = vimtouch.getClipText();
         }
-        return vimtouch.getClipText();
+
+        return clipText;
     }
 
     /**
