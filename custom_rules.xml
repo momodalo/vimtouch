@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project default="help">
     <target name="-post-compile">
-        <exec executable="./run buildnative" failonerror="true" />
+        <exec executable="./run" failonerror="true" >
+            <arg line="buildnative" />
+        </exec>
     </target>
 </project>

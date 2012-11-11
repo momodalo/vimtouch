@@ -41,8 +41,6 @@ import android.provider.MediaStore;
 import android.text.ClipboardManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -127,10 +125,6 @@ public class VimTouch extends Activity {
     private String mInitialCommand;
 
     private SharedPreferences mPrefs;
-
-    private final static int SELECT_TEXT_ID = 0;
-    private final static int COPY_ALL_ID = 1;
-    private final static int PASTE_ID = 2;
 
     private String mUrl = null;
     private long mEnqueue = -1;
@@ -251,10 +245,7 @@ public class VimTouch extends Activity {
     private TermView createEmulatorView(VimTermSession session) {
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        TermView emulatorView = new TermView(this, session, metrics);
-
-        registerForContextMenu(emulatorView);
-        return emulatorView;
+        return new TermView(this, session, metrics);
     }
 
     private void startEmulator() {
@@ -709,50 +700,6 @@ public class VimTouch extends Activity {
                 mButtonBar.setVisibility(View.VISIBLE);
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v,
-            ContextMenuInfo menuInfo) {
-      super.onCreateContextMenu(menu, v, menuInfo);
-
-      if (mEmulatorView.getScaleDetector ().isInProgress ())
-          return;
-
-      menu.setHeaderTitle(R.string.edit_text);
-
-      menu.add(0, SELECT_TEXT_ID, 0, R.string.select_text);
-      menu.add(0, COPY_ALL_ID, 0, R.string.copy_all);
-      menu.add(0, PASTE_ID, 0,  R.string.paste);
-
-      if (!canPaste()) {
-          menu.getItem(PASTE_ID).setEnabled(false);
-      }
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-          switch (item.getItemId()) {
-          case SELECT_TEXT_ID:
-            mEmulatorView.toggleSelectingText();
-            return true;
-          case COPY_ALL_ID:
-            doCopyAll();
-            return true;
-          case PASTE_ID:
-            doPaste();
-            return true;
-          default:
-            return super.onContextItemSelected(item);
-          }
-        }
-
-    private boolean canPaste() {
-        ClipboardManager clip = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        if (clip.hasText()) {
-            return true;
-        }
-        return false;
     }
 
     private void doPreferences() {
