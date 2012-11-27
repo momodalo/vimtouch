@@ -34,6 +34,7 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -684,7 +685,8 @@ public class VimTouch extends Activity {
         */
         }else if (id == R.id.menu_open) {
             Intent intent = new Intent(getBaseContext(), VimFileActivity.class);
-            intent.putExtra(FileDialog.START_PATH, "/sdcard");
+            String sdcard = Environment.getExternalStorageDirectory().getPath();
+            intent.putExtra(FileDialog.START_PATH, sdcard);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                             
             //can user select directories or not
