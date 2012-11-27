@@ -24,6 +24,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.lang.ref.WeakReference;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -491,10 +492,10 @@ public class VimTouch extends Activity {
         }
     }
 
-    private final int MSG_DIALOG = 1;
-    private final int MSG_UPDATE = 2;
-    private final int MSG_SYNCCLIP = 3;
-    private final int MSG_SETCLIP = 4;
+    private static final int MSG_DIALOG = 1;
+    private static final int MSG_UPDATE = 2;
+    private static final int MSG_SYNCCLIP = 3;
+    private static final int MSG_SETCLIP = 4;
     private class DialogObj {
         public int type;
         public String title;
@@ -503,35 +504,47 @@ public class VimTouch extends Activity {
         public int def_button;
         public String textfield;
     };
-    
-    private Handler mHandler = new Handler() {
-        @Override public void handleMessage(Message msg) {
+
+    static class MsgHandler extends Handler {
+        private final WeakReference<VimTouch> mActivity;
+
+        MsgHandler(VimTouch activity) {
+            mActivity = new WeakReference<VimTouch>(activity);
+        }
+
+        ClipboardManager clipMgr(Activity activity) {
+            Context ctx = activity.getApplicationContext();
+            String svc = Context.CLIPBOARD_SERVICE;
+            return (ClipboardManager) ctx.getSystemService(svc);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            VimTouch activity = mActivity.get();
+
             switch (msg.what) {
             case MSG_UPDATE:
                 Exec.updateScreen();
                 break;
             case MSG_DIALOG:
-                DialogObj obj = (DialogObj)msg.obj;
-                realShowDialog(obj.type, obj.title, obj.message, obj.buttons, obj.def_button, obj.textfield);
+                DialogObj obj = (DialogObj) msg.obj;
+                activity.realShowDialog(obj.type, obj.title, obj.message,
+                                        obj.buttons, obj.def_button,
+                                        obj.textfield);
                 break;
             case MSG_SYNCCLIP:
-                mClipText = null;
-                try{
-                    ClipboardManager clip = (ClipboardManager) getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                    mClipText = clip.getText().toString();
-                }catch (Exception e){
-                }
+                activity.mClipText = clipMgr(activity).getText().toString();
                 break;
             case MSG_SETCLIP:
-                mClipText = (String)msg.obj;
-                ClipboardManager clip = (ClipboardManager) getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                clip.setText(mClipText);
+                activity.mClipText = (String)msg.obj;
+                clipMgr(activity).setText(activity.mClipText);
                 break;
             default:
                 super.handleMessage(msg);
             }
         }
-    };
+    }
+    private MsgHandler mHandler = new MsgHandler(this);
 
     public void showDialog(int type, String title, String message, String buttons, int def_button, String textfield) {
         DialogObj obj = new DialogObj();
