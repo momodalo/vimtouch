@@ -45,9 +45,9 @@
 
    <string name="title_keyboard">key</string>
 
-   <string name="installing">Installing Vim Runtime...</string>
-   <string name="downloading">Downloading Vim Runtime...</string>
-   
+   <string name="installing">Installing Vim Runtime&#8230;</string>
+   <string name="downloading">Downloading Vim Runtime&#8230;</string>
+
    <string name="dialog_title_content_error">Content Error</string>
    <string name="message_content_too_big">The content is too big to do preview. Please save it first.</string>
 
