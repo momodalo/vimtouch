@@ -1,31 +1,15 @@
 package net.momodalo.app.vimtouch;
 
-import android.R;
 import android.content.Context;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.Selection;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.text.TextUtils;
-import android.text.method.KeyListener;
-import android.text.method.TextKeyListener;
-import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.View;
 import android.view.inputmethod.BaseInputConnection;
-import android.view.inputmethod.CompletionInfo;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
-import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
-import android.os.SystemClock;
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class VimInputConnection extends BaseInputConnection
 {
