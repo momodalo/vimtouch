@@ -214,7 +214,7 @@ public class InstallProgress extends Activity {
         CharSequence from = "VimTouch";
         CharSequence message = getString(R.string.install_finish);
 
-        Notification notif = new Notification(R.drawable.app_vimtouch, message,
+        Notification notif = new Notification(R.drawable.notification, message,
                                               System.currentTimeMillis());
 
         // The PendingIntent to launch our activity if the user selects this
