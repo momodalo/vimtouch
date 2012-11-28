@@ -3,6 +3,7 @@ package net.momodalo.app.vimtouch;
 import android.app.Activity;
 import com.lamerman.FileDialog;
 import android.os.Bundle;
+import android.os.Environment;
 import android.content.Intent;
 import java.io.File;
 import android.net.Uri;
@@ -16,7 +17,8 @@ public class VimFileActivity extends Activity{
 		super.onCreate(savedInstanceState);
 
         Intent intent = new Intent(getBaseContext(), VimFileDialog.class);
-        intent.putExtra(FileDialog.START_PATH, "/sdcard");
+        intent.putExtra(FileDialog.START_PATH,
+                        Environment.getExternalStorageDirectory().getPath());
                                             
         //can user select directories or not
         intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
