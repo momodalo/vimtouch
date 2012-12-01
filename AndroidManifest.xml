@@ -6,8 +6,14 @@
     >
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-sdk
+        android:minSdkVersion="9"
+        android:targetSdkVersion="17"
+        />
     <application android:icon="@drawable/app_vimtouch"
-                android:label="@string/application_vimtouch">
+        android:label="@string/application_vimtouch"
+        android:allowBackup="true"
+        >
         <activity android:name="VimTouch"
                 android:theme="@style/VimTheme"
                 android:launchMode="singleInstance"
@@ -69,7 +75,4 @@
             </intent-filter>
         </activity>
     </application>
-    <uses-sdk android:minSdkVersion="9"
-              android:targetSdkVersion="14"
-    />
 </manifest>

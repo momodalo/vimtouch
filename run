@@ -39,7 +39,7 @@ function gen_signatures {
     echo "#define SIGNATURES_H__" >> $signatures
     echo "" >> $signatures
 
-    class="./bin/classes/`echo $package | tr '.' '/'`/Exec.class"
+    class="./bin/classes/`echo $package | tr '.' '/'`/Exec"
     javap -s $class \
         | awk '/native/,/Signature/{ print };' \
         | awk '/Signature/{ print "\011\042"$2"\042;\n"; next }{ split($5,a1,/\(/); print "char const* jni_signature_"a1[1]" = " };' \

@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import android.os.Handler;
@@ -46,17 +47,25 @@ public class VimTermSession extends TermSession {
 
     private static final int PROCESS_EXITED = 1;
 
-    private Handler mMsgHandler = new Handler() {
+    static class ProcessHandler extends Handler {
+        private final WeakReference<VimTermSession> mSession;
+
+        ProcessHandler(VimTermSession session) {
+            mSession = new WeakReference<VimTermSession>(session);
+        }
+
         @Override
         public void handleMessage(Message msg) {
-            if (!isRunning()) {
+            VimTermSession session = mSession.get();
+
+            if (!session.isRunning())
                 return;
-            }
-            if (msg.what == PROCESS_EXITED) {
-                onProcessExit((Integer) msg.obj);
-            }
+
+            if (msg.what == PROCESS_EXITED)
+                session.onProcessExit((Integer) msg.obj);
         }
-    };
+    }
+    private ProcessHandler mMsgHandler = new ProcessHandler(this);
 
     private UpdateCallback mUTF8ModeNotify = new UpdateCallback() {
         public void onUpdate() {

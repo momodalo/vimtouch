@@ -34,6 +34,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.security.MessageDigest;
 import java.security.DigestInputStream;
+import java.lang.ref.WeakReference;
 import java.math.BigInteger;
 
 public class InstallProgress extends Activity {
@@ -145,16 +146,25 @@ public class InstallProgress extends Activity {
     }
 
     static final int MSG_SET_TEXT = 1;
-    private Handler mHandler = new Handler() {
-        @Override public void handleMessage(Message msg) {
+    static class ProgressHandler extends Handler {
+        private final WeakReference<InstallProgress> mActivity;
+
+        ProgressHandler(InstallProgress activity) {
+            mActivity = new WeakReference<InstallProgress>(activity);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
             switch (msg.what) {
             case MSG_SET_TEXT:
                 String res = (String)msg.obj;
-                mProgressText.setText(res);
+                InstallProgress activity = mActivity.get();
+                activity.mProgressText.setText(res);
                 break;
             }
         }
-    };
+    }
+    private ProgressHandler mHandler = new ProgressHandler(this);
 
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
@@ -204,7 +214,7 @@ public class InstallProgress extends Activity {
         CharSequence from = "VimTouch";
         CharSequence message = getString(R.string.install_finish);
 
-        Notification notif = new Notification(R.drawable.app_vimtouch, message,
+        Notification notif = new Notification(R.drawable.notification, message,
                                               System.currentTimeMillis());
 
         // The PendingIntent to launch our activity if the user selects this

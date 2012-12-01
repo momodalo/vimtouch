@@ -17,28 +17,11 @@
 <resources>
    <string name="application_vimtouch">Vi IMproved Touch</string>
    <string name="preferences">Preferences</string>
-   <string name="reset">Reset term</string>
-   <string name="send_email">Email to</string>
-   <string name="special_keys">Special keys</string>
    <string name="toggle_soft_keyboard">Toggle soft keyboard</string>
 
    <string name="paste">Paste</string>
 
    <!-- Preference dialog -->
-   <string name="screen_preferences">Screen</string>
-
-   <string name="title_statusbar_preference">Status bar</string>
-   <string name="summary_statusbar_preference">Show/hide status bar.</string>
-   <string name="dialog_title_statusbar_preference">Status bar</string>
-
-   <string name="title_cursorstyle_preference">Cursor style</string>
-   <string name="summary_cursorstyle_preference">Choose cursor style.</string>
-   <string name="dialog_title_cursorstyle_preference">Cursor style</string>
-
-   <string name="title_cursorblink_preference">Cursor blink</string>
-   <string name="summary_cursorblink_preference">Choose cursor blink.</string>
-   <string name="dialog_title_cursorblink_preference">Cursor blink</string>
-
    <string name="text_preferences">Text</string>
 
    <string name="title_fontsize_preference">Font size</string>
@@ -58,34 +41,13 @@
    <string name="summary_ime_preference">Choose input method for soft keyboard.</string>
    <string name="dialog_title_ime_preference">Input method</string>
 
-   <string name="shell_preferences">Shell</string>
-   <string name="title_shell_preference">Command line</string>
-   <string name="summary_shell_preference">Specify the shell command line.</string>
-   <string name="dialog_title_shell_preference">Shell</string>
-
-   <string name="title_initialcommand_preference">Initial command</string>
-   <string name="summary_initialcommand_preference">Sent to the shell when it starts.</string>
-   <string name="dialog_title_initialcommand_preference">Initial Command</string>
-
-   <!-- Don't localize these default values -->
-   <string name="default_value_statusbar_preference">0</string>
-   <string name="default_value_cursorstyle_preference">0</string>
-   <string name="default_value_cursorblink_preference">0</string>
-   <string name="default_value_fontsize_preference">10</string>
-   <string name="default_value_color_preference">2</string>
-   <string name="default_value_controlkey_preference">0</string>
-   <string name="default_value_ime_preference">0</string>
-   <string name="default_value_shell_preference">/system/bin/sh -</string>
-   <string name="default_value_initialcommand_preference">export PATH=/data/local/bin:$PATH</string>
-
    <string name="normal_quick_buttons">Normal Mode Quick Buttons</string>
-   
-   <string name="title_keyboard">key</string>
-   <string name="title_esc">ESC</string>
 
-   <string name="installing">Installing Vim Runtime...</string>
-   <string name="downloading">Downloading Vim Runtime...</string>
-   
+   <string name="title_keyboard">key</string>
+
+   <string name="installing">Installing Vim Runtime&#8230;</string>
+   <string name="downloading">Downloading Vim Runtime&#8230;</string>
+
    <string name="dialog_title_content_error">Content Error</string>
    <string name="message_content_too_big">The content is too big to do preview. Please save it first.</string>
 
@@ -128,7 +90,6 @@
    <string name="summary_quickbar_pos_preference">Choose position of quickbar</string>
    <string name="dialog_title_quickbar_pos_preference">Quickbar Position</string>
 
-   <string name="download_full_vim_runtime">Download Full VIM runtime</string>
    <string name="extra_downloads">Extra Downloads</string>
 
    <string name="vim_md5">4ca08ccbe3f4cf2caa9443795d324ac2</string>
