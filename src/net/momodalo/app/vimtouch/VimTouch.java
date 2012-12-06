@@ -522,6 +522,11 @@ public class VimTouch extends Activity {
         public void handleMessage(Message msg) {
             VimTouch activity = mActivity.get();
 
+            if (activity == null) {
+                super.handleMessage(msg);
+                return;
+            }
+
             switch (msg.what) {
             case MSG_UPDATE:
                 Exec.updateScreen();
