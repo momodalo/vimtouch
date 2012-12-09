@@ -159,7 +159,10 @@ public class InstallProgress extends Activity {
             case MSG_SET_TEXT:
                 String res = (String)msg.obj;
                 InstallProgress activity = mActivity.get();
-                activity.mProgressText.setText(res);
+
+                if (activity != null)
+                    activity.mProgressText.setText(res);
+
                 break;
             }
         }

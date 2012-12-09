@@ -58,6 +58,9 @@ public class VimTermSession extends TermSession {
         public void handleMessage(Message msg) {
             VimTermSession session = mSession.get();
 
+            if (session == null)
+                return;
+
             if (!session.isRunning())
                 return;
 
