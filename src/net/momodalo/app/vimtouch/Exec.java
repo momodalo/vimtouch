@@ -140,6 +140,8 @@ public class Exec
     public static native String getCurrentLine(int size);
     public static native int getCursorCol();
     public static native void setCursorCol(int col);
+    public static native int getCursorLine();
+    public static native void setCursorPos(int row, int col);
     public static native int getState();
     public static native String getCurrBuffer();
 

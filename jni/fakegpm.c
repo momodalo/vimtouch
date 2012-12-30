@@ -39,6 +39,11 @@ int Gpm_GetEvent(Gpm_Event *e){
         setcursor();
         out_flush();
         vimtouch_unlock();
+    }else if(event.type == VIM_EVENT_TYPE_CURSOR){
+        mouse_col = event.event.nums[0];
+        mouse_row = event.event.nums[1];
+
+        jump_to_mouse(MOUSE_DID_MOVE, NULL, 0);
     }else if(event.type == VIM_EVENT_TYPE_SETCOL){
         curwin->w_cursor.col = event.event.num;
     }else if(event.type == VIM_EVENT_TYPE_SCROLL){

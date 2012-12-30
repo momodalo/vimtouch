@@ -177,6 +177,7 @@ extern int Gpm_Wgetch();
 #define VIM_EVENT_TYPE_SETCOL 4
 #define VIM_EVENT_TYPE_RELINE 5
 #define VIM_EVENT_TYPE_RESIZE 6
+#define VIM_EVENT_TYPE_CURSOR 7
 
 #include "vim.h"
 
@@ -186,6 +187,7 @@ typedef struct VimEvnet{
         Gpm_Event gpm;
         char cmd[MAXPATHL];
         int num;
+        int nums[4];
     }event;
 } VimEvent;
 

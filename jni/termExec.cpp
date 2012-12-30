@@ -515,6 +515,23 @@ static int DEF_JNI0(getCursorCol)
     return curwin->w_cursor.col;
 }
 
+static int DEF_JNI0(getCursorLine)
+{
+    if(fake_gpm_fd[1] < 0) return 0;
+
+    return curwin->w_cursor.lnum;
+}
+
+static void DEF_JNI(setCursorPos, int row, int col)
+{
+    if(fake_gpm_fd[1] < 0) return;
+    VimEvent e;
+    e.type = VIM_EVENT_TYPE_CURSOR;
+    e.event.nums[0] = col;
+    e.event.nums[1] = row;
+    write(fake_gpm_fd[1],(void*)&e, sizeof(e));
+}
+
 static void DEF_JNI(setCursorCol, int col)
 {
     if(fake_gpm_fd[1] < 0) return;
@@ -683,6 +700,8 @@ static JNINativeMethod method_table[] = {
     DECL_JNI(scrollBy),
     DECL_JNI(setCursorCol),
     DECL_JNI(getCursorCol),
+    DECL_JNI(setCursorPos),
+    DECL_JNI(getCursorLine),
     DECL_JNI(getState),
     DECL_JNI(getCurrentLine),
     DECL_JNI(lineReplace),
