@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.os.Handler;
 import android.os.Message;
 
+import java.util.ArrayList;
 import java.io.FileInputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -47,6 +48,8 @@ public class InstallProgress extends Activity {
     private TextView mProgressText;
 
     private void installDefaultRuntime() {
+        ArrayList<RuntimeAddOn> runtimes = RuntimeFactory.getAllRuntimes(getApplicationContext());
+        if(runtimes.size() == 0) {
         try{
             MessageDigest md = MessageDigest.getInstance("MD5");
             InputStream is = new DigestInputStream(getResources().openRawResource(R.raw.vim),md);
@@ -67,6 +70,7 @@ public class InstallProgress extends Activity {
         } catch(Exception e) { 
             Log.e(LOG_TAG, "install vim runtime or compute md5 error", e); 
         }
+        }
 
         installZip(getResources().openRawResource(R.raw.terminfo));
 
@@ -83,6 +87,9 @@ public class InstallProgress extends Activity {
     }
 
     private static boolean checkMD5(Activity activity){
+        ArrayList<RuntimeAddOn> runtimes = RuntimeFactory.getAllRuntimes(activity.getApplicationContext());
+        if(runtimes.size() > 0)  return true;
+
         File md5 = new File(getMD5Filename(activity));
         InputStream ris = activity.getResources().openRawResource(R.raw.vim);
 
