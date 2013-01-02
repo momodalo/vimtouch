@@ -16,6 +16,7 @@
 
 package net.momodalo.app.vimtouch;
 
+import java.util.ArrayList;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.io.FileOutputStream;
@@ -65,6 +66,9 @@ import jackpal.androidterm.emulatorview.EmulatorView;
 import jackpal.androidterm.emulatorview.ColorScheme;
 import jackpal.androidterm.emulatorview.TermSession;
 import com.lamerman.FileDialog;
+
+import net.momodalo.app.vimtouch.addons.RuntimeFactory;
+import net.momodalo.app.vimtouch.addons.RuntimeAddOn;
 
 /**
  * A terminal emulator activity.
@@ -274,6 +278,18 @@ public class VimTouch extends Activity {
     }
     
     private boolean checkVimRuntime(){
+        // check runtimes which not installed yet first
+        ArrayList<RuntimeAddOn> runtimes = RuntimeFactory.getAllRuntimes(getApplicationContext());
+        for (RuntimeAddOn rt: runtimes){
+            if(!rt.isInstalled(getApplicationContext())){
+                Intent intent = new Intent(getApplicationContext(), InstallProgress.class);
+                intent.setData(Uri.parse("runtime://"+rt.getId()));
+                startActivityForResult(intent, REQUEST_INSTALL);
+                return false;
+            }
+        }
+        
+        // check default package
         PackageInfo info;
         try {
             info = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_META_DATA);

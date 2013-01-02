@@ -37,6 +37,9 @@ import java.security.DigestInputStream;
 import java.lang.ref.WeakReference;
 import java.math.BigInteger;
 
+import net.momodalo.app.vimtouch.addons.RuntimeFactory;
+import net.momodalo.app.vimtouch.addons.RuntimeAddOn;
+
 public class InstallProgress extends Activity {
     public static final String LOG_TAG = "VIM Installation";
     private Uri mUri;
@@ -99,6 +102,7 @@ public class InstallProgress extends Activity {
     }
 
     public static boolean isInstalled(Activity activity){
+
         File vimrc = new File(getVimrc(activity));
         if(vimrc.exists()){
             // Compare size to make sure the sys vimrc doesn't change
@@ -195,6 +199,16 @@ public class InstallProgress extends Activity {
                 }else if (mUri.getScheme().equals("file")) {
                     installLocalFile();
                     showNotification();
+                    finish();
+                }else if (mUri.getScheme().equals("runtime")){
+                    RuntimeAddOn runtime = RuntimeFactory.getRuntimeById( mUri.getAuthority(), getApplicationContext());
+                    try{
+                        InputStream input = runtime.getPackageContext().getAssets().openFd(runtime.getAssetName()).createInputStream();
+                        installZip(input);
+                        runtime.setInstalled(getApplicationContext(),true);
+                        showNotification();
+                    }catch(Exception e){
+                    }
                     finish();
                 }else if (mUri.getScheme().equals("content")){
                     try{
