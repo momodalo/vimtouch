@@ -710,9 +710,10 @@ public class VimTouch extends Activity {
         } else if (id == R.id.menu_ime_composing) {
             mEmulatorView.toggleIMEComposing();
         } else if (id == R.id.menu_extra_downloads)  {
-            Intent i = new Intent(Intent.ACTION_VIEW);
-            i.setData(Uri.parse("http://code.google.com/p/vimtouch/downloads/list?can=2&q=label=VRZ"));
-            startActivity(i);
+            Intent search = new Intent(Intent.ACTION_VIEW);
+            search.setData(Uri.parse("market://search?q=VimTouch"));
+            search.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(search);
         /*
         } else if (id == R.id.menu_full_vim_runtime)  {
             downloadFullRuntime();
