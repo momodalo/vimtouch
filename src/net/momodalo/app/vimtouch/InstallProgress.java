@@ -55,7 +55,7 @@ public class InstallProgress extends Activity {
         try{
             MessageDigest md = MessageDigest.getInstance("MD5");
             InputStream is = new DigestInputStream(getResources().openRawResource(R.raw.vim),md);
-            installZip(is);
+            installZip(is, null);
 
 
             // write md5 bytes
@@ -74,7 +74,7 @@ public class InstallProgress extends Activity {
         }
         }
 
-        installZip(getResources().openRawResource(R.raw.terminfo));
+        installZip(getResources().openRawResource(R.raw.terminfo),null);
 
         installSysVimrc(this);
 
@@ -151,7 +151,7 @@ public class InstallProgress extends Activity {
         try {
             File file = new File(mUri.getPath());
             if(file.exists()){
-                installZip(new FileInputStream(file));
+                installZip(new FileInputStream(file), null);
             }
         }catch (Exception e){
             Log.e(LOG_TAG, "install " + mUri + " error " + e);
@@ -198,6 +198,7 @@ public class InstallProgress extends Activity {
         new Thread(new Runnable() {
             public void run() {
             Log.e(LOG_TAG, "install " + mUri );
+                Context context = getApplicationContext();
                 if(mUri == null){
                     installDefaultRuntime();
                     finish();
@@ -210,21 +211,27 @@ public class InstallProgress extends Activity {
                     showNotification();
                     finish();
                 }else if (mUri.getScheme().equals("plugin")){
-                    PluginAddOn plugin = PluginFactory.getPluginById( mUri.getAuthority(), getApplicationContext());
+                    PluginAddOn plugin = PluginFactory.getPluginById( mUri.getAuthority(), context);
                     try{
                         InputStream input = plugin.getPackageContext().getAssets().openFd(plugin.getAssetName()).createInputStream();
-                        installZip(input);
-                        plugin.setInstalled(getApplicationContext(),true);
+                        plugin.initTypeDir(context);
+                        FileWriter fw = new FileWriter(plugin.getFileListName(context));
+                        installZip(input,fw);
+                        fw.close();
+                        plugin.setInstalled(context,true);
                         showNotification();
                     }catch(Exception e){
                     }
                     finish();
                 }else if (mUri.getScheme().equals("runtime")){
-                    RuntimeAddOn runtime = RuntimeFactory.getRuntimeById( mUri.getAuthority(), getApplicationContext());
+                    RuntimeAddOn runtime = RuntimeFactory.getRuntimeById( mUri.getAuthority(), context);
                     try{
                         InputStream input = runtime.getPackageContext().getAssets().openFd(runtime.getAssetName()).createInputStream();
-                        installZip(input);
-                        runtime.setInstalled(getApplicationContext(),true);
+                        runtime.initTypeDir(context);
+                        FileWriter fw = new FileWriter(runtime.getFileListName(context));
+                        installZip(input,fw);
+                        fw.close();
+                        runtime.setInstalled(context,true);
                         showNotification();
                     }catch(Exception e){
                     }
@@ -232,7 +239,7 @@ public class InstallProgress extends Activity {
                 }else if (mUri.getScheme().equals("content")){
                     try{
                         InputStream attachment = getContentResolver().openInputStream(mUri);
-                        installZip(attachment);
+                        installZip(attachment, null);
                         showNotification();
                     }catch(Exception e){
                     }
@@ -267,7 +274,7 @@ public class InstallProgress extends Activity {
         nm.notify(0, notif);
     }
 
-    private void installZip(InputStream is) {
+    private void installZip(InputStream is, FileWriter fw) {
         String dirname = getApplicationContext().getFilesDir().getPath();
         int progress = 0;
         mProgressBar.setProgress(0);
@@ -306,6 +313,7 @@ public class InstallProgress extends Activity {
                         file.setExecutable(true, false);
                         file.setReadable(true, false);
                     }
+                    if(fw != null) fw.write(ze.getName()+"\n");
                 }
                 mProgressBar.setProgress(total-is.available());
             }
@@ -349,7 +357,7 @@ public class InstallProgress extends Activity {
                                 public void run() {
                                     try {
                                         InputStream attachment = getContentResolver().openInputStream(mUri);
-                                        installZip(attachment);
+                                        installZip(attachment, null);
                                         showNotification();
                                     }catch(Exception e){}
                                     finish();
