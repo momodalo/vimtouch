@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public class PluginFactory extends AddOnsFactory <PluginAddOn> {
     private static final String TAG = "PluginFactory";
-    private static final String XML_ASSETS_ATTRIBUTE = "pluginAessetName";
+    private static final String XML_ASSETS_ATTRIBUTE = "pluginAssetName";
     private static final String XML_MD5_ATTRIBUTE = "pluginAssetMd5";
 
     private static final PluginFactory msInstance;
@@ -15,7 +15,7 @@ public class PluginFactory extends AddOnsFactory <PluginAddOn> {
         msInstance = new PluginFactory();
     }
     private PluginFactory () {
-        super(TAG, "net.momodalo.app.vimtouch.PLUGIN", "net.momodalo.app.vimtouch.plugin", "Plugins", "plugin");
+        super(TAG, "net.momodalo.app.vimtouch.PLUGIN", "net.momodalo.app.vimtouch.plugin", "Plugins", "Plugin");
     }
 
 	protected PluginAddOn createConcreteAddOn(Context context, String prefId, int nameId,

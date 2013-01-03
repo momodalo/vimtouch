@@ -40,6 +40,8 @@ import java.math.BigInteger;
 
 import net.momodalo.app.vimtouch.addons.RuntimeFactory;
 import net.momodalo.app.vimtouch.addons.RuntimeAddOn;
+import net.momodalo.app.vimtouch.addons.PluginFactory;
+import net.momodalo.app.vimtouch.addons.PluginAddOn;
 
 public class InstallProgress extends Activity {
     public static final String LOG_TAG = "VIM Installation";
@@ -206,6 +208,16 @@ public class InstallProgress extends Activity {
                 }else if (mUri.getScheme().equals("file")) {
                     installLocalFile();
                     showNotification();
+                    finish();
+                }else if (mUri.getScheme().equals("plugin")){
+                    PluginAddOn plugin = PluginFactory.getPluginById( mUri.getAuthority(), getApplicationContext());
+                    try{
+                        InputStream input = plugin.getPackageContext().getAssets().openFd(plugin.getAssetName()).createInputStream();
+                        installZip(input);
+                        plugin.setInstalled(getApplicationContext(),true);
+                        showNotification();
+                    }catch(Exception e){
+                    }
                     finish();
                 }else if (mUri.getScheme().equals("runtime")){
                     RuntimeAddOn runtime = RuntimeFactory.getRuntimeById( mUri.getAuthority(), getApplicationContext());

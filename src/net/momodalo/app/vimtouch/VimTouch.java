@@ -69,6 +69,8 @@ import com.lamerman.FileDialog;
 
 import net.momodalo.app.vimtouch.addons.RuntimeFactory;
 import net.momodalo.app.vimtouch.addons.RuntimeAddOn;
+import net.momodalo.app.vimtouch.addons.PluginFactory;
+import net.momodalo.app.vimtouch.addons.PluginAddOn;
 
 /**
  * A terminal emulator activity.
@@ -254,6 +256,21 @@ public class VimTouch extends Activity {
         return new TermView(this, session, metrics);
     }
 
+    private boolean checkPlugins() {
+        // check plugins which not installed yet first
+        ArrayList<PluginAddOn> plugins = PluginFactory.getAllPlugins(getApplicationContext());
+        for (PluginAddOn addon: plugins){
+            if(!addon.isInstalled(getApplicationContext())){
+                Intent intent = new Intent(getApplicationContext(), InstallProgress.class);
+                intent.setData(Uri.parse("plugin://"+addon.getId()));
+                startActivityForResult(intent, REQUEST_INSTALL);
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
     private void startEmulator() {
         String appPath = getApplicationContext().getFilesDir().getPath();
         mSession = new VimTermSession (appPath, mUrl, mSettings, "");
@@ -294,12 +311,12 @@ public class VimTouch extends Activity {
         try {
             info = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_META_DATA);
             if(mSettings.getLastVersionCode() == info.versionCode)
-                return true;
+                return checkPlugins();
         } catch (PackageManager.NameNotFoundException e) {
         }
 
         if(InstallProgress.isInstalled(this))
-            return true;
+            return checkPlugins();
         
         Intent intent = new Intent(getApplicationContext(), InstallProgress.class);
         startActivityForResult(intent, REQUEST_INSTALL);
