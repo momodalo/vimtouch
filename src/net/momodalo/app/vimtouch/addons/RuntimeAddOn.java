@@ -16,10 +16,11 @@ public class RuntimeAddOn extends AddOnImpl {
         super(packageContext, id, nameResId, description, sortIndex);
         mAssets = assets;
         mMd5 = md5;
+        mType = "runtime";
     }
 
-    private String getMd5FileName(Context context) {
-        return context.getFilesDir()+"/installed/"+TYPE+"/"+getId()+".md5";
+    protected String getMd5FileName(Context context) {
+        return getTypeDir(context)+"/"+getId()+".md5";
     }
 
     public boolean isInstalled(Context context){
@@ -38,8 +39,7 @@ public class RuntimeAddOn extends AddOnImpl {
     }
 
     public void setInstalled( Context context, boolean installed){
-        File dir = new File(context.getFilesDir()+"/installed/"+TYPE);
-        if(!dir.exists()) dir.mkdirs();
+        initTypeDir(context);
 
         String name = getMd5FileName(context); 
         File md5file = new File(name);
