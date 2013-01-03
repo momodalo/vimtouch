@@ -51,8 +51,9 @@ public class InstallProgress extends Activity {
 
     private void installDefaultRuntime() {
         ArrayList<RuntimeAddOn> runtimes = RuntimeFactory.getAllRuntimes(getApplicationContext());
-        if(runtimes.size() == 0) {
         try{
+
+        if(runtimes.size() == 0) {
             MessageDigest md = MessageDigest.getInstance("MD5");
             InputStream is = new DigestInputStream(getResources().openRawResource(R.raw.vim),md);
             installZip(is, null, "Default Runtime");
@@ -69,15 +70,27 @@ public class InstallProgress extends Activity {
             Log.e(LOG_TAG, "compute md5 "+result);
             fout.write(result);
             fout.close();
-        } catch(Exception e) { 
-            Log.e(LOG_TAG, "install vim runtime or compute md5 error", e); 
-        }
+        }else{
+            Context context = getApplicationContext();
+            for (RuntimeAddOn rt: runtimes){
+                if(!rt.isInstalled(context)){
+                    InputStream input = rt.getPackageContext().getAssets().openFd(rt.getAssetName()).createInputStream();
+                    rt.initTypeDir(context);
+                    FileWriter fw = new FileWriter(rt.getFileListName(context));
+                    installZip(input,fw, rt.getDescription());
+                    fw.close();
+                    rt.setInstalled(context,true);
+                }
+            }
         }
 
         installZip(getResources().openRawResource(R.raw.terminfo),null, "Terminfo");
 
         installSysVimrc(this);
 
+        } catch(Exception e) { 
+            Log.e(LOG_TAG, "install vim runtime or compute md5 error", e); 
+        }
     }
 
     private static String getVimrc(Activity activity) {
@@ -111,6 +124,14 @@ public class InstallProgress extends Activity {
     }
 
     public static boolean isInstalled(Activity activity){
+        // check runtimes which not installed yet first
+        ArrayList<RuntimeAddOn> runtimes = RuntimeFactory.getAllRuntimes(activity.getApplicationContext());
+        for (RuntimeAddOn rt: runtimes){
+            if(!rt.isInstalled(activity.getApplicationContext())){
+                return false;
+            }
+        }
+        
 
         File vimrc = new File(getVimrc(activity));
         if(vimrc.exists()){
@@ -202,15 +223,15 @@ public class InstallProgress extends Activity {
                 Context context = getApplicationContext();
                 if(mUri == null){
                     installDefaultRuntime();
-                    finish();
+                /*
                 }else if (mUri.getScheme().equals("http") || 
                           mUri.getScheme().equals("https") ||
                           mUri.getScheme().equals("ftp")) {
                     downloadRuntime(mUri);
+                */
                 }else if (mUri.getScheme().equals("file")) {
                     installLocalFile();
                     showNotification();
-                    finish();
                 }else if (mUri.getScheme().equals("plugin")){
                     PluginAddOn plugin = PluginFactory.getPluginById( mUri.getAuthority(), context);
                     try{
@@ -223,7 +244,6 @@ public class InstallProgress extends Activity {
                         showNotification();
                     }catch(Exception e){
                     }
-                    finish();
                 }else if (mUri.getScheme().equals("runtime")){
                     RuntimeAddOn runtime = RuntimeFactory.getRuntimeById( mUri.getAuthority(), context);
                     try{
@@ -236,7 +256,6 @@ public class InstallProgress extends Activity {
                         showNotification();
                     }catch(Exception e){
                     }
-                    finish();
                 }else if (mUri.getScheme().equals("content")){
                     try{
                         InputStream attachment = getContentResolver().openInputStream(mUri);
@@ -244,8 +263,26 @@ public class InstallProgress extends Activity {
                         showNotification();
                     }catch(Exception e){
                     }
-                    finish();
                 }
+
+                // check plugins which not installed yet first
+                ArrayList<PluginAddOn> plugins = PluginFactory.getAllPlugins(getApplicationContext());
+                for (PluginAddOn plugin: plugins){
+                    if(!plugin.isInstalled(getApplicationContext())){
+                        try{
+                            InputStream input = plugin.getPackageContext().getAssets().openFd(plugin.getAssetName()).createInputStream();
+                            plugin.initTypeDir(context);
+                            FileWriter fw = new FileWriter(plugin.getFileListName(context));
+                            installZip(input,fw, plugin.getDescription());
+                            fw.close();
+                            plugin.setInstalled(context,true);
+                            showNotification();
+                        }catch(Exception e){
+                        }
+                    }
+                }
+        
+                finish();
 
             }
         }).start();

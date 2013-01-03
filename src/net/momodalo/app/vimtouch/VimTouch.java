@@ -295,16 +295,8 @@ public class VimTouch extends Activity {
     }
     
     private boolean checkVimRuntime(){
-        // check runtimes which not installed yet first
-        ArrayList<RuntimeAddOn> runtimes = RuntimeFactory.getAllRuntimes(getApplicationContext());
-        for (RuntimeAddOn rt: runtimes){
-            if(!rt.isInstalled(getApplicationContext())){
-                Intent intent = new Intent(getApplicationContext(), InstallProgress.class);
-                intent.setData(Uri.parse("runtime://"+rt.getId()));
-                startActivityForResult(intent, REQUEST_INSTALL);
-                return false;
-            }
-        }
+        if(InstallProgress.isInstalled(this))
+            return checkPlugins();
         
         // check default package
         PackageInfo info;
@@ -315,9 +307,6 @@ public class VimTouch extends Activity {
         } catch (PackageManager.NameNotFoundException e) {
         }
 
-        if(InstallProgress.isInstalled(this))
-            return checkPlugins();
-        
         Intent intent = new Intent(getApplicationContext(), InstallProgress.class);
         startActivityForResult(intent, REQUEST_INSTALL);
 
