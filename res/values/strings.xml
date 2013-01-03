@@ -45,8 +45,8 @@
 
    <string name="title_keyboard">key</string>
 
-   <string name="installing">Installing Vim Runtime&#8230;</string>
-   <string name="downloading">Downloading Vim Runtime&#8230;</string>
+   <string name="installing">Installing </string>
+   <string name="downloading">Downloading </string>
 
    <string name="dialog_title_content_error">Content Error</string>
    <string name="message_content_too_big">The content is too big to do preview. Please save it first.</string>
@@ -94,7 +94,7 @@
 
    <string name="vim_md5">4ca08ccbe3f4cf2caa9443795d324ac2</string>
 
-   <string name="install_activity">Install Vim Runtime</string>
+   <string name="install_activity">Install Vim Add-On</string>
 
    <string name="ime_composing">Toggle Word-based IME</string>
 

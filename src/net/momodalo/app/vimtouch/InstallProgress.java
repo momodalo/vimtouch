@@ -55,7 +55,7 @@ public class InstallProgress extends Activity {
         try{
             MessageDigest md = MessageDigest.getInstance("MD5");
             InputStream is = new DigestInputStream(getResources().openRawResource(R.raw.vim),md);
-            installZip(is, null);
+            installZip(is, null, "Default Runtime");
 
 
             // write md5 bytes
@@ -74,7 +74,7 @@ public class InstallProgress extends Activity {
         }
         }
 
-        installZip(getResources().openRawResource(R.raw.terminfo),null);
+        installZip(getResources().openRawResource(R.raw.terminfo),null, "Terminfo");
 
         installSysVimrc(this);
 
@@ -151,7 +151,7 @@ public class InstallProgress extends Activity {
         try {
             File file = new File(mUri.getPath());
             if(file.exists()){
-                installZip(new FileInputStream(file), null);
+                installZip(new FileInputStream(file), null, mUri.getPath());
             }
         }catch (Exception e){
             Log.e(LOG_TAG, "install " + mUri + " error " + e);
@@ -175,6 +175,7 @@ public class InstallProgress extends Activity {
 
                 if (activity != null)
                     activity.mProgressText.setText(res);
+                    activity.setTitle(res);
 
                 break;
             }
@@ -216,7 +217,7 @@ public class InstallProgress extends Activity {
                         InputStream input = plugin.getPackageContext().getAssets().openFd(plugin.getAssetName()).createInputStream();
                         plugin.initTypeDir(context);
                         FileWriter fw = new FileWriter(plugin.getFileListName(context));
-                        installZip(input,fw);
+                        installZip(input,fw, plugin.getDescription());
                         fw.close();
                         plugin.setInstalled(context,true);
                         showNotification();
@@ -229,7 +230,7 @@ public class InstallProgress extends Activity {
                         InputStream input = runtime.getPackageContext().getAssets().openFd(runtime.getAssetName()).createInputStream();
                         runtime.initTypeDir(context);
                         FileWriter fw = new FileWriter(runtime.getFileListName(context));
-                        installZip(input,fw);
+                        installZip(input,fw, runtime.getDescription());
                         fw.close();
                         runtime.setInstalled(context,true);
                         showNotification();
@@ -239,7 +240,7 @@ public class InstallProgress extends Activity {
                 }else if (mUri.getScheme().equals("content")){
                     try{
                         InputStream attachment = getContentResolver().openInputStream(mUri);
-                        installZip(attachment, null);
+                        installZip(attachment, null, " from other application");
                         showNotification();
                     }catch(Exception e){
                     }
@@ -274,12 +275,12 @@ public class InstallProgress extends Activity {
         nm.notify(0, notif);
     }
 
-    private void installZip(InputStream is, FileWriter fw) {
+    private void installZip(InputStream is, FileWriter fw, String desc) {
         String dirname = getApplicationContext().getFilesDir().getPath();
         int progress = 0;
         mProgressBar.setProgress(0);
         String msgText = getString(R.string.installing);
-        mHandler.sendMessage(mHandler.obtainMessage(MSG_SET_TEXT, msgText));
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_SET_TEXT, msgText+" "+desc));
         ZipInputStream zin = new ZipInputStream(new BufferedInputStream(is));
         ZipEntry ze = null;
         int size;
@@ -357,7 +358,7 @@ public class InstallProgress extends Activity {
                                 public void run() {
                                     try {
                                         InputStream attachment = getContentResolver().openInputStream(mUri);
-                                        installZip(attachment, null);
+                                        installZip(attachment, null, "downloads");
                                         showNotification();
                                     }catch(Exception e){}
                                     finish();

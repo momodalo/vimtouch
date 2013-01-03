@@ -338,6 +338,8 @@ public class VimTouch extends Activity {
                 }
 
                 startEmulator();
+                updatePrefs();
+                mEmulatorView.onResume();
             }
         }else if (requestCode == REQUEST_OPEN){
             if (resultCode == Activity.RESULT_OK) {
