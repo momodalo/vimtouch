@@ -299,6 +299,7 @@ public class VimTouch extends Activity {
             return checkPlugins();
         
         // check default package
+        /* FIXME: we won't change default runtime for long time , but it's better to re-check again later.
         PackageInfo info;
         try {
             info = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_META_DATA);
@@ -306,6 +307,7 @@ public class VimTouch extends Activity {
                 return checkPlugins();
         } catch (PackageManager.NameNotFoundException e) {
         }
+        */
 
         Intent intent = new Intent(getApplicationContext(), InstallProgress.class);
         startActivityForResult(intent, REQUEST_INSTALL);
