@@ -234,9 +234,20 @@ static int create_subprocess(const char *cmd, const char *arg0, const char *arg1
 
     char** thread_arg = (char**)malloc(sizeof(char*)*2);
     thread_arg[0] = strdup(devname);
-    if(arg0)
+    if(arg0){
+        struct stat st;
+        if(stat(arg0, &st) == 0){
+            if(S_ISDIR(st.st_mode)) chdir(arg0);
+            if(S_IFREG&st.st_mode){
+                char* pdir = strdup(arg0);
+                char* end = strrchr(pdir,'/');
+                *end = NULL;
+                chdir(pdir);
+            }
+
+        }
         thread_arg[1] = strdup(arg0);
-    else 
+    }else 
         thread_arg[1] = NULL;
 
     pthread_t thread_id;
