@@ -29,7 +29,6 @@ import java.nio.charset.CodingErrorAction;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 
 /**
  * A terminal session, consisting of a VT100 terminal emulator and its
@@ -62,6 +61,8 @@ public class TermSession {
 
     private OutputStream mTermOut;
     private InputStream mTermIn;
+
+    private String mTitle;
 
     private TranscriptScreen mTranscriptScreen;
     private TerminalEmulator mEmulator;
@@ -115,6 +116,8 @@ public class TermSession {
         }
     };
 
+    private UpdateCallback mTitleChangedListener;
+
     public TermSession() {
         mWriteCharBuffer = CharBuffer.allocate(2);
         mWriteByteBuffer = ByteBuffer.allocate(4);
@@ -136,9 +139,15 @@ public class TermSession {
                             // EOF -- process exited
                             return;
                         }
-                        mByteQueue.write(mBuffer, 0, read);
-                        mMsgHandler.sendMessage(
-                                mMsgHandler.obtainMessage(NEW_INPUT));
+                        int offset = 0;
+                        while (read > 0) {
+                            int written = mByteQueue.write(mBuffer,
+                                    offset, read);
+                            offset += written;
+                            read -= written;
+                            mMsgHandler.sendMessage(
+                                    mMsgHandler.obtainMessage(NEW_INPUT));
+                        }
                     }
                 } catch (IOException e) {
                 } catch (InterruptedException e) {
@@ -233,10 +242,14 @@ public class TermSession {
      */
     public void write(byte[] data, int offset, int count) {
         try {
-            mWriteQueue.write(data, offset, count);
+            while (count > 0) {
+                int written = mWriteQueue.write(data, offset, count);
+                offset += written;
+                count -= written;
+                notifyNewOutput();
+            }
         } catch (InterruptedException e) {
         }
-        notifyNewOutput();
     }
 
     /**
@@ -362,6 +375,44 @@ public class TermSession {
     protected void notifyUpdate() {
         if (mNotify != null) {
             mNotify.onUpdate();
+        }
+    }
+
+    /**
+     * Get the terminal session's title (may be null).
+     */
+    public String getTitle() {
+        return mTitle;
+    }
+
+    /**
+     * Change the terminal session's title.
+     */
+    public void setTitle(String title) {
+        mTitle = title;
+        notifyTitleChanged();
+    }
+
+    /**
+     * Set an {@link UpdateCallback} to be invoked when the terminal emulator's
+     * title is changed.
+     *
+     * @param listener The {@link UpdateCallback} to be invoked on changes.
+     */
+    public void setTitleChangedListener(UpdateCallback listener) {
+        mTitleChangedListener = listener;
+    }
+
+    /**
+     * Notify the UpdateCallback registered for title changes, if any, that the
+     * terminal session's title has changed.
+     *
+     * @param title The terminal's new title.
+     */
+    protected void notifyTitleChanged() {
+        UpdateCallback listener = mTitleChangedListener;
+        if (listener != null) {
+            listener.onUpdate();
         }
     }
 
@@ -531,15 +582,20 @@ public class TermSession {
      */
     public void finish() {
         mIsRunning = false;
-        mTranscriptScreen.finish();
+        if (mTranscriptScreen != null) {
+            mTranscriptScreen.finish();
+        }
 
         // Stop the reader and writer threads, and close the I/O streams
-        mWriterHandler.sendEmptyMessage(FINISH);
+        if (mWriterHandler != null) {
+            mWriterHandler.sendEmptyMessage(FINISH);
+        }
         try {
             mTermIn.close();
             mTermOut.close();
         } catch (IOException e) {
             // We don't care if this fails
+        } catch (NullPointerException e) {
         }
 
         if (mFinishCallback != null) {

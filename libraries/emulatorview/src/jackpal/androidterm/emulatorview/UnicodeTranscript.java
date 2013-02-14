@@ -33,9 +33,7 @@ import jackpal.androidterm.emulatorview.compat.AndroidCharacterCompat;
  *   is used to store the "offset" at which each column starts; for example,
  *   if column 20 starts at index 23 in the array, then mOffset[20] = 3.
  *
- * Color/formatting information is stored in a separate circular buffer of
- * byte[].  The high four bits encode foreground color, while the low four
- * bits encode background color.
+ * Style information is stored in a separate circular buffer of StyleRows.
  *
  * Rows are allocated on demand, when a character is first stored into them.
  * A "basic" row is allocated unless the store which triggers the allocation
@@ -47,49 +45,37 @@ class UnicodeTranscript {
     private static final String TAG = "UnicodeTranscript";
 
     private Object[] mLines;
-    private byte[][] mColor;
+    private StyleRow[] mColor;
     private boolean[] mLineWrap;
     private int mTotalRows;
     private int mScreenRows;
     private int mColumns;
     private int mActiveTranscriptRows = 0;
-    private int mDefaultForeColor = 0;
-    private int mDefaultBackColor = 0;
+    private int mDefaultStyle = 0;
 
     private int mScreenFirstRow = 0;
 
-    private char[] tmpChar = new char[2];
     private char[] tmpLine;
-    private byte[] tmpColor;
+    private StyleRow tmpColor;
 
-    public UnicodeTranscript(int columns, int totalRows, int screenRows, int foreColor, int backColor) {
+    public UnicodeTranscript(int columns, int totalRows, int screenRows, int defaultStyle) {
         mColumns = columns;
         mTotalRows = totalRows;
         mScreenRows = screenRows;
         mLines = new Object[totalRows];
-        mColor = new byte[totalRows][];
+        mColor = new StyleRow[totalRows];
         mLineWrap = new boolean[totalRows];
-        tmpColor = new byte[columns];
+        tmpColor = new StyleRow(defaultStyle, mColumns);
 
-        mDefaultForeColor = foreColor;
-        mDefaultBackColor = backColor;
+        mDefaultStyle = defaultStyle;
     }
 
-    public void setDefaultColors(int foreColor, int backColor) {
-        mDefaultForeColor = foreColor;
-        mDefaultBackColor = backColor;
+    public void setDefaultStyle(int defaultStyle) {
+        mDefaultStyle = defaultStyle;
     }
 
-    public int getDefaultForeColor() {
-        return mDefaultForeColor;
-    }
-
-    public int getDefaultBackColor() {
-        return mDefaultBackColor;
-    }
-
-    public byte getDefaultColorsEncoded() {
-        return encodeColor(mDefaultForeColor, mDefaultBackColor);
+    public int getDefaultStyle() {
+        return mDefaultStyle;
     }
 
     public int getActiveTranscriptRows() {
@@ -164,7 +150,7 @@ class UnicodeTranscript {
         if (shift < -activeTranscriptRows) {
             // We want to add blank lines at the bottom instead of at the top
             Object[] lines = mLines;
-            byte[][] color = mColor;
+            Object[] color = mColor;
             boolean[] lineWrap = mLineWrap;
             int screenFirstRow = mScreenFirstRow;
             int totalRows = mTotalRows;
@@ -294,8 +280,9 @@ class UnicodeTranscript {
      *
      * @param topMargin First line that is scrolled.
      * @param bottomMargin One line after the last line that is scrolled.
+     * @param style the style for the newly exposed line.
      */
-    public void scroll(int topMargin, int bottomMargin) {
+    public void scroll(int topMargin, int bottomMargin, int style) {
         // Separate out reasons so that stack crawls help us
         // figure out which condition was violated.
         if (topMargin > bottomMargin - 1) {
@@ -323,14 +310,13 @@ class UnicodeTranscript {
             // Blank the bottom margin
             int blankRow = externalToInternalRow(bottomMargin - 1);
             mLines[blankRow] = null;
-            mColor[blankRow] = null;
+            mColor[blankRow] = new StyleRow(style, mColumns);
             mLineWrap[blankRow] = false;
 
             return;
         }
 
         int screenFirstRow = mScreenFirstRow;
-        int scrollLen = bottomMargin - topMargin;
         int topMarginInt = externalToInternalRow(topMargin);
         int bottomMarginInt = externalToInternalRow(bottomMargin);
 
@@ -338,10 +324,10 @@ class UnicodeTranscript {
            one line, move the lines on screen below the bottom margin down
            one line, then insert the scrolled line into the transcript */
         Object[] lines = mLines;
-        byte[][] color = mColor;
+        StyleRow[] color = mColor;
         boolean[] lineWrap = mLineWrap;
         Object scrollLine = lines[topMarginInt];
-        byte[] scrollColor = color[topMarginInt];
+        StyleRow scrollColor = color[topMarginInt];
         boolean scrollLineWrap = lineWrap[topMarginInt];
         blockCopyLines(screenFirstRow, topMargin, 1);
         blockCopyLines(bottomMarginInt, screenRows - bottomMargin, 1);
@@ -358,7 +344,7 @@ class UnicodeTranscript {
         // Blank the bottom margin
         int blankRow = externalToInternalRow(bottomMargin - 1);
         lines[blankRow] = null;
-        color[blankRow] = null;
+        color[blankRow] = new StyleRow(style, mColumns);
         lineWrap[blankRow] = false;
 
         return;
@@ -384,7 +370,7 @@ class UnicodeTranscript {
             throw new IllegalArgumentException();
         }
         Object[] lines = mLines;
-        byte[][] color = mColor;
+        StyleRow[] color = mColor;
         if (sy > dy) {
             // Move in increasing order
             for (int y = 0; y < h; y++) {
@@ -398,7 +384,7 @@ class UnicodeTranscript {
                     char[] tmp = getLine(sy + y, sx, sx + w);
                     if (tmp == null) {
                         // Source line was blank
-                        blockSet(dx, extDstRow, w, 1, ' ', mDefaultForeColor, mDefaultBackColor);
+                        blockSet(dx, extDstRow, w, 1, ' ', mDefaultStyle);
                         continue;
                     }
                     char cHigh = 0;
@@ -421,18 +407,7 @@ class UnicodeTranscript {
                         }
                     }
                 }
-                if (color[srcRow] == null && color[dstRow] == null) {
-                    continue;
-                } else if (color[srcRow] == null && color[dstRow] != null) {
-                    byte defaultColor = encodeColor(mDefaultForeColor, mDefaultBackColor);
-                    for (int x = dx; x < dx + w; ++x) {
-                        color[dstRow][x] = defaultColor;
-                    }
-                    continue;
-                } else if (color[srcRow] != null && color[dstRow] == null) {
-                    allocateColor(dstRow, mColumns);
-                }
-                System.arraycopy(color[srcRow], sx, color[dstRow], dx, w);
+                color[srcRow].copy(sx, color[dstRow], dx, w);
             }
         } else {
             // Move in decreasing order
@@ -447,7 +422,7 @@ class UnicodeTranscript {
                     char[] tmp = getLine(sy + y2, sx, sx + w);
                     if (tmp == null) {
                         // Source line was blank
-                        blockSet(dx, extDstRow, w, 1, ' ', mDefaultForeColor, mDefaultBackColor);
+                        blockSet(dx, extDstRow, w, 1, ' ', mDefaultStyle);
                         continue;
                     }
                     char cHigh = 0;
@@ -470,18 +445,7 @@ class UnicodeTranscript {
                         }
                     }
                 }
-                if (color[srcRow] == null && color[dstRow] == null) {
-                    continue;
-                } else if (color[srcRow] == null && color[dstRow] != null) {
-                    byte defaultColor = encodeColor(mDefaultForeColor, mDefaultBackColor);
-                    for (int x = dx; x < dx + w; ++x) {
-                        color[dstRow][x] = defaultColor;
-                    }
-                    continue;
-                } else if (color[srcRow] != null && color[dstRow] == null) {
-                    allocateColor(dstRow, mColumns);
-                }
-                System.arraycopy(color[srcRow], sx, color[dstRow], dx, w);
+                color[srcRow].copy(sx, color[dstRow], dx, w);
             }
         }
     }
@@ -498,8 +462,7 @@ class UnicodeTranscript {
      * @param h height
      * @param val value to set.
      */
-    public void blockSet(int sx, int sy, int w, int h, int val,
-            int foreColor, int backColor) {
+    public void blockSet(int sx, int sy, int w, int h, int val, int style) {
         if (sx < 0 || sx + w > mColumns || sy < 0 || sy + h > mScreenRows) {
             Log.e(TAG, "illegal arguments! " + sx + " " + sy + " " + w + " " + h + " " + val + " " + mColumns + " " + mScreenRows);
             throw new IllegalArgumentException();
@@ -507,7 +470,7 @@ class UnicodeTranscript {
 
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
-                setChar(sx + x, sy + y, val, foreColor, backColor);
+                setChar(sx + x, sy + y, val, style);
             }
         }
     }
@@ -575,6 +538,23 @@ class UnicodeTranscript {
     }
 
     /**
+     * Gives the display width of a code point in a char array
+     * in a monospace font.
+     *
+     * @param chars The array containing the code point in question.
+     * @param index The index into the array at which the code point starts.
+     * @return The display width of the Unicode code point.
+     */
+    public static int charWidth(char[] chars, int index) {
+        char c = chars[index];
+        if (Character.isHighSurrogate(c)) {
+            return charWidth(c, chars[index+1]);
+        } else {
+            return charWidth(c);
+        }
+    }
+
+    /**
      * Get the contents of a line (or part of a line) of the transcript.
      *
      * The char[] array returned may be part of the internal representation
@@ -637,25 +617,31 @@ class UnicodeTranscript {
         return getLine(row, 0, mColumns);
     }
 
-    public byte[] getLineColor(int row, int x1, int x2) {
+    /**
+     * Get color/formatting information for a particular line.
+     * The returned object may be a pointer to a temporary buffer, only good
+     * until the next call to getLineColor.
+     */
+    public StyleRow getLineColor(int row, int x1, int x2) {
         if (row < -mActiveTranscriptRows || row > mScreenRows-1) {
             throw new IllegalArgumentException();
         }
 
         row = externalToInternalRow(row);
-        if (mColor[row] != null) {
+        StyleRow color = mColor[row];
+        StyleRow tmp = tmpColor;
+        if (color != null) {
             if (x1 == 0 && x2 == mColumns) {
-                return mColor[row];
+                return color;
             }
-
-            System.arraycopy(mColor[row], x1, tmpColor, 0, x2-x1);
-            return tmpColor;
+            color.copy(x1, tmp, 0, x2-x1);
+            return tmp;
         } else {
             return null;
         }
     }
 
-    public byte[] getLineColor(int row) {
+    public StyleRow getLineColor(int row) {
         return getLineColor(row, 0, mColumns);
     }
 
@@ -672,7 +658,8 @@ class UnicodeTranscript {
      *
      * @param row The row of the character to get.
      * @param column The column of the character to get.
-     * @param charIndex The index of the character in the column to get (0 for the first character, 1 for the next, etc.)
+     * @param charIndex The index of the character in the column to get
+     *  (0 for the first character, 1 for the next, etc.)
      * @param out The char[] array into which the character will be placed.
      * @param offset The offset in the array at which the character will be placed.
      * @return Whether or not there are characters following this one in the column.
@@ -694,32 +681,6 @@ class UnicodeTranscript {
         return line.getChar(column, charIndex, out, offset);
     }
 
-    public int getForeColor(int row, int column) {
-        if (row < -mActiveTranscriptRows || row > mScreenRows-1) {
-            throw new IllegalArgumentException();
-        }
-        row = externalToInternalRow(row);
-
-        if (mColor[row] == null) {
-            return mDefaultForeColor;
-        } else {
-            return (mColor[row][column] >> 4) & 0xf;
-        }
-    }
-
-    public int getBackColor(int row, int column) {
-        if (row < -mActiveTranscriptRows || row > mScreenRows-1) {
-            throw new IllegalArgumentException();
-        }
-        row = externalToInternalRow(row);
-
-        if (mColor[row] == null) {
-            return mDefaultBackColor;
-        } else {
-            return mColor[row][column] & 0xf;
-        }
-    }
-
     private boolean isBasicChar(int codePoint) {
         return !(charWidth(codePoint) != 1 || Character.charCount(codePoint) != 1);
     }
@@ -733,7 +694,9 @@ class UnicodeTranscript {
         }
 
         mLines[row] = line;
-        mColor[row] = null;
+        if (mColor[row] == null) {
+            mColor[row] = new StyleRow(0, columns);
+        }
         return line;
     }
 
@@ -741,36 +704,19 @@ class UnicodeTranscript {
         FullUnicodeLine line = new FullUnicodeLine(columns);
 
         mLines[row] = line;
-        mColor[row] = null;
+        if (mColor[row] == null) {
+            mColor[row] = new StyleRow(0, columns);
+        }
         return line;
     }
 
-    private byte[] allocateColor(int row, int columns) {
-        byte[] color = new byte[columns];
-
-        // Set all of the columns to the default colors
-        byte defaultColor = encodeColor(mDefaultForeColor, mDefaultBackColor);
-        for (int i = 0; i < columns; ++i) {
-            color[i] = defaultColor;
-        }
-        mColor[row] = color;
-        return color;
-    }
-
-    private byte encodeColor(int foreColor, int backColor) {
-        return (byte) (((foreColor & 0xf) << 4) | (backColor & 0xf));
-    }
-
-    public boolean setChar(int column, int row, int codePoint, int foreColor, int backColor) {
+    public boolean setChar(int column, int row, int codePoint, int style) {
         if (!setChar(column, row, codePoint)) {
             return false;
         }
 
         row = externalToInternalRow(row);
-        if (mColor[row] == null) {
-            allocateColor(row, mColumns);
-        }
-        mColor[row][column] = encodeColor(foreColor, backColor);
+        mColor[row].set(column, style);
 
         return true;
     }
@@ -914,12 +860,7 @@ class FullUnicodeLine {
         int pos = findStartOfColumn(column);
 
         int charWidth = UnicodeTranscript.charWidth(codePoint);
-        int oldCharWidth;
-        if (Character.isHighSurrogate(text[pos])) {
-            oldCharWidth = UnicodeTranscript.charWidth(Character.toCodePoint(text[pos], text[pos+1]));
-        } else {
-            oldCharWidth = UnicodeTranscript.charWidth(text[pos]);
-        }
+        int oldCharWidth = UnicodeTranscript.charWidth(text, pos);
 
         // Get the number of elements in the mText array this column uses now
         int oldLen;
@@ -1020,15 +961,10 @@ class FullUnicodeLine {
             } else {
                 // Overwrite the contents of the next column.
                 int nextPos = pos + newLen;
-                int nextWidth;
-                if (Character.isHighSurrogate(text[nextPos])) {
-                    nextWidth = UnicodeTranscript.charWidth(Character.toCodePoint(text[nextPos], text[nextPos+1]));
-                } else {
-                    nextWidth = UnicodeTranscript.charWidth(text[nextPos]);
-                }
+                int nextWidth = UnicodeTranscript.charWidth(text, nextPos);
                 int nextLen;
                 if (column + nextWidth + 1 < columns) {
-                    nextLen = findStartOfColumn(column + nextWidth + 1) - nextPos;
+                    nextLen = findStartOfColumn(column + nextWidth + 1) + shift - nextPos;
                 } else {
                     nextLen = spaceUsed - nextPos;
                 }
@@ -1047,7 +983,7 @@ class FullUnicodeLine {
                     shift -= nextLen;
 
                     // Truncate the line
-                    offset[0] = (short) findStartOfColumn(columns - 1);
+                    offset[0] -= nextLen;
                 }
 
                 // Correct the offset for the next column to reflect width change
@@ -1068,3 +1004,4 @@ class FullUnicodeLine {
         }
     }
 }
+

@@ -16,6 +16,7 @@
 
 package jackpal.androidterm.emulatorview;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -25,7 +26,7 @@ import java.nio.charset.CodingErrorAction;
 import android.util.Log;
 
 /**
- * Renders text into a screen. Contains all the terminal-specific knowlege and
+ * Renders text into a screen. Contains all the terminal-specific knowledge and
  * state. Emulates a subset of the X Window System xterm terminal, which in turn
  * is an emulator for a subset of the Digital Equipment Corporation vt100
  * terminal. Missing functionality: text attributes (bold, underline, reverse
@@ -79,6 +80,20 @@ class TerminalEmulator {
      */
     private int[] mArgs = new int[MAX_ESCAPE_PARAMETERS];
 
+    /**
+     * Holds OSC arguments, which can be strings.
+     */
+    private byte[] mOSCArg = new byte[MAX_OSC_STRING_LENGTH];
+
+    private int mOSCArgLength;
+
+    private int mOSCArgTokenizerIndex;
+
+    /**
+     * Don't know what the actual limit is, this seems OK for now.
+     */
+    private static final int MAX_OSC_STRING_LENGTH = 512;
+
     // Escape processing states:
 
     /**
@@ -122,6 +137,16 @@ class TerminalEmulator {
     private static final int ESC_PERCENT = 7;
 
     /**
+     * Escape processing state: ESC ] (AKA OSC - Operating System Controls)
+     */
+    private static final int ESC_RIGHT_SQUARE_BRACKET = 8;
+
+    /**
+     * Escape processing state: ESC ] (AKA OSC - Operating System Controls)
+     */
+    private static final int ESC_RIGHT_SQUARE_BRACKET_ESC = 9;
+
+    /**
      * True if the current escape sequence should continue, false if the current
      * escape sequence should be terminated. Used when parsing a single
      * character.
@@ -145,6 +170,11 @@ class TerminalEmulator {
      */
     private int mSavedCursorCol;
 
+    private int mSavedEffect;
+
+    private int mSavedDecFlags_DECSC_DECRC;
+
+
     // DecSet booleans
 
     /**
@@ -152,6 +182,11 @@ class TerminalEmulator {
      * mode.)
      */
     private static final int K_132_COLUMN_MODE_MASK = 1 << 3;
+
+    /**
+     * DECSCNM - set means reverse video (light background.)
+     */
+    private static final int K_REVERSE_VIDEO_MASK = 1 << 5;
 
     /**
      * This mask indicates that origin mode is set. (Cursor addressing is
@@ -165,6 +200,18 @@ class TerminalEmulator {
      * stop-at-right-column mode.)
      */
     private static final int K_WRAPAROUND_MODE_MASK = 1 << 7;
+
+    /**
+     * This mask indicates that the cursor should be shown. DECTCEM
+     */
+
+    private static final int K_SHOW_CURSOR_MASK = 1 << 25;
+
+    /** This mask is the subset of DecSet bits that are saved / restored by
+     * the DECSC / DECRC commands
+     */
+    private static final int K_DECSC_DECRC_MASK =
+            K_ORIGIN_MODE_MASK | K_WRAPAROUND_MODE_MASK;
 
     /**
      * Holds multiple DECSET flags. The data is stored this way, rather than in
@@ -242,22 +289,40 @@ class TerminalEmulator {
     private int mProcessedCharCount;
 
     /**
-     * Foreground color, 0..7, mask with 8 for bold
+     * Foreground color, 0..255
      */
     private int mForeColor;
     private int mDefaultForeColor;
 
     /**
-     * Background color, 0..7, mask with 8 for underline
+     * Background color, 0..255
      */
     private int mBackColor;
     private int mDefaultBackColor;
 
-    private boolean mInverseColors;
+    /**
+     * Current TextStyle effect
+     */
+    private int mEffect;
 
     private boolean mbKeypadApplicationMode;
 
+    /** false == G0, true == G1 */
     private boolean mAlternateCharSet;
+
+    private final static int CHAR_SET_UK = 0;
+    private final static int CHAR_SET_ASCII = 1;
+    private final static int CHAR_SET_SPECIAL_GRAPHICS = 2;
+    private final static int CHAR_SET_ALT_STANDARD = 3;
+    private final static int CHAR_SET_ALT_SPECIAL_GRAPICS = 4;
+
+    /** What is the current graphics character set. [0] == G0, [1] == G1 */
+    private int[] mCharSet = new int[2];
+
+    /** Derived from mAlternateCharSet and mCharSet.
+     *  True if we're supposed to be drawing the special graphics.
+     */
+    private boolean mUseAlternateCharSet;
 
     /**
      * Special graphics character set
@@ -325,6 +390,11 @@ class TerminalEmulator {
     private CharsetDecoder mUTF8Decoder;
     private UpdateCallback mUTF8ModeNotify;
 
+    /** This is not accurate, but it makes the terminal more useful on
+     * small screens.
+     */
+    private final static boolean DEFAULT_TO_AUTOWRAP_ENABLED = true;
+
     /**
      * Construct a terminal emulator that uses the supplied screen
      *
@@ -368,23 +438,23 @@ class TerminalEmulator {
         int[] cursor = { mCursorCol, mCursorRow };
         boolean fastResize = mScreen.fastResize(columns, rows, cursor);
 
-        StringBuilder cursorColor = null;
+        GrowableIntArray cursorColor = null;
         String charAtCursor = null;
-        StringBuilder colors = null;
+        GrowableIntArray colors = null;
         String transcriptText = null;
         if (!fastResize) {
             /* Save the character at the cursor (if one exists) and store an
              * ASCII ESC character at the cursor's location
              * This is an epic hack that lets us restore the cursor later...
              */
-            cursorColor = new StringBuilder(1);
+            cursorColor = new GrowableIntArray(1);
             charAtCursor = mScreen.getSelectedText(cursorColor, mCursorCol, mCursorRow, mCursorCol, mCursorRow);
-            mScreen.set(mCursorCol, mCursorRow, 27, 0, 0);
+            mScreen.set(mCursorCol, mCursorRow, 27, 0);
 
-            colors = new StringBuilder();
+            colors = new GrowableIntArray(1024);
             transcriptText = mScreen.getTranscriptText(colors);
 
-            mScreen.resize(columns, rows, mForeColor, mBackColor);
+            mScreen.resize(columns, rows, getStyle());
         }
 
         if (mRows != rows) {
@@ -427,15 +497,13 @@ class TerminalEmulator {
             end--;
         }
         char c, cLow;
-        int foreColor, backColor;
         int colorOffset = 0;
         for(int i = 0; i <= end; i++) {
             c = transcriptText.charAt(i);
-            foreColor = (colors.charAt(i-colorOffset) >> 4) & 0xf;
-            backColor = colors.charAt(i-colorOffset) & 0xf;
+            int style = colors.at(i-colorOffset);
             if (Character.isHighSurrogate(c)) {
                 cLow = transcriptText.charAt(++i);
-                emit(Character.toCodePoint(c, cLow), foreColor, backColor);
+                emit(Character.toCodePoint(c, cLow), style);
                 ++colorOffset;
             } else if (c == '\n') {
                 setCursorCol(0);
@@ -448,12 +516,11 @@ class TerminalEmulator {
                 newCursorTranscriptPos = mScreen.getActiveRows();
                 if (charAtCursor != null && charAtCursor.length() > 0) {
                     // Emit the real character that was in this spot
-                    foreColor = (cursorColor.charAt(0) >> 4) & 0xf;
-                    backColor = cursorColor.charAt(0) & 0xf;
-                    emit(charAtCursor.toCharArray(), 0, charAtCursor.length(), foreColor, backColor);
+                    int encodedCursorColor = cursorColor.at(0);
+                    emit(charAtCursor.toCharArray(), 0, charAtCursor.length(), encodedCursorColor);
                 }
             } else {
-                emit(c, foreColor, backColor);
+                emit(c, style);
             }
         }
 
@@ -491,6 +558,14 @@ class TerminalEmulator {
      */
     public final int getCursorCol() {
         return mCursorCol;
+    }
+
+    public final boolean getReverseVideo() {
+        return (mDecFlags & K_REVERSE_VIDEO_MASK) != 0;
+    }
+
+    public final boolean getShowCursor() {
+        return (mDecFlags & K_SHOW_CURSOR_MASK) != 0;
     }
 
     public final boolean getKeypadApplicationMode() {
@@ -546,7 +621,7 @@ class TerminalEmulator {
         if ((b & 0x80) == 0x80 && (b & 0x7f) <= 0x1f) {
             /* ESC ((code & 0x7f) + 0x40) is the two-byte escape sequence
                corresponding to a particular C1 code */
-            startEscapeSequence(ESC);
+            process((byte) 27, false);
             process((byte) ((b & 0x7f) + 0x40), false);
             return;
         }
@@ -557,7 +632,11 @@ class TerminalEmulator {
             break;
 
         case 7: // BEL
-            // Do nothing
+            /* If in an OSC sequence, BEL may terminate a string; otherwise do
+             * nothing */
+            if (mEscapeState == ESC_RIGHT_SQUARE_BRACKET) {
+                doEscRightSquareBracket(b);
+            }
             break;
 
         case 8: // BS
@@ -597,8 +676,12 @@ class TerminalEmulator {
             break;
 
         case 27: // ESC
-            // Always starts an escape sequence
-            startEscapeSequence(ESC);
+            // Starts an escape sequence unless we're parsing a string
+            if (mEscapeState != ESC_RIGHT_SQUARE_BRACKET) {
+                startEscapeSequence(ESC);
+            } else {
+                doEscRightSquareBracket(b);
+            }
             break;
 
         default:
@@ -627,15 +710,23 @@ class TerminalEmulator {
                 break;
 
             case ESC_LEFT_SQUARE_BRACKET:
-                doEscLeftSquareBracket(b);
+                doEscLeftSquareBracket(b); // CSI
                 break;
 
             case ESC_LEFT_SQUARE_BRACKET_QUESTION_MARK:
-                doEscLSBQuest(b);
+                doEscLSBQuest(b); // CSI ?
                 break;
 
             case ESC_PERCENT:
                 doEscPercent(b);
+                break;
+
+            case ESC_RIGHT_SQUARE_BRACKET:
+                doEscRightSquareBracket(b);
+                break;
+
+            case ESC_RIGHT_SQUARE_BRACKET_ESC:
+                doEscRightSquareBracketEsc(b);
                 break;
 
             default:
@@ -710,6 +801,12 @@ class TerminalEmulator {
 
     private void setAltCharSet(boolean alternateCharSet) {
         mAlternateCharSet = alternateCharSet;
+        computeEffectiveCharSet();
+    }
+
+    private void computeEffectiveCharSet() {
+        int charSet = mCharSet[mAlternateCharSet ? 1 : 0];
+        mUseAlternateCharSet = charSet == CHAR_SET_SPECIAL_GRAPHICS;
     }
 
     private int nextTabStop(int cursorCol) {
@@ -747,6 +844,7 @@ class TerminalEmulator {
 
     private void doEscLSBQuest(byte b) {
         int mask = getDecFlagsMask(getArg0(0));
+        int oldFlags = mDecFlags;
         switch (b) {
         case 'h': // Esc [ ? Pn h - DECSET
             mDecFlags |= mask;
@@ -769,23 +867,26 @@ class TerminalEmulator {
             break;
         }
 
+        int newlySetFlags = (~oldFlags) & mDecFlags;
+        int changedFlags = oldFlags ^ mDecFlags;
+
         // 132 column mode
-        if ((mask & K_132_COLUMN_MODE_MASK) != 0) {
-            // We don't actually set 132 cols, but we do want the
+        if ((changedFlags & K_132_COLUMN_MODE_MASK) != 0) {
+            // We don't actually set/reset 132 cols, but we do want the
             // side effect of clearing the screen and homing the cursor.
             blockClear(0, 0, mColumns, mRows);
             setCursorRowCol(0, 0);
         }
 
         // origin mode
-        if ((mask & K_ORIGIN_MODE_MASK) != 0) {
+        if ((newlySetFlags & K_ORIGIN_MODE_MASK) != 0) {
             // Home the cursor.
             setCursorPosition(0, 0);
         }
     }
 
     private int getDecFlagsMask(int argument) {
-        if (argument >= 1 && argument <= 9) {
+        if (argument >= 1 && argument <= 32) {
             return (1 << argument);
         }
 
@@ -819,35 +920,44 @@ class TerminalEmulator {
     }
 
     private void doEscSelectLeftParen(byte b) {
-        doSelectCharSet(true, b);
+        doSelectCharSet(0, b);
     }
 
     private void doEscSelectRightParen(byte b) {
-        doSelectCharSet(false, b);
+        doSelectCharSet(1, b);
     }
 
-    private void doSelectCharSet(boolean isG0CharSet, byte b) {
+    private void doSelectCharSet(int charSetIndex, byte b) {
+        int charSet;
         switch (b) {
         case 'A': // United Kingdom character set
+            charSet = CHAR_SET_UK;
             break;
         case 'B': // ASCII set
+            charSet = CHAR_SET_ASCII;
             break;
         case '0': // Special Graphics
+            charSet = CHAR_SET_SPECIAL_GRAPHICS;
             break;
         case '1': // Alternate character set
+            charSet = CHAR_SET_ALT_STANDARD;
             break;
         case '2':
+            charSet = CHAR_SET_ALT_SPECIAL_GRAPICS;
             break;
         default:
             unknownSequence(b);
+            return;
         }
+        mCharSet[charSetIndex] = charSet;
+        computeEffectiveCharSet();
     }
 
     private void doEscPound(byte b) {
         switch (b) {
         case '8': // Esc # 8 - DECALN alignment test
             mScreen.blockSet(0, 0, mColumns, mRows, 'E',
-                    getForeColor(), getBackColor());
+                    getStyle());
             break;
 
         default:
@@ -873,10 +983,15 @@ class TerminalEmulator {
         case '7': // DECSC save cursor
             mSavedCursorRow = mCursorRow;
             mSavedCursorCol = mCursorCol;
+            mSavedEffect = mEffect;
+            mSavedDecFlags_DECSC_DECRC = mDecFlags & K_DECSC_DECRC_MASK;
             break;
 
         case '8': // DECRC restore cursor
             setCursorRowCol(mSavedCursorRow, mSavedCursorCol);
+            mEffect = mSavedEffect;
+            mDecFlags = (mDecFlags & ~ K_DECSC_DECRC_MASK)
+                    | mSavedDecFlags_DECSC_DECRC;
             break;
 
         case 'D': // INDEX
@@ -931,6 +1046,11 @@ class TerminalEmulator {
             mbKeypadApplicationMode = true;
             break;
 
+        case ']': // OSC
+            startCollectingOSCArgs();
+            continueSequence(ESC_RIGHT_SQUARE_BRACKET);
+            break;
+
         case '>' : // DECKPNM
             mbKeypadApplicationMode = false;
             break;
@@ -942,6 +1062,7 @@ class TerminalEmulator {
     }
 
     private void doEscLeftSquareBracket(byte b) {
+        // CSI
         switch (b) {
         case '@': // ESC [ Pn @ - ICH Insert Characters
         {
@@ -978,21 +1099,22 @@ class TerminalEmulator {
             setHorizontalVerticalPosition();
             break;
 
-        case 'J': // ESC [ Pn J - Erase in Display
+        case 'J': // ESC [ Pn J - ED - Erase in Display
+            // ED ignores the scrolling margins.
             switch (getArg0(0)) {
             case 0: // Clear below
                 blockClear(mCursorCol, mCursorRow, mColumns - mCursorCol);
                 blockClear(0, mCursorRow + 1, mColumns,
-                        mBottomMargin - (mCursorRow + 1));
+                        mRows - (mCursorRow + 1));
                 break;
 
             case 1: // Erase from the start of the screen to the cursor.
-                blockClear(0, mTopMargin, mColumns, mCursorRow - mTopMargin);
+                blockClear(0, 0, mColumns, mCursorRow);
                 blockClear(0, mCursorRow, mCursorCol + 1);
                 break;
 
             case 2: // Clear all
-                blockClear(0, mTopMargin, mColumns, mBottomMargin - mTopMargin);
+                blockClear(0, 0, mColumns, mRows);
                 break;
 
             default:
@@ -1109,6 +1231,7 @@ class TerminalEmulator {
             break;
 
         case 'm': // Esc [ Pn m - character attributes.
+                  // (can have up to 16 numerical arguments)
             selectGraphicRendition();
             break;
 
@@ -1145,6 +1268,7 @@ class TerminalEmulator {
     }
 
     private void selectGraphicRendition() {
+        // SGR
         for (int i = 0; i <= mArgIndex; i++) {
             int code = mArgs[i];
             if ( code < 0) {
@@ -1158,38 +1282,63 @@ class TerminalEmulator {
             // See http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
 
             if (code == 0) { // reset
-                mInverseColors = false;
                 mForeColor = mDefaultForeColor;
                 mBackColor = mDefaultBackColor;
+                mEffect = TextStyle.fxNormal;
             } else if (code == 1) { // bold
-                mForeColor |= 0x8;
+                mEffect |= TextStyle.fxBold;
             } else if (code == 3) { // italics, but rarely used as such; "standout" (inverse colors) with TERM=screen
-                mInverseColors = true;
+                mEffect |= TextStyle.fxItalic;
             } else if (code == 4) { // underscore
-                mBackColor |= 0x8;
+                mEffect |= TextStyle.fxUnderline;
+            } else if (code == 5) { // blink
+                mEffect |= TextStyle.fxBlink;
             } else if (code == 7) { // inverse
-                mInverseColors = true;
+                mEffect |= TextStyle.fxInverse;
+            } else if (code == 8) { // invisible
+                mEffect |= TextStyle.fxInvisible;
             } else if (code == 10) { // exit alt charset (TERM=linux)
                 setAltCharSet(false);
             } else if (code == 11) { // enter alt charset (TERM=linux)
                 setAltCharSet(true);
             } else if (code == 22) { // Normal color or intensity, neither bright, bold nor faint
-                mForeColor &= 0x7;
+                //mEffect &= ~(TextStyle.fxBold | TextStyle.fxFaint);
+                mEffect &= ~TextStyle.fxBold;
             } else if (code == 23) { // not italic, but rarely used as such; clears standout with TERM=screen
-                mInverseColors = false;
+                mEffect &= ~TextStyle.fxItalic;
             } else if (code == 24) { // underline: none
-                mBackColor &= 0x7;
+                mEffect &= ~TextStyle.fxUnderline;
+            } else if (code == 25) { // blink: none
+                mEffect &= ~TextStyle.fxBlink;
             } else if (code == 27) { // image: positive
-                mInverseColors = false;
+                mEffect &= ~TextStyle.fxInverse;
+            } else if (code == 28) { // invisible
+                mEffect &= ~TextStyle.fxInvisible;
             } else if (code >= 30 && code <= 37) { // foreground color
-                mForeColor = (mForeColor & 0x8) | (code - 30);
+                mForeColor = code - 30;
+            } else if (code == 38 && i+2 <= mArgIndex && mArgs[i+1] == 5) { // foreground 256 color
+                int color = mArgs[i+2];
+                if (checkColor(color)) {
+                    mForeColor = color;
+                }
+                i += 2;
             } else if (code == 39) { // set default text color
-                mForeColor = mDefaultForeColor | (mForeColor & 0x8); // preserve bold
-                mBackColor = mBackColor & 0x7; // no underline
+                mForeColor = mDefaultForeColor;
             } else if (code >= 40 && code <= 47) { // background color
-                mBackColor = (mBackColor & 0x8) | (code - 40);
+                mBackColor = code - 40;
+            } else if (code == 48 && i+2 <= mArgIndex && mArgs[i+1] == 5) { // background 256 color
+                mBackColor = mArgs[i+2];
+                int color = mArgs[i+2];
+                if (checkColor(color)) {
+                    mBackColor = color;
+                }
+                i += 2;
             } else if (code == 49) { // set default background color
-                mBackColor = mDefaultBackColor | (mBackColor & 0x8); // preserve underscore.
+                mBackColor = mDefaultBackColor;
+            } else if (code >= 90 && code <= 97) { // bright foreground color
+                mForeColor = code - 90 + 8;
+            } else if (code >= 100 && code <= 107) { // bright background color
+                mBackColor = code - 100 + 8;
             } else {
                 if (EmulatorDebug.LOG_UNKNOWN_ESCAPE_SEQUENCES) {
                     Log.w(EmulatorDebug.LOG_TAG, String.format("SGR unknown code %d", code));
@@ -1198,22 +1347,95 @@ class TerminalEmulator {
         }
     }
 
+    private boolean checkColor(int color) {
+        boolean result = isValidColor(color);
+        if (!result) {
+            if (EmulatorDebug.LOG_UNKNOWN_ESCAPE_SEQUENCES) {
+                Log.w(EmulatorDebug.LOG_TAG,
+                        String.format("Invalid color %d", color));
+            }
+        }
+        return result;
+    }
+
+    private boolean isValidColor(int color) {
+        return color >= 0 && color < TextStyle.ciColorLength;
+    }
+
+    private void doEscRightSquareBracket(byte b) {
+        switch (b) {
+        case 0x7:
+            doOSC();
+            break;
+        case 0x1b: // Esc, probably start of Esc \ sequence
+            continueSequence(ESC_RIGHT_SQUARE_BRACKET_ESC);
+            break;
+        default:
+            collectOSCArgs(b);
+            break;
+        }
+    }
+
+    private void doEscRightSquareBracketEsc(byte b) {
+        switch (b) {
+        case '\\':
+            doOSC();
+            break;
+
+        default:
+            // The ESC character was not followed by a \, so insert the ESC and
+            // the current character in arg buffer.
+            collectOSCArgs((byte) 0x1b);
+            collectOSCArgs(b);
+            continueSequence(ESC_RIGHT_SQUARE_BRACKET);
+            break;
+        }
+    }
+
+    private void doOSC() { // Operating System Controls
+        startTokenizingOSC();
+        int ps = nextOSCInt(';');
+        switch (ps) {
+        case 0: // Change icon name and window title to T
+        case 1: // Change icon name to T
+        case 2: // Change window title to T
+            changeTitle(ps, nextOSCString(-1));
+            break;
+        default:
+            unknownParameter(ps);
+            break;
+        }
+        finishSequence();
+    }
+
+    private void changeTitle(int parameter, String title) {
+        if (parameter == 0 || parameter == 2) {
+            mSession.setTitle(title);
+        }
+    }
+
     private void blockClear(int sx, int sy, int w) {
         blockClear(sx, sy, w, 1);
     }
 
     private void blockClear(int sx, int sy, int w, int h) {
-        mScreen.blockSet(sx, sy, w, h, ' ', getForeColor(), getBackColor());
+        mScreen.blockSet(sx, sy, w, h, ' ', getStyle());
     }
 
     private int getForeColor() {
-        return mInverseColors ?
-                ((mBackColor & 0x7) | (mForeColor & 0x8)) : mForeColor;
+        return mForeColor;
     }
 
     private int getBackColor() {
-        return mInverseColors ?
-                ((mForeColor & 0x7) | (mBackColor & 0x8)) : mBackColor;
+        return mBackColor;
+    }
+
+    private int getEffect() {
+        return mEffect;
+    }
+
+    private int getStyle() {
+        return TextStyle.encode(getForeColor(), getBackColor(),  getEffect());
     }
 
     private void doSetMode(boolean newValue) {
@@ -1283,7 +1505,7 @@ class TerminalEmulator {
     private void scroll() {
         //System.out.println("Scroll(): mTopMargin " + mTopMargin + " mBottomMargin " + mBottomMargin);
         mScrollCounter ++;
-        mScreen.scroll(mTopMargin, mBottomMargin);
+        mScreen.scroll(mTopMargin, mBottomMargin, getStyle());
     }
 
     /**
@@ -1316,19 +1538,75 @@ class TerminalEmulator {
     }
 
     private int getArg0(int defaultValue) {
-        return getArg(0, defaultValue);
+        return getArg(0, defaultValue, true);
     }
 
     private int getArg1(int defaultValue) {
-        return getArg(1, defaultValue);
+        return getArg(1, defaultValue, true);
     }
 
-    private int getArg(int index, int defaultValue) {
+    private int getArg(int index, int defaultValue,
+            boolean treatZeroAsDefault) {
         int result = mArgs[index];
-        if (result < 0) {
+        if (result < 0 || (result == 0 && treatZeroAsDefault)) {
             result = defaultValue;
         }
         return result;
+    }
+
+    private void startCollectingOSCArgs() {
+        mOSCArgLength = 0;
+    }
+
+    private void collectOSCArgs(byte b) {
+        if (mOSCArgLength < MAX_OSC_STRING_LENGTH) {
+            mOSCArg[mOSCArgLength++] = b;
+            continueSequence();
+        } else {
+            unknownSequence(b);
+        }
+    }
+
+    private void startTokenizingOSC() {
+        mOSCArgTokenizerIndex = 0;
+    }
+
+    private String nextOSCString(int delimiter) {
+        int start = mOSCArgTokenizerIndex;
+        int end = start;
+        while (mOSCArgTokenizerIndex < mOSCArgLength) {
+            byte b = mOSCArg[mOSCArgTokenizerIndex++];
+            if ((int) b == delimiter) {
+                break;
+            }
+            end++;
+        }
+        if (start == end) {
+            return "";
+        }
+        try {
+            return new String(mOSCArg, start, end-start, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return new String(mOSCArg, start, end-start);
+        }
+    }
+
+    private int nextOSCInt(int delimiter) {
+        int value = -1;
+        while (mOSCArgTokenizerIndex < mOSCArgLength) {
+            byte b = mOSCArg[mOSCArgTokenizerIndex++];
+            if ((int) b == delimiter) {
+                break;
+            } else if (b >= '0' && b <= '9') {
+                if (value < 0) {
+                    value = 0;
+                }
+                value = value * 10 + b - '0';
+            } else {
+                unknownSequence(b);
+            }
+        }
+        return value;
     }
 
     private void unimplementedSequence(byte b) {
@@ -1393,9 +1671,7 @@ class TerminalEmulator {
     }
 
     private boolean autoWrapEnabled() {
-        // Always enable auto wrap, because it's useful on a small screen
-        return true;
-        // return (mDecFlags & K_WRAPAROUND_MODE_MASK) != 0;
+        return (mDecFlags & K_WRAPAROUND_MODE_MASK) != 0;
     }
 
     /**
@@ -1405,7 +1681,7 @@ class TerminalEmulator {
      * @param foreColor The foreground color of the character
      * @param backColor The background color of the character
      */
-    private void emit(int c, int foreColor, int backColor) {
+    private void emit(int c, int style) {
         boolean autoWrap = autoWrapEnabled();
         int width = UnicodeTranscript.charWidth(c);
 
@@ -1433,12 +1709,12 @@ class TerminalEmulator {
         if (width == 0) {
             // Combining character -- store along with character it modifies
             if (mJustWrapped) {
-                mScreen.set(mColumns - mLastEmittedCharWidth, mCursorRow - 1, c, foreColor, backColor);
+                mScreen.set(mColumns - mLastEmittedCharWidth, mCursorRow - 1, c, style);
             } else {
-                mScreen.set(mCursorCol - mLastEmittedCharWidth, mCursorRow, c, foreColor, backColor);
+                mScreen.set(mCursorCol - mLastEmittedCharWidth, mCursorRow, c, style);
             }
         } else {
-            mScreen.set(mCursorCol, mCursorRow, c, foreColor, backColor);
+            mScreen.set(mCursorCol, mCursorRow, c, style);
             mJustWrapped = false;
         }
 
@@ -1453,11 +1729,11 @@ class TerminalEmulator {
     }
 
     private void emit(int c) {
-        emit(c, getForeColor(), getBackColor());
+        emit(c, getStyle());
     }
 
     private void emit(byte b) {
-        if (mAlternateCharSet && b < 128) {
+        if (mUseAlternateCharSet && b < 128) {
             emit((int) mSpecialGraphicsCharMap[b]);
         } else {
             emit((int) b);
@@ -1482,22 +1758,18 @@ class TerminalEmulator {
      *
      * @param c A char[] array whose contents are to be sent to the screen.
      */
-    private void emit(char[] c, int offset, int length, int foreColor, int backColor) {
+    private void emit(char[] c, int offset, int length, int style) {
         for (int i = offset; i < length; ++i) {
             if (c[i] == 0) {
                 break;
             }
             if (Character.isHighSurrogate(c[i])) {
-                emit(Character.toCodePoint(c[i], c[i+1]), foreColor, backColor);
+                emit(Character.toCodePoint(c[i], c[i+1]), style);
                 ++i;
             } else {
-                emit((int) c[i], foreColor, backColor);
+                emit((int) c[i], style);
             }
         }
-    }
-
-    private void emit(char[] c, int offset, int length) {
-        emit(c, offset, length, getForeColor(), getBackColor());
     }
 
     private void setCursorRow(int row) {
@@ -1535,7 +1807,13 @@ class TerminalEmulator {
         mEscapeState = ESC_NONE;
         mSavedCursorRow = 0;
         mSavedCursorCol = 0;
+        mSavedEffect = 0;
+        mSavedDecFlags_DECSC_DECRC = 0;
         mDecFlags = 0;
+        if (DEFAULT_TO_AUTOWRAP_ENABLED) {
+            mDecFlags |= K_WRAPAROUND_MODE_MASK;
+        }
+        mDecFlags |= K_SHOW_CURSOR_MASK;
         mSavedDecFlags = 0;
         mInsertMode = false;
         mAutomaticNewlineMode = false;
@@ -1544,9 +1822,11 @@ class TerminalEmulator {
         mAboutToAutoWrap = false;
         mForeColor = mDefaultForeColor;
         mBackColor = mDefaultBackColor;
-        mInverseColors = false;
         mbKeypadApplicationMode = false;
         mAlternateCharSet = false;
+        mCharSet[0] = CHAR_SET_ASCII;
+        mCharSet[1] = CHAR_SET_SPECIAL_GRAPHICS;
+        computeEffectiveCharSet();
         // mProcessedCharCount is preserved unchanged.
         setDefaultTabStops();
         blockClear(0, 0, mColumns, mRows);
@@ -1586,8 +1866,8 @@ class TerminalEmulator {
     }
 
     public void setColorScheme(ColorScheme scheme) {
-        mDefaultForeColor = scheme.getForeColorIndex();
-        mDefaultBackColor = scheme.getBackColorIndex();
+        mDefaultForeColor = TextStyle.ciForeground;
+        mDefaultBackColor = TextStyle.ciBackground;
     }
 
     public String getSelectedText(int x1, int y1, int x2, int y2) {

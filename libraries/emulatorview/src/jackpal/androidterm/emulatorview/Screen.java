@@ -35,10 +35,9 @@ interface Screen {
      * @param x X coordinate (also known as column)
      * @param y Y coordinate (also known as row)
      * @param codePoint Unicode code point to store
-     * @param foreColor the foreground color
-     * @param backColor the background color
+     * @param style the text style
      */
-    void set(int x, int y, int codePoint, int foreColor, int backColor);
+    void set(int x, int y, int codePoint, int style);
 
     /**
      * Store byte b into the screen at location (x, y)
@@ -46,10 +45,9 @@ interface Screen {
      * @param x X coordinate (also known as column)
      * @param y Y coordinate (also known as row)
      * @param b ASCII character to store
-     * @param foreColor the foreground color
-     * @param backColor the background color
+     * @param style the text style
      */
-    void set(int x, int y, byte b, int foreColor, int backColor);
+    void set(int x, int y, byte b, int style);
 
     /**
      * Scroll the screen down one line. To scroll the whole screen of a 24 line
@@ -57,8 +55,9 @@ interface Screen {
      *
      * @param topMargin First line that is scrolled.
      * @param bottomMargin One line after the last line that is scrolled.
+     * @param style the style for the newly exposed line.
      */
-    void scroll(int topMargin, int bottomMargin);
+    void scroll(int topMargin, int bottomMargin, int style);
 
     /**
      * Block copy characters from one position in the screen to another. The two
@@ -86,11 +85,9 @@ interface Screen {
      * @param w width
      * @param h height
      * @param val value to set.
-     * @param foreColor the foreground color
-     * @param backColor the background color
+     * @param style the text style
      */
-    void blockSet(int sx, int sy, int w, int h, int val, int foreColor, int
-            backColor);
+    void blockSet(int sx, int sy, int w, int h, int val, int style);
 
     /**
      * Get the contents of the transcript buffer as a text string.
@@ -103,10 +100,10 @@ interface Screen {
      * Get the contents of the transcript buffer as a text string with color
      * information.
      *
-     * @param colors A StringBuilder which will hold the colors.
+     * @param colors A GrowableIntArray which will hold the colors.
      * @return the contents of the transcript buffer.
      */
-    String getTranscriptText(StringBuilder colors);
+    String getTranscriptText(GrowableIntArray colors);
 
     /**
      * Get the selected text inside transcript buffer as a text string.
@@ -129,7 +126,7 @@ interface Screen {
      * @param y2 Selection end
      * @return the contents of the transcript buffer.
      */
-    String getSelectedText(StringBuilder colors, int x1, int y1, int x2, int y2);
+    String getSelectedText(GrowableIntArray colors, int x1, int y1, int x2, int y2);
 
     /**
      * Get the number of "active" (in-use) screen rows, including any rows in a
@@ -154,6 +151,7 @@ interface Screen {
      * Resize the screen
      * @param columns
      * @param rows
+     * @param style
      */
-    void resize(int columns, int rows, int foreColor, int backColor);
+    void resize(int columns, int rows, int style);
 }

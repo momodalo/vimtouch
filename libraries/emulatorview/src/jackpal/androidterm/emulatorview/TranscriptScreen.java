@@ -19,7 +19,6 @@ package jackpal.androidterm.emulatorview;
 import java.util.Arrays;
 
 import android.graphics.Canvas;
-import android.util.Log;
 
 /**
  * A TranscriptScreen is a screen that remembers data that's been scrolled. The
@@ -28,8 +27,6 @@ import android.util.Log;
  * expose its internal data structures.
  */
 class TranscriptScreen implements Screen {
-    private static final String TAG = "TranscriptScreen";
-
     /**
      * The width of the transcript, in characters. Fixed at initialization.
      */
@@ -59,20 +56,20 @@ class TranscriptScreen implements Screen {
      */
     public TranscriptScreen(int columns, int totalRows, int screenRows,
             ColorScheme scheme) {
-        init(columns, totalRows, screenRows, scheme.getForeColorIndex(), scheme.getBackColorIndex());
+        init(columns, totalRows, screenRows, TextStyle.kNormalTextStyle);
     }
 
-    private void init(int columns, int totalRows, int screenRows, int foreColor, int backColor) {
+    private void init(int columns, int totalRows, int screenRows, int style) {
         mColumns = columns;
         mTotalRows = totalRows;
         mScreenRows = screenRows;
 
-        mData = new UnicodeTranscript(columns, totalRows, screenRows, foreColor, backColor);
-        mData.blockSet(0, 0, mColumns, mScreenRows, ' ', foreColor, backColor);
+        mData = new UnicodeTranscript(columns, totalRows, screenRows, style);
+        mData.blockSet(0, 0, mColumns, mScreenRows, ' ', style);
     }
 
     public void setColorScheme(ColorScheme scheme) {
-        mData.setDefaultColors(scheme.getForeColorIndex(), scheme.getBackColorIndex());
+        mData.setDefaultStyle(TextStyle.kNormalTextStyle);
     }
 
     public void finish() {
@@ -99,12 +96,12 @@ class TranscriptScreen implements Screen {
      * @param foreColor the foreground color
      * @param backColor the background color
      */
-    public void set(int x, int y, int codePoint, int foreColor, int backColor) {
-        mData.setChar(x, y, codePoint, foreColor, backColor);
+    public void set(int x, int y, int codePoint, int style) {
+        mData.setChar(x, y, codePoint, style);
     }
 
-    public void set(int x, int y, byte b, int foreColor, int backColor) {
-        mData.setChar(x, y, b, foreColor, backColor);
+    public void set(int x, int y, byte b, int style) {
+        mData.setChar(x, y, b, style);
     }
 
     /**
@@ -113,9 +110,10 @@ class TranscriptScreen implements Screen {
      *
      * @param topMargin First line that is scrolled.
      * @param bottomMargin One line after the last line that is scrolled.
+     * @param style the style for the newly exposed line.
      */
-    public void scroll(int topMargin, int bottomMargin) {
-        mData.scroll(topMargin, bottomMargin);
+    public void scroll(int topMargin, int bottomMargin, int style) {
+        mData.scroll(topMargin, bottomMargin, style);
     }
 
     /**
@@ -148,8 +146,8 @@ class TranscriptScreen implements Screen {
      * @param val value to set.
      */
     public void blockSet(int sx, int sy, int w, int h, int val,
-            int foreColor, int backColor) {
-        mData.blockSet(sx, sy, w, h, val, foreColor, backColor);
+            int style) {
+        mData.blockSet(sx, sy, w, h, val, style);
     }
 
     /**
@@ -164,11 +162,12 @@ class TranscriptScreen implements Screen {
      * @param selx1 the text selection start X coordinate
      * @param selx2 the text selection end X coordinate, if equals to selx1 don't draw selection
      * @param imeText current IME text, to be rendered at cursor
+     * @param cursorMode the cursor mode. See TextRenderer.
      */
     public final void drawText(int row, Canvas canvas, float x, float y,
-            TextRenderer renderer, int cx, int selx1, int selx2, String imeText) {
+            TextRenderer renderer, int cx, int selx1, int selx2, String imeText, int cursorMode) {
         char[] line;
-        byte[] color;
+        StyleRow color;
         try {
             line = mData.getLine(row);
             color = mData.getLineColor(row);
@@ -180,8 +179,7 @@ class TranscriptScreen implements Screen {
             // XXX Figure out why this happens on Honeycomb
             return;
         }
-        int defaultForeColor = mData.getDefaultForeColor();
-        int defaultBackColor = mData.getDefaultBackColor();
+        int defaultStyle = mData.getDefaultStyle();
 
         if (line == null) {
             // Line is blank.
@@ -190,61 +188,50 @@ class TranscriptScreen implements Screen {
                 char[] blank = new char[selx2-selx1];
                 Arrays.fill(blank, ' ');
                 renderer.drawTextRun(canvas, x, y, selx1, selx2-selx1,
-                                blank, 0, 1, true,
-                                defaultForeColor, defaultBackColor);
+                                blank, 0, 1, true, defaultStyle);
             } else if (cx != -1) {
                 // We need to draw the cursor
-                renderer.drawTextRun(canvas, x, y, cx, 1,
-                                " ".toCharArray(), 0, 1, true,
-                                defaultForeColor, defaultBackColor);
+                renderer.drawCursor(canvas, x, y, cx, cursorMode);
             }
 
             return;
         }
 
         int columns = mColumns;
-        int lastForeColor = 0;
-        int lastBackColor = 0;
+        int lastStyle = 0;
+        boolean lastCursorStyle = false;
         int runWidth = 0;
         int lastRunStart = -1;
         int lastRunStartIndex = -1;
         boolean forceFlushRun = false;
-        char cHigh = 0;
-        final int CURSOR_MASK = 0x10000;
         int column = 0;
         int index = 0;
         while (column < columns) {
-            int foreColor, backColor;
-            if (color != null) {
-                foreColor = (color[column] >> 4) & 0xf;
-                backColor = color[column] & 0xf;
-            } else {
-                foreColor = defaultForeColor;
-                backColor = defaultBackColor;
-            }
+            int style = color.get(column);
+            boolean cursorStyle = false;
+            int incr = 1;
             int width;
             if (Character.isHighSurrogate(line[index])) {
-                cHigh = line[index++];
-                continue;
-            } else if (Character.isLowSurrogate(line[index])) {
-                width = UnicodeTranscript.charWidth(cHigh, line[index]);
+                width = UnicodeTranscript.charWidth(line, index);
+                incr++;
             } else {
                 width = UnicodeTranscript.charWidth(line[index]);
             }
-            if (cx == column || (column >= selx1 && column <= selx2)) {
+            if (column >= selx1 && column <= selx2) {
                 // Set cursor background color:
-                backColor |= CURSOR_MASK;
+                cursorStyle = true;
             }
-            if (foreColor != lastForeColor || backColor != lastBackColor || (width > 0 && forceFlushRun)) {
+            if (style != lastStyle
+                    || cursorStyle != lastCursorStyle
+                    || (width > 0 && forceFlushRun)) {
                 if (lastRunStart >= 0) {
                     renderer.drawTextRun(canvas, x, y, lastRunStart, runWidth,
                             line,
                             lastRunStartIndex, index - lastRunStartIndex,
-                            (lastBackColor & CURSOR_MASK) != 0,
-                            lastForeColor, lastBackColor);
+                            lastCursorStyle, lastStyle);
                 }
-                lastForeColor = foreColor;
-                lastBackColor = backColor;
+                lastStyle = style;
+                lastCursorStyle = cursorStyle;
                 runWidth = 0;
                 lastRunStart = column;
                 lastRunStartIndex = index;
@@ -252,7 +239,7 @@ class TranscriptScreen implements Screen {
             }
             runWidth += width;
             column += width;
-            index++;
+            index += incr;
             if (width > 1) {
                 /* We cannot draw two or more East Asian wide characters in the
                    same run, because we need to make each wide character take
@@ -265,8 +252,7 @@ class TranscriptScreen implements Screen {
             renderer.drawTextRun(canvas, x, y, lastRunStart, runWidth,
                     line,
                     lastRunStartIndex, index - lastRunStartIndex,
-                    (lastBackColor & CURSOR_MASK) != 0,
-                    lastForeColor, lastBackColor);
+                    lastCursorStyle, lastStyle);
         }
 
         if (cx >= 0 && imeText.length() > 0) {
@@ -274,7 +260,11 @@ class TranscriptScreen implements Screen {
             int imeOffset = imeText.length() - imeLength;
             int imePosition = Math.min(cx, columns - imeLength);
             renderer.drawTextRun(canvas, x, y, imePosition, imeLength, imeText.toCharArray(),
-                    imeOffset, imeLength, true, 0x0f, 0x00);
+                    imeOffset, imeLength, true, TextStyle.encode(0x0f, 0x00, TextStyle.fxNormal));
+        }
+
+        if (cx >= 0) {
+            renderer.drawCursor(canvas,  x, y, cx, cursorMode);
         }
      }
 
@@ -300,7 +290,7 @@ class TranscriptScreen implements Screen {
         return internalGetTranscriptText(null, 0, -mData.getActiveTranscriptRows(), mColumns, mScreenRows);
     }
 
-    public String getTranscriptText(StringBuilder colors) {
+    public String getTranscriptText(GrowableIntArray colors) {
         return internalGetTranscriptText(colors, 0, -mData.getActiveTranscriptRows(), mColumns, mScreenRows);
     }
 
@@ -308,16 +298,16 @@ class TranscriptScreen implements Screen {
         return internalGetTranscriptText(null, selX1, selY1, selX2, selY2);
     }
 
-    public String getSelectedText(StringBuilder colors, int selX1, int selY1, int selX2, int selY2) {
+    public String getSelectedText(GrowableIntArray colors, int selX1, int selY1, int selX2, int selY2) {
         return internalGetTranscriptText(colors, selX1, selY1, selX2, selY2);
     }
 
-    private String internalGetTranscriptText(StringBuilder colors, int selX1, int selY1, int selX2, int selY2) {
+    private String internalGetTranscriptText(GrowableIntArray colors, int selX1, int selY1, int selX2, int selY2) {
         StringBuilder builder = new StringBuilder();
         UnicodeTranscript data = mData;
         int columns = mColumns;
         char[] line;
-        byte[] rowColorBuffer = null;
+        StyleRow rowColorBuffer = null;
         if (selY1 < -data.getActiveTranscriptRows()) {
             selY1 = -data.getActiveTranscriptRows();
         }
@@ -346,19 +336,26 @@ class TranscriptScreen implements Screen {
                 if (!data.getLineWrap(row) && row < selY2 && row < mScreenRows - 1) {
                     builder.append('\n');
                     if (colors != null) {
-                        colors.append((char) 0);
+                        colors.append(0);
                     }
                 }
                 continue;
             }
+            int defaultColor = mData.getDefaultStyle();
             int lastPrintingChar = -1;
-            int length = line.length;
+            int lineLen = line.length;
             int i;
-            for (i = 0; i < length; i++) {
-                if (line[i] == 0) {
+            int width = x2 - x1;
+            int column = 0;
+            for (i = 0; i < lineLen && column < width; ++i) {
+                char c = line[i];
+                if (c == 0) {
                     break;
-                } else if (line[i] != ' ') {
+                } else if (c != ' ' || ((rowColorBuffer != null) && (rowColorBuffer.get(column) != defaultColor))) {
                     lastPrintingChar = i;
+                }
+                if (!Character.isLowSurrogate(c)) {
+                    column += UnicodeTranscript.charWidth(line, i);
                 }
             }
             if (data.getLineWrap(row) && lastPrintingChar > -1 && x2 == columns) {
@@ -367,22 +364,22 @@ class TranscriptScreen implements Screen {
             }
             builder.append(line, 0, lastPrintingChar + 1);
             if (colors != null) {
-                int column = 0;
                 if (rowColorBuffer != null) {
-                    for (int j = 0; j < lastPrintingChar + 1; ++j) {
-                        colors.append((char) rowColorBuffer[column]);
+                    column = 0;
+                    for (int j = 0; j <= lastPrintingChar; ++j) {
+                        colors.append(rowColorBuffer.get(column));
+                        column += UnicodeTranscript.charWidth(line, j);
                         if (Character.isHighSurrogate(line[j])) {
-                            column += UnicodeTranscript.charWidth(
-                                Character.toCodePoint(line[j], line[j+1]));
                             ++j;
-                        } else {
-                            column += UnicodeTranscript.charWidth(line[j]);
                         }
                     }
                 } else {
-                    char defaultColor = (char) mData.getDefaultColorsEncoded();
-                    for (int j = 0; j < lastPrintingChar + 1; ++j) {
+                    for (int j = 0; j <= lastPrintingChar; ++j) {
                         colors.append(defaultColor);
+                        char c = line[j];
+                        if (Character.isHighSurrogate(c)) {
+                            ++j;
+                        }
                     }
                 }
             }
@@ -410,17 +407,7 @@ class TranscriptScreen implements Screen {
         }
     }
 
-    public void resize(int columns, int rows, int foreColor, int backColor) {
-        init(columns, mTotalRows, rows, foreColor, backColor);
-    }
-
-    public char[] getLine(int row) {
-        char[] line;
-        try {
-            line = mData.getLine(row);
-            return line;
-        }catch (Exception e){
-            return null;
-        }
+    public void resize(int columns, int rows, int style) {
+        init(columns, mTotalRows, rows, style);
     }
 }
