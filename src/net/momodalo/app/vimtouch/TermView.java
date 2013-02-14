@@ -18,6 +18,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.view.KeyEvent;
 
 import java.lang.Runnable;
+import java.lang.reflect.Field;
 import jackpal.androidterm.emulatorview.ColorScheme;
 import jackpal.androidterm.emulatorview.EmulatorView;
 import jackpal.androidterm.emulatorview.TermSession;
@@ -387,6 +388,30 @@ public class TermView extends EmulatorView implements
             }
             canvas.clipRect(mZoomX - mZoomX/3+5, mZoomY-h, mZoomX+(getVisibleWidth()-mZoomX)/3-5,mZoomY+h);
             super.onDraw(canvas);
+        }
+    }
+
+    public float getCharacterWidth(){
+        try {
+            Field privateField = 
+               EmulatorView.class.getDeclaredField("mCharacterWidth");
+            privateField.setAccessible(true);
+
+            return privateField.getFloat(this);
+        }catch(Exception e){
+            return 0.0f;
+        }
+    }
+
+    public float getCharacterHeight(){
+        try{
+            Field privateField = 
+               EmulatorView.class.getDeclaredField("mCharacterHeight");
+            privateField.setAccessible(true);
+
+            return (float) privateField.getInt(this);
+        }catch(Exception e){
+            return 0.0f;
         }
     }
 }

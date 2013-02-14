@@ -84,13 +84,13 @@ public class VimSettings {
 
     // foreground index, foreground color, background index, background color
     public static final int[][] COLOR_SCHEMES = {
-        {0, BLACK, 7, WHITE},
-        {7, WHITE, 0, BLACK},
-        {7, WHITE, 4, BLUE},
-        {2, GREEN, 0, BLACK},
-        {3, AMBER, 0, BLACK},
-        {1, RED, 0, BLACK},
-        {4, HOLO_BLUE, 0, BLACK}
+        {BLACK, WHITE},
+        {WHITE, BLACK},
+        {WHITE, BLUE},
+        {GREEN, BLACK},
+        {AMBER, BLACK},
+        {RED,   BLACK},
+        {HOLO_BLUE, BLACK}
     };
 
     public static final int ACTION_BAR_MODE_NONE = 0;
