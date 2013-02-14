@@ -100,4 +100,7 @@
 
    <string name="install_finish">Install finished. Please restart VimTouch to effect</string>
 
+   <string name="title_termtype_preference">Terminal type</string>
+   <string name="summary_termtype_preference">What terminal type to report to the shell.</string>
+   <string name="dialog_title_termtype_preference">Terminal type</string>
 </resources>

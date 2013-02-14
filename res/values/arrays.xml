@@ -150,4 +150,10 @@
         <item>2</item>
         <item>3</item>
     </string-array>
+    <string-array name="entries_termtype_preference">
+        <item>vt100</item>
+        <item>screen</item>
+        <item>linux</item>
+        <item>screen-256color</item>
+    </string-array>
 </resources>

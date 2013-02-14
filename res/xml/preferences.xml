@@ -44,6 +44,15 @@
                 android:title="@string/title_utf8_by_default_preference"
                 android:summary="@string/summary_utf8_by_default_preference" />
 
+        <ListPreference
+                android:key="termtype"
+                android:defaultValue="@string/pref_termtype_default"
+                android:title="@string/title_termtype_preference"
+                android:summary="@string/summary_termtype_preference"
+                android:entries="@array/entries_termtype_preference"
+                android:entryValues="@array/entries_termtype_preference"
+                android:dialogTitle="@string/dialog_title_termtype_preference" />
+
     </PreferenceCategory>
 
     <PreferenceCategory
