@@ -148,8 +148,14 @@ public class VimTouch extends Activity implements OnItemSelectedListener {
         public void onClick(View v){
             TextView textview = (TextView)v;
             CharSequence cmd = textview.getText();
-            if(cmd.charAt(0) == ':' && cmd.length() > 1){
-                Exec.doCommand(cmd.subSequence(1,cmd.length()).toString());
+            if(cmd.charAt(0) == ':'){
+                if(cmd.length() > 1){
+                    Exec.doCommand(cmd.subSequence(1,cmd.length()).toString());
+                }else{
+                    if(Exec.isInsertMode())
+                        mSession.write(27);
+                    mSession.write(cmd.toString());
+                }
             }else
                 mSession.write(cmd.toString());
             Exec.updateScreen();
