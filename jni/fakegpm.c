@@ -55,6 +55,17 @@ int Gpm_GetEvent(Gpm_Event *e){
         redraw_later(CLEAR);
         update_screen(CLEAR);
         out_flush();
+    }else if(event.type == VIM_EVENT_TYPE_SETTAB){
+        int nr = event.event.nums[0];
+
+        if (nr != tabpage_index(curtab)){
+            current_tab = nr;
+            if (current_tab == 255)     /* -1 in a byte gives 255 */
+            current_tab = -1;
+            goto_tabpage(current_tab);
+            update_screen(CLEAR);
+            out_flush();
+        }
     }
     return 0;
 }

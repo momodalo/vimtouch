@@ -789,6 +789,18 @@
 # define FEAT_GUI_TABLINE
 #endif
 
+# define FEAT_GUI_TABLINE
+//FIXME copy from global.h
+/* Tab in tab pages line just selected, set by check_termcode() */
+int	    current_tab;
+
+/* Menu entry in tab pages line menu just selected, set by check_termcode() */
+int	    current_tabmenu;
+#  define TABLINE_MENU_CLOSE	1
+#  define TABLINE_MENU_NEW	2
+#  define TABLINE_MENU_OPEN	3
+int         redraw_gui_only;
+
 /*
  * +browse		":browse" command.
  *			or just the ":browse" command modifier

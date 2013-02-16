@@ -53,6 +53,10 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Spinner;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageInfo;
@@ -76,7 +80,7 @@ import net.momodalo.app.vimtouch.addons.PluginAddOn;
  * A terminal emulator activity.
  */
 
-public class VimTouch extends Activity {
+public class VimTouch extends Activity implements OnItemSelectedListener {
     /**
      * Set to true to add debugging code and logging.
      */
@@ -119,6 +123,8 @@ public class VimTouch extends Activity {
     private View mLeftButtonBar;
     private View mRightButtonBar;
     private TextView mButtons[];
+    private Spinner mTabSpinner;
+    private ArrayAdapter<CharSequence> mTabAdapter;
     private final static int QUICK_BUTTON_SIZE=9;
 
     private int mControlKeyId = 0;
@@ -233,6 +239,13 @@ public class VimTouch extends Activity {
         button.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){ doToggleSoftKeyboard(); }
         });
+        // add tab spinner
+        mTabSpinner = (Spinner)getLayoutInflater().inflate(R.layout.tabspinner, (ViewGroup)mButtonBarLayout, false);
+        mTabSpinner.setOnItemSelectedListener(this);
+        mButtonBarLayout.addView((View)mTabSpinner);
+        mTabAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item);
+        mTabAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mTabSpinner.setAdapter(mTabAdapter);
 
         mMainLayout = (LinearLayout)findViewById(R.id.main_layout);
 
@@ -396,7 +409,7 @@ public class VimTouch extends Activity {
             FileReader fileReader = new FileReader(getQuickbarFile());
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             String line = null;
-            int index = 0;
+            int index = 1;
             while ((line = bufferedReader.readLine()) != null) {
                 if(line.length() == 0)continue;
                 if(index < mButtonBarLayout.getChildCount()){
@@ -522,6 +535,8 @@ public class VimTouch extends Activity {
     private static final int MSG_UPDATE = 2;
     private static final int MSG_SYNCCLIP = 3;
     private static final int MSG_SETCLIP = 4;
+    private static final int MSG_SETCURTAB = 5;
+    private static final int MSG_SETTABS = 6;
     private class DialogObj {
         public int type;
         public String title;
@@ -569,6 +584,20 @@ public class VimTouch extends Activity {
             case MSG_SETCLIP:
                 activity.mClipText = (String)msg.obj;
                 clipMgr(activity).setText(activity.mClipText);
+                break;
+            case MSG_SETCURTAB:
+                int n = (int)msg.arg1;
+                activity.realSetCurTab(n);
+            case MSG_SETTABS:
+                String[] array = (String[])msg.obj;
+                if(array==null)
+                    break;
+                ArrayAdapter<CharSequence> adapter = activity.getTabAdapter();
+                adapter.clear();
+                for (String str: array){
+                    adapter.add(str);
+                }
+                adapter.notifyDataSetChanged();
                 break;
             default:
                 super.handleMessage(msg);
@@ -771,5 +800,28 @@ public class VimTouch extends Activity {
             getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
 
+    }
+
+    public ArrayAdapter<CharSequence> getTabAdapter(){
+        return mTabAdapter;
+    }
+
+    public void realSetCurTab(int n){
+        mTabSpinner.setSelection(n);
+    }
+
+    public void setCurTab(int n){
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_SETCURTAB, n, 0));
+    }
+
+    public void setTabs(String[] array){
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_SETTABS, array));
+    }
+
+    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+        Exec.setTab(pos);
+    }
+
+    public void onNothingSelected(AdapterView<?> parent) {
     }
 }

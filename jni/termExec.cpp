@@ -83,6 +83,8 @@ static jmethodID method_Exec_getDialogState;
 static jmethodID method_Exec_quit;
 static jmethodID method_Exec_getClipText;
 static jmethodID method_Exec_setClipText;
+static jmethodID method_Exec_setCurTab;
+static jmethodID method_Exec_setTabLabels;
 static std::map<pthread_t, char**> thread_data;
 static int thread_exit_val = 0;
 
@@ -642,7 +644,30 @@ static jstring DEF_JNI0(getCurrBuffer)
     return env->NewStringUTF(result.c_str());
 }
 
+static void DEF_JNI(setTab, int nr)
+{
+    if(fake_gpm_fd[1] < 0) return;
+    VimEvent e;
+    e.type = VIM_EVENT_TYPE_SETTAB;
+    e.event.nums[0] = nr+1;
+    write(fake_gpm_fd[1],(void*)&e, sizeof(e));
+}
+
 extern "C" {
+
+void vimtouch_Exec_setCurTab(int nr){
+    global_env->CallStaticVoidMethod(class_Exec, method_Exec_setCurTab, nr);
+}
+
+void vimtouch_Exec_setTabLabels(u_char** labels, int num){
+    jobjectArray ret;
+    ret = (jobjectArray)global_env->NewObjectArray(num,  global_env->FindClass("java/lang/String"), global_env->NewStringUTF(""));  
+       
+    for(int i=0; i<num; i++) {  
+        global_env->SetObjectArrayElement( ret,i,global_env->NewStringUTF((char const*)labels[i]));  
+    }  
+    global_env->CallStaticVoidMethod(class_Exec, method_Exec_setTabLabels, ret);
+}
 
 int vimtouch_Exec_getDialogState() 
 {
@@ -722,6 +747,7 @@ static JNINativeMethod method_table[] = {
     DECL_JNI(close),
     DECL_JNI(getCurrBuffer),
     DECL_JNI(startVim),
+    DECL_JNI(setTab),
 };
 
 /*
@@ -790,6 +816,16 @@ static int registerNatives(JNIEnv* env)
     method_Exec_setClipText = env->GetStaticMethodID(class_Exec, "setClipText", "(Ljava/lang/String;)V");
     if (method_Exec_setClipText == NULL) {
         LOGE("Can't find Exec.setClipText");
+        return -1;
+    }
+    method_Exec_setTabLabels = env->GetStaticMethodID(class_Exec, "setTabLabels", "([Ljava/lang/String;)V");
+    if (method_Exec_setTabLabels == NULL) {
+        LOGE("Can't find Exec.setTabLabels");
+        return -1;
+    }
+    method_Exec_setCurTab = env->GetStaticMethodID(class_Exec, "setCurTab", "(I)V");
+    if (method_Exec_setCurTab == NULL) {
+        LOGE("Can't find Exec.setCurTab");
         return -1;
     }
 

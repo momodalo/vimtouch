@@ -65,6 +65,14 @@ public class Exec
         vimtouch.finish();
     }
 
+    public static void setCurTab(int n){
+        vimtouch.setCurTab(n);
+    }
+
+    public static void setTabLabels(String[] labels){
+        vimtouch.setTabs(labels);
+    }
+
     public static void setClipText(String text){
         vimtouch.setClipText(text);
     }
@@ -144,6 +152,7 @@ public class Exec
     public static native void setCursorPos(int row, int col);
     public static native int getState();
     public static native String getCurrBuffer();
+    public static native void setTab(int nr);
 
     public static boolean isInsertMode(){
         return (Exec.getState() & 0x10) != 0;

@@ -178,6 +178,7 @@ extern int Gpm_Wgetch();
 #define VIM_EVENT_TYPE_RELINE 5
 #define VIM_EVENT_TYPE_RESIZE 6
 #define VIM_EVENT_TYPE_CURSOR 7
+#define VIM_EVENT_TYPE_SETTAB 8
 
 #include "vim.h"
 

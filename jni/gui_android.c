@@ -57,3 +57,146 @@ gui_mch_dialog(
     return state;
 }
 #endif
+
+#if defined( FEAT_GUI_TABLINE )
+    void
+gui_mch_show_tabline(int showit)
+{
+}
+
+    int
+gui_mch_showing_tabline(void)
+{
+    return 1;
+}
+
+static u_char **tabLabels = NULL;
+static int tabLabelsSize = 0;
+
+    static int
+getTabCount(void)
+{
+    tabpage_T	*tp;
+    int		numTabs = 0;
+
+    for (tp = first_tabpage; tp != NULL; tp = tp->tp_next)
+	++numTabs;
+    return numTabs;
+}
+
+    void
+gui_mch_update_tabline(void)
+{
+    tabpage_T	*tp;
+    int		numTabs = getTabCount();
+    int		nr = 1;
+    int		curtabidx = 1;
+
+    // adjust data browser
+    if (tabLabels != NULL)
+    {
+	int i;
+
+	for (i = 0; i < tabLabelsSize; ++i)
+	    free(tabLabels[i]);
+	free(tabLabels);
+    }
+    tabLabels = (u_char**)malloc(numTabs * sizeof(u_char*));
+    tabLabelsSize = numTabs;
+
+    for (tp = first_tabpage; tp != NULL; tp = tp->tp_next, ++nr)
+    {
+	if (tp == curtab)
+	    curtabidx = nr;
+    get_tabline_label(tp, FALSE);
+	tabLabels[nr-1] = strdup(NameBuff);
+    }
+
+    vimtouch_Exec_setTabLabels(tabLabels, numTabs);
+    vimtouch_Exec_setCurTab(curtabidx-1);
+}
+
+    void
+gui_mch_set_curtab(int nr)
+{
+    vimtouch_Exec_setCurTab(nr-1);
+}
+
+/*
+ * Return TRUE if the GUI is taking care of the tabline.
+ * It may still be hidden if 'showtabline' is zero.
+ */
+    int
+gui_use_tabline()
+{
+    return TRUE;
+}
+
+/*
+ * Update the tabline.
+ * This may display/undisplay the tabline and update the labels.
+ */
+    void
+gui_update_tabline()
+{
+    int	    showit = TRUE;
+    int	    shown = gui_mch_showing_tabline();
+
+	/* Updating the tabline uses direct GUI commands, flush
+	 * outstanding instructions first. (esp. clear screen) */
+	out_flush();
+
+	if (!showit != !shown)
+	    gui_mch_show_tabline(showit);
+	if (showit != 0)
+	    gui_mch_update_tabline();
+
+	/* When the tabs change from hidden to shown or from shown to
+	 * hidden the size of the text area should remain the same. */
+	//if (!showit != !shown)
+	//    set_shellsize(FALSE, showit, RESIZE_VERT);
+}
+
+/* FIXME copy from gui.c
+ * Get the label or tooltip for tab page "tp" into NameBuff[].
+ */
+    void
+get_tabline_label(tp, tooltip)
+    tabpage_T	*tp;
+    int		tooltip;	/* TRUE: get tooltip */
+{
+    int		modified = FALSE;
+    char_u	buf[40];
+    int		wincount;
+    win_T	*wp;
+    char_u	**opt;
+
+    /* Use 'guitablabel' or 'guitabtooltip' if it's set. */
+    //opt = (tooltip ? &p_gtt : &p_gtl);
+
+    /* If 'guitablabel'/'guitabtooltip' is not set or the result is empty then
+     * use a default label. */
+	/* Get the buffer name into NameBuff[] and shorten it. */
+	get_trans_bufname(tp == curtab ? curbuf : tp->tp_curwin->w_buffer);
+	if (!tooltip)
+	    shorten_dir(NameBuff);
+
+	wp = (tp == curtab) ? firstwin : tp->tp_firstwin;
+	for (wincount = 0; wp != NULL; wp = wp->w_next, ++wincount)
+	    if (bufIsChanged(wp->w_buffer))
+		modified = TRUE;
+	if (modified || wincount > 1)
+	{
+	    if (wincount > 1)
+		vim_snprintf((char *)buf, sizeof(buf), "%d", wincount);
+	    else
+		buf[0] = NUL;
+	    if (modified)
+		STRCAT(buf, "+");
+	    STRCAT(buf, " ");
+	    STRMOVE(NameBuff + STRLEN(buf), NameBuff);
+	    mch_memmove(NameBuff, buf, STRLEN(buf));
+	}
+}
+
+#endif
