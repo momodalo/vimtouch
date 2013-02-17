@@ -79,7 +79,9 @@
    <string name="title_zoombottom_preference">Zoom Bottom Text</string>
    <string name="summary_zoombottom_preference">Whether zoom bottom text is enabled.</string>
 
-   <string name="open_file">Open</string>
+   <string name="new_file">Open(:new)</string>
+   <string name="vnew_file">Open(:vnew)</string>
+   <string name="tabnew_file">Open(:tabnew)</string>
    <string name="esc_key">ESC</string>
    <string name="more_key">Quick Keys</string>
    <string name="save_file">Save</string>

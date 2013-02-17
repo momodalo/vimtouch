@@ -491,7 +491,7 @@ public class VimTouch extends Activity implements OnItemSelectedListener {
             mEmulatorView.onResume();
 
             if(mUrl != null){
-                Exec.doCommand("new "+mUrl);
+                Exec.doCommand("tabnew "+mUrl);
                 Exec.updateScreen();
                 mUrl = null;
             }
@@ -529,7 +529,22 @@ public class VimTouch extends Activity implements OnItemSelectedListener {
         }
         if(url == mUrl || url == "") return;
         
-        Exec.doCommand("new "+url);
+        Bundle extras = intent.getExtras();
+        int opentype = extras==null?VimFileActivity.FILE_TABNEW:extras.getInt(VimFileActivity.OPEN_TYPE, VimFileActivity.FILE_TABNEW);
+        String opencmd;
+        switch(opentype){
+            case VimFileActivity.FILE_NEW:
+                opencmd = "new";
+                break;
+            case VimFileActivity.FILE_VNEW:
+                opencmd = "vnew";
+                break;
+            case VimFileActivity.FILE_TABNEW:
+            default:
+                opencmd = "tabnew";
+                break;
+        }
+        Exec.doCommand(opencmd+" "+url);
         Exec.updateScreen();
         mUrl = null;
     }
@@ -757,10 +772,10 @@ public class VimTouch extends Activity implements OnItemSelectedListener {
         } else if (id == R.id.menu_fullscreen) {
             item.setChecked(doToggleFullscreen());
         } else if (id == R.id.menu_vimrc) {
-            Exec.doCommand("new ~/.vimrc");
+            Exec.doCommand("tabnew ~/.vimrc");
             Exec.updateScreen();
         } else if (id == R.id.menu_quickbar) {
-            Exec.doCommand("new "+getQuickbarFile());
+            Exec.doCommand("tabnew "+getQuickbarFile());
             Exec.updateScreen();
         } else if (id == R.id.menu_toggle_soft_keyboard) {
             doToggleSoftKeyboard();
@@ -782,15 +797,20 @@ public class VimTouch extends Activity implements OnItemSelectedListener {
         } else if (id == R.id.menu_full_vim_runtime)  {
             downloadFullRuntime();
         */
-        }else if (id == R.id.menu_open) {
+        }else if (id == R.id.menu_new) {
             Intent intent = new Intent(getBaseContext(), VimFileActivity.class);
-            String sdcard = Environment.getExternalStorageDirectory().getPath();
-            intent.putExtra(FileDialog.START_PATH, sdcard);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                            
-            //can user select directories or not
-            intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
-                                                            
+            intent.putExtra(VimFileActivity.OPEN_TYPE, VimFileActivity.FILE_NEW);
+            startActivity(intent);
+        }else if (id == R.id.menu_vnew) {
+            Intent intent = new Intent(getBaseContext(), VimFileActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra(VimFileActivity.OPEN_TYPE, VimFileActivity.FILE_VNEW);
+            startActivity(intent);
+        }else if (id == R.id.menu_tabnew) {
+            Intent intent = new Intent(getBaseContext(), VimFileActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra(VimFileActivity.OPEN_TYPE, VimFileActivity.FILE_TABNEW);
             startActivity(intent);
         } else if (id == R.id.menu_save) {
             Exec.doCommand("w");

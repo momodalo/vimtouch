@@ -10,11 +10,17 @@ import android.net.Uri;
 import android.util.Log;
 
 public class VimFileActivity extends Activity{
-    private static final int REQUEST_OPEN = 1;
+    public static final String OPEN_TYPE = "open_type";
+
+    public static final int FILE_TABNEW = 1;
+    public static final int FILE_NEW = 2;
+    public static final int FILE_VNEW = 3;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+        int opentype = getIntent().getExtras().getInt(OPEN_TYPE, FILE_TABNEW);
 
         Intent intent = new Intent(getBaseContext(), VimFileDialog.class);
         intent.putExtra(FileDialog.START_PATH,
@@ -23,18 +29,17 @@ public class VimFileActivity extends Activity{
         //can user select directories or not
         intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
                                                             
-        startActivityForResult(intent, REQUEST_OPEN);
+        startActivityForResult(intent, opentype);
 	}
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_OPEN){
-            if (resultCode == Activity.RESULT_OK) {
-                String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
-                Intent intent = new Intent(getBaseContext(), VimTouch.class);
-                File file = new File(filePath.replace(" ", "\\ "));
-                intent.setData(Uri.fromFile(file));
-                startActivity(intent);
-            }
+        if (resultCode == Activity.RESULT_OK) {
+            String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
+            Intent intent = new Intent(getBaseContext(), VimTouch.class);
+            File file = new File(filePath.replace(" ", "\\ "));
+            intent.setData(Uri.fromFile(file));
+            intent.putExtra(OPEN_TYPE, requestCode);
+            startActivity(intent);
         }
         finish();
     }

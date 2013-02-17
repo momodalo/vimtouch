@@ -41,9 +41,15 @@
         android:showAsAction="ifRoom"
         android:icon="@android:drawable/ic_menu_save"
         android:title="@string/save_file" />
-    <item android:id="@+id/menu_open"
+    <item android:id="@+id/menu_new"
         android:showAsAction="ifRoom|withText"
-        android:title="@string/open_file" />
+        android:title="@string/new_file" />
+    <item android:id="@+id/menu_vnew"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/vnew_file" />
+    <item android:id="@+id/menu_tabnew"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/tabnew_file" />
     <item android:id="@+id/menu_vimrc"
         android:showAsAction="ifRoom|withText"
         android:title="@string/vimrc" />
