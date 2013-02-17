@@ -344,7 +344,7 @@ public class TermView extends EmulatorView implements
             return super.onCreateInputConnection(outAttrs);
         }
         outAttrs.actionLabel = null;
-        outAttrs.inputType = InputType.TYPE_CLASS_TEXT;
+        outAttrs.inputType = InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE;
         outAttrs.imeOptions = EditorInfo.IME_ACTION_NONE;
         mInputConnection = new VimInputConnection(this);
         return mInputConnection;
