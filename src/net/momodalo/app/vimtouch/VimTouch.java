@@ -362,6 +362,7 @@ public class VimTouch extends Activity implements OnItemSelectedListener {
     @Override
     public void onStop() {
         Log.e(VimTouch.LOG_TAG, "on stop.");
+        mSettings.writePrefs(mPrefs);
         /*
         if (mTermFd != null) {
             try{
@@ -469,7 +470,14 @@ public class VimTouch extends Activity implements OnItemSelectedListener {
                 break;
         }
         ((ViewGroup)mButtonBar).addView(mButtonBarLayout);
-        mButtonBar.setVisibility(View.VISIBLE);
+        if(mSettings.getQuickbarShow())
+            mButtonBar.setVisibility(View.VISIBLE);
+        else
+            mButtonBar.setVisibility(View.GONE);
+
+        if(mSettings.getFullscreen() != ((getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_FULLSCREEN ) != 0)) {
+            doToggleFullscreen();
+        }
     }
 
     @Override
@@ -687,13 +695,18 @@ public class VimTouch extends Activity implements OnItemSelectedListener {
         return true;
     }
 
-    private void doToggleFullscreen() {
+    private boolean doToggleFullscreen() {
+        boolean ret = false;
         WindowManager.LayoutParams attrs = getWindow().getAttributes(); 
-        if((attrs.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN ) != 0) 
+        if((attrs.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN ) != 0) {
             attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        else
+        }else{
             attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN; 
+            ret = true;
+        }
+        mSettings.setFullscreen(ret);
         getWindow().setAttributes(attrs); 
+        return ret;
     }
 
     private void downloadFullRuntime() {
@@ -729,6 +742,12 @@ public class VimTouch extends Activity implements OnItemSelectedListener {
         mEnqueue = mDM.enqueue(request);
     }
 
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        menu.findItem(R.id.menu_fullscreen).setChecked(mSettings.getFullscreen());
+        menu.findItem(R.id.menu_keys).setChecked(mSettings.getQuickbarShow());
+        return true;
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -736,7 +755,7 @@ public class VimTouch extends Activity implements OnItemSelectedListener {
         if (id == R.id.menu_preferences) {
             doPreferences();
         } else if (id == R.id.menu_fullscreen) {
-            doToggleFullscreen();
+            item.setChecked(doToggleFullscreen());
         } else if (id == R.id.menu_vimrc) {
             Exec.doCommand("new ~/.vimrc");
             Exec.updateScreen();
@@ -753,7 +772,7 @@ public class VimTouch extends Activity implements OnItemSelectedListener {
             Exec.doCommand("q!");
             Exec.updateScreen();
         } else if (id == R.id.menu_ime_composing) {
-            mEmulatorView.toggleIMEComposing();
+            item.setChecked(mEmulatorView.toggleIMEComposing());
         } else if (id == R.id.menu_extra_downloads)  {
             Intent search = new Intent(Intent.ACTION_VIEW);
             search.setData(Uri.parse("market://search?q=VimTouch"));
@@ -776,10 +795,15 @@ public class VimTouch extends Activity implements OnItemSelectedListener {
         } else if (id == R.id.menu_save) {
             Exec.doCommand("w");
         } else if (id == R.id.menu_keys) {
-            if(mButtonBarLayout.isShown())
+            if(mButtonBarLayout.isShown()){
+                mSettings.setQuickbarShow(false);
+                item.setChecked(false);
                 mButtonBar.setVisibility(View.GONE);
-            else
+            }else{
+                mSettings.setQuickbarShow(true);
+                item.setChecked(true);
                 mButtonBar.setVisibility(View.VISIBLE);
+            }
         }
         return super.onOptionsItemSelected(item);
     }

@@ -79,12 +79,12 @@
    <string name="title_zoombottom_preference">Zoom Bottom Text</string>
    <string name="summary_zoombottom_preference">Whether zoom bottom text is enabled.</string>
 
-   <string name="open_file">Open File</string>
+   <string name="open_file">Open</string>
    <string name="esc_key">ESC</string>
-   <string name="more_key">Toggle Quick Keys</string>
+   <string name="more_key">Quick Keys</string>
    <string name="save_file">Save</string>
    <string name="quit_file">:q!</string>
-   <string name="toggle_fullscreen">Toggle Fullscreen</string>
+   <string name="toggle_fullscreen">Fullscreen</string>
 
    <string name="title_quickbar_pos_preference">Quickbar Position</string>
    <string name="summary_quickbar_pos_preference">Choose position of quickbar</string>
@@ -96,7 +96,7 @@
 
    <string name="install_activity">Install Vim Add-On</string>
 
-   <string name="ime_composing">Toggle Word-based IME</string>
+   <string name="ime_composing">Auto Complete</string>
 
    <string name="install_finish">Install finished. Please restart VimTouch to effect</string>
 
