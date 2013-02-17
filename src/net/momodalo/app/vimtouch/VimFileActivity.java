@@ -23,8 +23,7 @@ public class VimFileActivity extends Activity{
         int opentype = getIntent().getExtras().getInt(OPEN_TYPE, FILE_TABNEW);
 
         Intent intent = new Intent(getBaseContext(), VimFileDialog.class);
-        intent.putExtra(FileDialog.START_PATH,
-                        Environment.getExternalStorageDirectory().getPath());
+        intent.putExtra(FileDialog.START_PATH, ".");
                                             
         //can user select directories or not
         intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
