@@ -653,6 +653,15 @@ static void DEF_JNI(setTab, int nr)
     write(fake_gpm_fd[1],(void*)&e, sizeof(e));
 }
 
+static jstring DEF_JNI0(getcwd)
+{
+    if(fake_gpm_fd[1] < 0) return NULL;
+
+    char buf[PATH_MAX];
+    getcwd(buf,PATH_MAX);
+    return env->NewStringUTF((const char*)buf);
+}
+
 extern "C" {
 
 void vimtouch_Exec_setCurTab(int nr){
@@ -748,6 +757,7 @@ static JNINativeMethod method_table[] = {
     DECL_JNI(getCurrBuffer),
     DECL_JNI(startVim),
     DECL_JNI(setTab),
+    DECL_JNI(getcwd),
 };
 
 /*

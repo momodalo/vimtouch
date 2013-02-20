@@ -11,6 +11,7 @@ import android.util.Log;
 
 public class VimFileActivity extends Activity{
     public static final String OPEN_TYPE = "open_type";
+    public static final String OPEN_PATH = "open_path";
 
     public static final int FILE_TABNEW = 1;
     public static final int FILE_NEW = 2;
@@ -21,9 +22,14 @@ public class VimFileActivity extends Activity{
 		super.onCreate(savedInstanceState);
 
         int opentype = getIntent().getExtras().getInt(OPEN_TYPE, FILE_TABNEW);
+        String path = getIntent().getExtras().getString(OPEN_PATH);
 
         Intent intent = new Intent(getBaseContext(), VimFileDialog.class);
-        intent.putExtra(FileDialog.START_PATH, ".");
+        if(path != null)
+            intent.putExtra(FileDialog.START_PATH, path);
+        else
+            intent.putExtra(FileDialog.START_PATH,
+                        Environment.getExternalStorageDirectory().getPath());
                                             
         //can user select directories or not
         intent.putExtra(FileDialog.CAN_SELECT_DIR, false);

@@ -153,6 +153,7 @@ public class Exec
     public static native int getState();
     public static native String getCurrBuffer();
     public static native void setTab(int nr);
+    public static native String getcwd();
 
     public static boolean isInsertMode(){
         return (Exec.getState() & 0x10) != 0;

@@ -801,16 +801,19 @@ public class VimTouch extends Activity implements OnItemSelectedListener {
             Intent intent = new Intent(getBaseContext(), VimFileActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.putExtra(VimFileActivity.OPEN_TYPE, VimFileActivity.FILE_NEW);
+            intent.putExtra(VimFileActivity.OPEN_PATH, Exec.getcwd());
             startActivity(intent);
         }else if (id == R.id.menu_vnew) {
             Intent intent = new Intent(getBaseContext(), VimFileActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.putExtra(VimFileActivity.OPEN_TYPE, VimFileActivity.FILE_VNEW);
+            intent.putExtra(VimFileActivity.OPEN_PATH, Exec.getcwd());
             startActivity(intent);
         }else if (id == R.id.menu_tabnew) {
             Intent intent = new Intent(getBaseContext(), VimFileActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.putExtra(VimFileActivity.OPEN_TYPE, VimFileActivity.FILE_TABNEW);
+            intent.putExtra(VimFileActivity.OPEN_PATH, Exec.getcwd());
             startActivity(intent);
         } else if (id == R.id.menu_save) {
             Exec.doCommand("w");
