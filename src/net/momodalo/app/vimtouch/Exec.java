@@ -69,6 +69,10 @@ public class Exec
         vimtouch.setCurTab(n);
     }
 
+    public static void showTab(int n){
+        vimtouch.showTab(n);
+    }
+
     public static void setTabLabels(String[] labels){
         vimtouch.setTabs(labels);
     }

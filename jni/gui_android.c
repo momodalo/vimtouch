@@ -59,15 +59,20 @@ gui_mch_dialog(
 #endif
 
 #if defined( FEAT_GUI_TABLINE )
+
+int gui_tab_showing = 1;
+
     void
 gui_mch_show_tabline(int showit)
 {
+    gui_tab_showing = showit;
+    vimtouch_Exec_showTab(showit);
 }
 
     int
 gui_mch_showing_tabline(void)
 {
-    return 1;
+    return gui_tab_showing;
 }
 
 static u_char **tabLabels = NULL;
@@ -133,13 +138,28 @@ gui_use_tabline()
 }
 
 /*
+ * Return TRUE if the GUI is showing the tabline.
+ * This uses 'showtabline'.
+ */
+    static int
+gui_has_tabline()
+{
+    if (!gui_use_tabline()
+        || p_stal == 0
+        || (p_stal == 1 && first_tabpage->tp_next == NULL))
+        return FALSE;
+     return TRUE;
+}
+
+
+/*
  * Update the tabline.
  * This may display/undisplay the tabline and update the labels.
  */
     void
 gui_update_tabline()
 {
-    int	    showit = TRUE;
+    int	    showit = gui_has_tabline();
     int	    shown = gui_mch_showing_tabline();
 
 	/* Updating the tabline uses direct GUI commands, flush

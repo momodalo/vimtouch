@@ -566,6 +566,7 @@ public class VimTouch extends Activity implements OnItemSelectedListener {
     private static final int MSG_SETCLIP = 4;
     private static final int MSG_SETCURTAB = 5;
     private static final int MSG_SETTABS = 6;
+    private static final int MSG_SHOWTAB = 7;
     private class DialogObj {
         public int type;
         public String title;
@@ -627,6 +628,10 @@ public class VimTouch extends Activity implements OnItemSelectedListener {
                     adapter.add(str);
                 }
                 adapter.notifyDataSetChanged();
+                break;
+            case MSG_SHOWTAB:
+                int s = (int)msg.arg1;
+                activity.realShowTab(s);
                 break;
             default:
                 super.handleMessage(msg);
@@ -863,8 +868,16 @@ public class VimTouch extends Activity implements OnItemSelectedListener {
         mTabSpinner.setSelection(n);
     }
 
+    public void realShowTab(int n){
+        mTabSpinner.setVisibility(n>0?View.VISIBLE:View.GONE);
+    }
+
     public void setCurTab(int n){
         mHandler.sendMessage(mHandler.obtainMessage(MSG_SETCURTAB, n, 0));
+    }
+
+    public void showTab(int n){
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_SHOWTAB, n, 0));
     }
 
     public void setTabs(String[] array){

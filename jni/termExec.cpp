@@ -84,6 +84,7 @@ static jmethodID method_Exec_quit;
 static jmethodID method_Exec_getClipText;
 static jmethodID method_Exec_setClipText;
 static jmethodID method_Exec_setCurTab;
+static jmethodID method_Exec_showTab;
 static jmethodID method_Exec_setTabLabels;
 static std::map<pthread_t, char**> thread_data;
 static int thread_exit_val = 0;
@@ -678,6 +679,10 @@ void vimtouch_Exec_setTabLabels(u_char** labels, int num){
     global_env->CallStaticVoidMethod(class_Exec, method_Exec_setTabLabels, ret);
 }
 
+void vimtouch_Exec_showTab(int showit){
+    global_env->CallStaticVoidMethod(class_Exec, method_Exec_showTab, showit);
+}
+
 int vimtouch_Exec_getDialogState() 
 {
     jint result = global_env->CallStaticIntMethod(class_Exec, method_Exec_getDialogState);
@@ -836,6 +841,11 @@ static int registerNatives(JNIEnv* env)
     method_Exec_setCurTab = env->GetStaticMethodID(class_Exec, "setCurTab", "(I)V");
     if (method_Exec_setCurTab == NULL) {
         LOGE("Can't find Exec.setCurTab");
+        return -1;
+    }
+    method_Exec_showTab = env->GetStaticMethodID(class_Exec, "showTab", "(I)V");
+    if (method_Exec_showTab == NULL) {
+        LOGE("Can't find Exec.showTab");
         return -1;
     }
 
