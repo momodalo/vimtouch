@@ -65,6 +65,7 @@ import android.app.DownloadManager.Query;
 import android.app.DownloadManager.Request;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
+import android.app.ActionBar;
 
 import jackpal.androidterm.emulatorview.EmulatorView;
 import jackpal.androidterm.emulatorview.ColorScheme;
@@ -80,7 +81,7 @@ import net.momodalo.app.vimtouch.addons.PluginAddOn;
  * A terminal emulator activity.
  */
 
-public class VimTouch extends Activity implements OnItemSelectedListener {
+public class VimTouch extends Activity implements ActionBar.OnNavigationListener {
     /**
      * Set to true to add debugging code and logging.
      */
@@ -123,7 +124,6 @@ public class VimTouch extends Activity implements OnItemSelectedListener {
     private View mLeftButtonBar;
     private View mRightButtonBar;
     private TextView mButtons[];
-    private Spinner mTabSpinner;
     private ArrayAdapter<CharSequence> mTabAdapter;
     private final static int QUICK_BUTTON_SIZE=9;
 
@@ -245,13 +245,13 @@ public class VimTouch extends Activity implements OnItemSelectedListener {
         button.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){ doToggleSoftKeyboard(); }
         });
-        // add tab spinner
-        mTabSpinner = (Spinner)getLayoutInflater().inflate(R.layout.tabspinner, (ViewGroup)mButtonBarLayout, false);
-        mTabSpinner.setOnItemSelectedListener(this);
-        mButtonBarLayout.addView((View)mTabSpinner);
+
+        ActionBar actionBar = getActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
         mTabAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item);
         mTabAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mTabSpinner.setAdapter(mTabAdapter);
+
+        actionBar.setListNavigationCallbacks(mTabAdapter, this);
 
         mMainLayout = (LinearLayout)findViewById(R.id.main_layout);
 
@@ -416,7 +416,7 @@ public class VimTouch extends Activity implements OnItemSelectedListener {
             FileReader fileReader = new FileReader(getQuickbarFile());
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             String line = null;
-            int index = 1;
+            int index = 0;
             while ((line = bufferedReader.readLine()) != null) {
                 if(line.length() == 0)continue;
                 if(index < mButtonBarLayout.getChildCount()){
@@ -865,11 +865,12 @@ public class VimTouch extends Activity implements OnItemSelectedListener {
     }
 
     public void realSetCurTab(int n){
-        mTabSpinner.setSelection(n);
+        getActionBar().setSelectedNavigationItem(n);
     }
 
     public void realShowTab(int n){
-        mTabSpinner.setVisibility(n>0?View.VISIBLE:View.GONE);
+        //mTabSpinner.setVisibility(n>0?View.VISIBLE:View.GONE);
+        getActionBar().setNavigationMode(n>0?ActionBar.NAVIGATION_MODE_LIST:ActionBar.NAVIGATION_MODE_STANDARD);
     }
 
     public void setCurTab(int n){
@@ -884,8 +885,9 @@ public class VimTouch extends Activity implements OnItemSelectedListener {
         mHandler.sendMessage(mHandler.obtainMessage(MSG_SETTABS, array));
     }
 
-    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+    public boolean onNavigationItemSelected(int pos, long id) {
         Exec.setTab(pos);
+        return true;
     }
 
     public void onNothingSelected(AdapterView<?> parent) {
