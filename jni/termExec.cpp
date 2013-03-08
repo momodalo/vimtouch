@@ -663,6 +663,11 @@ static jstring DEF_JNI0(getcwd)
     return env->NewStringUTF((const char*)buf);
 }
 
+static jstring DEF_JNI(getCmdHistory, int i)
+{
+    return env->NewStringUTF((const char*)get_history_entry(HIST_CMD,i));
+}
+
 extern "C" {
 
 void vimtouch_Exec_setCurTab(int nr){
@@ -763,6 +768,7 @@ static JNINativeMethod method_table[] = {
     DECL_JNI(startVim),
     DECL_JNI(setTab),
     DECL_JNI(getcwd),
+    DECL_JNI(getCmdHistory),
 };
 
 /*
