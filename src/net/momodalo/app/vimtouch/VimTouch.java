@@ -240,11 +240,14 @@ public class VimTouch extends Activity implements ActionBar.OnNavigationListener
         mButtonBar = mTopButtonBar;
 
         mButtonBarLayout = (LinearLayout) findViewById(R.id.button_bar_layout);
+        mButtonBarLayout.setShowDividers(LinearLayout. SHOW_DIVIDER_MIDDLE);
+        /*
         TextView button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
         button.setText(R.string.title_keyboard);
         button.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){ doToggleSoftKeyboard(); }
         });
+        */
 
         ActionBar actionBar = getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
