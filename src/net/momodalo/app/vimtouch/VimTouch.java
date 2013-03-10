@@ -66,6 +66,15 @@ import android.app.DownloadManager.Request;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.app.ActionBar;
+import android.app.Dialog;
+import android.view.Window;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.TextView;
+import android.widget.LinearLayout;
 
 import jackpal.androidterm.emulatorview.EmulatorView;
 import jackpal.androidterm.emulatorview.ColorScheme;
@@ -143,6 +152,7 @@ public class VimTouch extends Activity implements ActionBar.OnNavigationListener
     private String mUrl = null;
     private long mEnqueue = -1;
     private DownloadManager mDM;
+    private int mScreenWidth;
 
     View.OnClickListener mClickListener = new View.OnClickListener() {
         public void onClick(View v){
@@ -164,7 +174,7 @@ public class VimTouch extends Activity implements ActionBar.OnNavigationListener
     };
     View.OnLongClickListener mLongClickListener = new View.OnLongClickListener() {
         public boolean onLongClick(View v){
-            mEmulatorView.showCmdHistory();
+            showCmdHistory();
             return true;
         }
     };
@@ -281,6 +291,7 @@ public class VimTouch extends Activity implements ActionBar.OnNavigationListener
     private TermView createEmulatorView(VimTermSession session) {
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        mScreenWidth = metrics.widthPixels;
         return new TermView(this, session, metrics);
     }
 
@@ -902,4 +913,48 @@ public class VimTouch extends Activity implements ActionBar.OnNavigationListener
 
     public void onNothingSelected(AdapterView<?> parent) {
     }
+
+    public void showCmdHistory() {
+
+        final Dialog dialog = new Dialog(this,R.style.DialogSlideAnim);
+
+        // Setting dialogview
+        Window window = dialog.getWindow();
+        window.setGravity(Gravity.BOTTOM);
+
+        window.setLayout(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+        dialog.setTitle(null);
+        dialog.setContentView(R.layout.hist_list);
+        dialog.setCancelable(true);
+
+        LinearLayout layout = (LinearLayout)dialog.findViewById(R.id.hist_layout);
+        layout.setShowDividers(LinearLayout.SHOW_DIVIDER_BEGINNING | LinearLayout.SHOW_DIVIDER_MIDDLE | LinearLayout.SHOW_DIVIDER_END);
+        LayoutParams params = layout.getLayoutParams();
+        params.width = mScreenWidth;
+        layout.setLayoutParams(params);
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+        boolean exists = false;
+
+        for (int i = 1; i <= 10; i++){
+            TextView button = (TextView)inflater.inflate(R.layout.histbutton, layout, false);
+            String cmd = Exec.getCmdHistory(i);
+            if(cmd.length() == 0) break;
+            exists = true;
+            button.setText(":"+cmd);
+            button.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v){
+                    TextView text = (TextView)v;
+                    CharSequence cmd = text.getText();
+                    Exec.doCommand(cmd.subSequence(1,cmd.length()).toString());
+                    dialog.dismiss();
+                }
+            });
+            layout.addView((View)button);
+        }
+
+        if(exists)
+            dialog.show();
+    }
+
 }
