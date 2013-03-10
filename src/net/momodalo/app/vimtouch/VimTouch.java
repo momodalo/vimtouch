@@ -33,6 +33,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.content.ServiceConnection;
+import android.content.ComponentName;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -60,6 +62,7 @@ import android.widget.ArrayAdapter;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageInfo;
+import android.os.IBinder;
 import android.app.DownloadManager;
 import android.app.DownloadManager.Query;
 import android.app.DownloadManager.Request;
@@ -154,6 +157,19 @@ public class VimTouch extends Activity implements ActionBar.OnNavigationListener
     private DownloadManager mDM;
     private int mScreenWidth;
 
+    private Intent TSIntent;
+    private VimTermService mService;
+    private ServiceConnection mTSConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            VimTermService.TSBinder binder = (VimTermService.TSBinder) service;
+            mService = binder.getService();
+        }
+
+        public void onServiceDisconnected(ComponentName arg0) {
+            mService = null;
+        }
+    };
+
     View.OnClickListener mClickListener = new View.OnClickListener() {
         public void onClick(View v){
             TextView textview = (TextView)v;
@@ -243,6 +259,14 @@ public class VimTouch extends Activity implements ActionBar.OnNavigationListener
         mSettings = new VimSettings(getResources(), mPrefs);
 
         mUrl = getIntentUrl(getIntent());
+
+        TSIntent = new Intent(this, VimTermService.class);
+        startService(TSIntent);
+
+        if (!bindService(TSIntent, mTSConnection, BIND_AUTO_CREATE)) {
+            Log.w(VimTouch.LOG_TAG, "bind to service failed!");
+        }
+
 
         if(Integer.valueOf(android.os.Build.VERSION.SDK) < 11)
             requestWindowFeature(Window.FEATURE_NO_TITLE);

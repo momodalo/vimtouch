@@ -105,4 +105,6 @@
    <string name="title_termtype_preference">Terminal type</string>
    <string name="summary_termtype_preference">What terminal type to report to the shell.</string>
    <string name="dialog_title_termtype_preference">Terminal type</string>
+
+   <string name="service_notify_text">VimTouch is running</string>
 </resources>

@@ -73,5 +73,6 @@
                 <data android:pathPattern=".*\\.vrz" />
             </intent-filter>
         </activity>
+        <service android:name="VimTermService" />
     </application>
 </manifest>
