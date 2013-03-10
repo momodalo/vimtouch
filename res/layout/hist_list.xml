@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/hist_layout"
+    android:background="@drawable/editbox_dropdown_background_dark"
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:divider="?android:attr/actionBarDivider"
+    android:dividerPadding="12dip"
+    android:layout_gravity="bottom"
+    android:orientation="vertical">
+</LinearLayout>

@@ -162,6 +162,12 @@ public class VimTouch extends Activity implements ActionBar.OnNavigationListener
             mEmulatorView.lateCheckInserted();
         }
     };
+    View.OnLongClickListener mLongClickListener = new View.OnLongClickListener() {
+        public boolean onLongClick(View v){
+            mEmulatorView.showCmdHistory();
+            return true;
+        }
+    };
 
     private String getIntentUrl(Intent intent){
         if(intent == null || intent.getScheme() == null) return null;
@@ -392,6 +398,7 @@ public class VimTouch extends Activity implements ActionBar.OnNavigationListener
         TextView button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
         button.setText(text);
         button.setOnClickListener(mClickListener);
+        button.setOnLongClickListener(mLongClickListener);
         mButtonBarLayout.addView((View)button);
     }
 
