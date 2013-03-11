@@ -983,7 +983,9 @@ public class VimTouch extends Activity implements ActionBarCompat.OnNavigationLi
         dialog.setCancelable(true);
 
         LinearLayout layout = (LinearLayout)dialog.findViewById(R.id.hist_layout);
-        layout.setShowDividers(LinearLayout.SHOW_DIVIDER_BEGINNING | LinearLayout.SHOW_DIVIDER_MIDDLE | LinearLayout.SHOW_DIVIDER_END);
+        if (AndroidCompat.SDK >= 11) {
+            layout.setShowDividers(LinearLayout.SHOW_DIVIDER_BEGINNING | LinearLayout.SHOW_DIVIDER_MIDDLE | LinearLayout.SHOW_DIVIDER_END);
+        }
         LayoutParams params = layout.getLayoutParams();
         params.width = mScreenWidth;
         layout.setLayoutParams(params);
