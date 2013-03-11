@@ -68,7 +68,6 @@ import android.app.DownloadManager.Query;
 import android.app.DownloadManager.Request;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
-import android.app.ActionBar;
 import android.app.Dialog;
 import android.view.Window;
 import android.view.Gravity;
@@ -84,6 +83,9 @@ import jackpal.androidterm.emulatorview.ColorScheme;
 import jackpal.androidterm.emulatorview.TermSession;
 import com.lamerman.FileDialog;
 
+import net.momodalo.app.vimtouch.compat.ActionBarCompat;
+import net.momodalo.app.vimtouch.compat.AndroidCompat;
+import net.momodalo.app.vimtouch.compat.ActivityCompat;
 import net.momodalo.app.vimtouch.addons.RuntimeFactory;
 import net.momodalo.app.vimtouch.addons.RuntimeAddOn;
 import net.momodalo.app.vimtouch.addons.PluginFactory;
@@ -93,7 +95,7 @@ import net.momodalo.app.vimtouch.addons.PluginAddOn;
  * A terminal emulator activity.
  */
 
-public class VimTouch extends Activity implements ActionBar.OnNavigationListener {
+public class VimTouch extends Activity implements ActionBarCompat.OnNavigationListener, OnItemSelectedListener {
     /**
      * Set to true to add debugging code and logging.
      */
@@ -136,6 +138,7 @@ public class VimTouch extends Activity implements ActionBar.OnNavigationListener
     private View mLeftButtonBar;
     private View mRightButtonBar;
     private TextView mButtons[];
+    private Spinner mTabSpinner;
     private ArrayAdapter<CharSequence> mTabAdapter;
     private final static int QUICK_BUTTON_SIZE=9;
 
@@ -280,7 +283,9 @@ public class VimTouch extends Activity implements ActionBar.OnNavigationListener
         mButtonBar = mTopButtonBar;
 
         mButtonBarLayout = (LinearLayout) findViewById(R.id.button_bar_layout);
-        mButtonBarLayout.setShowDividers(LinearLayout. SHOW_DIVIDER_MIDDLE);
+        if (AndroidCompat.SDK >= 11) {
+            mButtonBarLayout.setShowDividers(LinearLayout. SHOW_DIVIDER_MIDDLE);
+        }
         /*
         TextView button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
         button.setText(R.string.title_keyboard);
@@ -289,12 +294,24 @@ public class VimTouch extends Activity implements ActionBar.OnNavigationListener
         });
         */
 
-        ActionBar actionBar = getActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-        mTabAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item);
-        mTabAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ActionBarCompat actionBar = ActivityCompat.getActionBar(this);
+        mTabSpinner = (Spinner)findViewById(R.id.tab_spinner);
+        if(actionBar == null){
+            mTabSpinner.setVisibility(View.VISIBLE);
+            // add tab spinner
+            mTabSpinner.setOnItemSelectedListener(this);
+            mTabAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item);
+            mTabAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        actionBar.setListNavigationCallbacks(mTabAdapter, this);
+            mTabSpinner.setAdapter(mTabAdapter);
+        }else{
+            mTabSpinner.setVisibility(View.GONE);
+            actionBar.setNavigationMode(ActionBarCompat.NAVIGATION_MODE_LIST);
+            mTabAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item);
+            mTabAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+            actionBar.setListNavigationCallbacks(mTabAdapter, this);
+        }
 
         mMainLayout = (LinearLayout)findViewById(R.id.main_layout);
 
@@ -910,12 +927,22 @@ public class VimTouch extends Activity implements ActionBar.OnNavigationListener
     }
 
     public void realSetCurTab(int n){
-        getActionBar().setSelectedNavigationItem(n);
+        ActionBarCompat actionbar = ActivityCompat.getActionBar(this);
+        if(actionbar == null){
+            mTabSpinner.setSelection(n);
+        }else{
+            actionbar.setSelectedNavigationItem(n);
+        }
     }
 
     public void realShowTab(int n){
         //mTabSpinner.setVisibility(n>0?View.VISIBLE:View.GONE);
-        getActionBar().setNavigationMode(n>0?ActionBar.NAVIGATION_MODE_LIST:ActionBar.NAVIGATION_MODE_STANDARD);
+        ActionBarCompat actionbar = ActivityCompat.getActionBar(this);
+        if(actionbar == null){
+            mTabSpinner.setVisibility(n>0?View.VISIBLE:View.GONE);
+        }else{
+            actionbar.setNavigationMode(n>0?ActionBarCompat.NAVIGATION_MODE_LIST:ActionBarCompat.NAVIGATION_MODE_STANDARD);
+        }
     }
 
     public void setCurTab(int n){
@@ -928,6 +955,10 @@ public class VimTouch extends Activity implements ActionBar.OnNavigationListener
 
     public void setTabs(String[] array){
         mHandler.sendMessage(mHandler.obtainMessage(MSG_SETTABS, array));
+    }
+
+    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+        Exec.setTab(pos);
     }
 
     public boolean onNavigationItemSelected(int pos, long id) {
