@@ -37,6 +37,10 @@
             android:orientation="horizontal">
         </LinearLayout>
     </HorizontalScrollView>
+    <ImageView 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/list_divider_holo_dark" />
     <LinearLayout 
         android:layout_width="match_parent" 
         android:layout_height="match_parent"
@@ -52,6 +56,10 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent">
         </HorizontalScrollView>
+        <ImageView 
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/list_divider_holo_dark" />
 
         <LinearLayout
             android:layout_width="match_parent" 
@@ -59,6 +67,10 @@
             android:layout_weight="1"
             android:id="@+id/main_layout">
         </LinearLayout>
+        <ImageView 
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/list_divider_holo_dark" />
         <HorizontalScrollView
             android:id="@+id/right_bar"
             android:visibility="gone"
@@ -68,6 +80,10 @@
             android:layout_height="match_parent">
         </HorizontalScrollView>
     </LinearLayout>
+    <ImageView 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/list_divider_holo_dark" />
     <HorizontalScrollView
         android:id="@+id/bottom_bar"
         android:visibility="gone"
