@@ -323,6 +323,10 @@ public class VimTouch extends Activity implements ActionBarCompat.OnNavigationLi
 
     public void onDestroy() {
         super.onDestroy();
+        unbindService(mTSConnection);
+        stopService(TSIntent);
+        mService = null;
+        mTSConnection = null;
 
         System.runFinalizersOnExit(true);
 
