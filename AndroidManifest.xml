@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" 
     package="net.momodalo.app.vimtouch"
-    android:versionCode="23"
-    android:versionName="2.2r1"
+    android:versionCode="24"
+    android:versionName="2.2r2"
     android:installLocation="auto"
     >
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
