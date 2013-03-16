@@ -157,9 +157,16 @@ public class TermView extends EmulatorView implements
 
     private float mVelocity = 0;
 
+    private void scrollBy(int line){
+        if(line> 0)
+            mSession.write("L"+line+"gj");
+        else
+            mSession.write("H"+(-1*line)+"gk");
+    }
+
     private Runnable mFlingRun = new Runnable() {
         public void run() {
-            Exec.scrollBy((int)mVelocity);
+            scrollBy((int)mVelocity);
             if(mVelocity > 0){
                 mVelocity -= mVelocity>2?2:mVelocity;
             }else{
@@ -288,7 +295,7 @@ public class TermView extends EmulatorView implements
                         Exec.setCursorPos(cursorY, cursorX);
                     }
                     //Exec.mouseDown( mDownY, mDownX);
-                    Exec.scrollBy((int)((mLastY - y)/getCharacterHeight()));
+                    scrollBy((int)((mLastY - y)/getCharacterHeight()));
                     if(mInputConnection!=null)mInputConnection.notifyTextChange();
                 }
                 mLastY = y;
