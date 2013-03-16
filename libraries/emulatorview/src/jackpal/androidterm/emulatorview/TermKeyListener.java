@@ -5,23 +5,16 @@ import jackpal.androidterm.emulatorview.compat.KeyCharacterMapCompat;
 
 import java.io.IOException;
 
-import android.util.Log;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 
 /**
  * An ASCII key listener. Supports control characters and escape. Keeps track of
- * the current state of the alt, shift, fn, and control keys.
- *
+ * the current state of the alt, shift, and control keys.
  */
 class TermKeyListener {
-    private final static String TAG = "TermKeyListener";
-    private static final boolean LOG_KEYS = false;
-    private static final boolean LOG_COMBINING_ACCENT = false;
-
     /** Disabled for now because it interferes with ALT processing on phones with physical keyboards. */
-    private final static boolean SUPPORT_8_BIT_META = false;
-
+    private boolean SUPPORT_8_BIT_META = false;
     /**
      * Android key codes that are defined in the Android 2.3 API.
      * We want to recognize these codes, because they will be sent to our
@@ -651,20 +644,6 @@ class TermKeyListener {
         public boolean isActive() {
             return mState != UNPRESSED;
         }
-
-        public int getUIMode() {
-            switch (mState) {
-            default:
-            case UNPRESSED:
-                return TextRenderer.MODE_OFF;
-            case PRESSED:
-            case RELEASED:
-            case USED:
-                return TextRenderer.MODE_ON;
-            case LOCKED:
-                return TextRenderer.MODE_LOCKED;
-            }
-        }
     }
 
     private ModifierKey mAltKey = new ModifierKey();
@@ -675,16 +654,10 @@ class TermKeyListener {
 
     private ModifierKey mFnKey = new ModifierKey();
 
-    private int mCursorMode;
-
-    private boolean mHardwareControlKey;
-
     private TermSession mTermSession;
 
     private int mBackKeyCode;
     private boolean mAltSendsEsc;
-
-    private int mCombiningAccent;
 
     // Map keycodes out of (above) the Unicode code point space.
     static public final int KEYCODE_OFFSET = 0xA00000;
@@ -696,7 +669,6 @@ class TermKeyListener {
     public TermKeyListener(TermSession termSession) {
         mTermSession = termSession;
         initKeyCodes();
-        updateCursorMode();
     }
 
     public void setBackKeyCharacter(int code) {
@@ -707,17 +679,12 @@ class TermKeyListener {
         mAltSendsEsc = flag;
     }
 
-    public void handleHardwareControlKey(boolean down) {
-        mHardwareControlKey = down;
-    }
-
     public void handleControlKey(boolean down) {
         if (down) {
             mControlKey.onPress();
         } else {
             mControlKey.onRelease();
         }
-        updateCursorMode();
     }
 
     public void handleFnKey(boolean down) {
@@ -726,7 +693,6 @@ class TermKeyListener {
         } else {
             mFnKey.onRelease();
         }
-        updateCursorMode();
     }
 
     public void setTermType(String termType) {
@@ -782,7 +748,7 @@ class TermKeyListener {
     }
 
     public int mapControlChar(int ch) {
-        return mapControlChar(mHardwareControlKey || mControlKey.isActive(), mFnKey.isActive(), ch);
+        return mapControlChar(mControlKey.isActive(), mFnKey.isActive(), ch);
     }
 
     public int mapControlChar(boolean control, boolean fn, int ch) {
@@ -856,7 +822,6 @@ class TermKeyListener {
             mCapKey.adjustAfterKeypress();
             mControlKey.adjustAfterKeypress();
             mFnKey.adjustAfterKeypress();
-            updateCursorMode();
         }
 
         return result;
@@ -870,9 +835,6 @@ class TermKeyListener {
      */
     public void keyDown(int keyCode, KeyEvent event, boolean appMode,
             boolean allowToggle) throws IOException {
-        if (LOG_KEYS) {
-            Log.i(TAG, "keyDown(" + keyCode + "," + event + "," + appMode + "," + allowToggle + ")");
-        }
         if (handleKeyCode(keyCode, appMode)) {
             return;
         }
@@ -884,7 +846,6 @@ class TermKeyListener {
         case KeyEvent.KEYCODE_ALT_LEFT:
             if (allowToggle) {
                 mAltKey.onPress();
-                updateCursorMode();
             }
             break;
 
@@ -892,7 +853,6 @@ class TermKeyListener {
         case KeyEvent.KEYCODE_SHIFT_RIGHT:
             if (allowToggle) {
                 mCapKey.onPress();
-                updateCursorMode();
             }
             break;
 
@@ -954,28 +914,11 @@ class TermKeyListener {
                 }
             }
             result = event.getUnicodeChar(effectiveMetaState);
-
-            if ((result & KeyCharacterMap.COMBINING_ACCENT) != 0) {
-                if (LOG_COMBINING_ACCENT) {
-                    Log.i(TAG, "Got combining accent " + result);
-                }
-                mCombiningAccent = result & KeyCharacterMap.COMBINING_ACCENT_MASK;
-                return;
-            }
-            if (mCombiningAccent != 0) {
-                int unaccentedChar = result;
-                result = KeyCharacterMap.getDeadChar(mCombiningAccent, unaccentedChar);
-                if (LOG_COMBINING_ACCENT) {
-                    Log.i(TAG, "getDeadChar(" + mCombiningAccent + ", " + unaccentedChar + ") -> " + result);
-                }
-                mCombiningAccent = 0;
-            }
-
             break;
             }
         }
 
-        boolean effectiveControl = chordedCtrl || mHardwareControlKey || (allowToggle && mControlKey.isActive());
+        boolean effectiveControl = chordedCtrl || (allowToggle && mControlKey.isActive());
         boolean effectiveFn = allowToggle && mFnKey.isActive();
 
         result = mapControlChar(effectiveControl, effectiveFn, result);
@@ -988,25 +931,6 @@ class TermKeyListener {
             }
             mTermSession.write(result);
         }
-    }
-
-    public int getCombiningAccent() {
-        return mCombiningAccent;
-    }
-
-    public int getCursorMode() {
-        return mCursorMode;
-    }
-
-    private void updateCursorMode() {
-        mCursorMode = getCursorModeHelper(mCapKey, TextRenderer.MODE_SHIFT_SHIFT)
-                | getCursorModeHelper(mAltKey, TextRenderer.MODE_ALT_SHIFT)
-                | getCursorModeHelper(mControlKey, TextRenderer.MODE_CTRL_SHIFT)
-                | getCursorModeHelper(mFnKey, TextRenderer.MODE_FN_SHIFT);
-    }
-
-    private static int getCursorModeHelper(ModifierKey key, int shift) {
-        return key.getUIMode() << shift;
     }
 
     static boolean isEventFromToggleDevice(KeyEvent event) {
@@ -1048,14 +972,12 @@ class TermKeyListener {
         case KeyEvent.KEYCODE_ALT_RIGHT:
             if (allowToggle) {
                 mAltKey.onRelease();
-                updateCursorMode();
             }
             break;
         case KeyEvent.KEYCODE_SHIFT_LEFT:
         case KeyEvent.KEYCODE_SHIFT_RIGHT:
             if (allowToggle) {
                 mCapKey.onRelease();
-                updateCursorMode();
             }
             break;
 

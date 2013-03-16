@@ -25,7 +25,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.ClipboardManager;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -54,9 +53,9 @@ import android.widget.Scroller;
  * take care of this for you.
  */
 public class EmulatorView extends View implements GestureDetector.OnGestureListener {
-    private final static String TAG = "EmulatorView";
-    private final static boolean LOG_KEY_EVENTS = false;
-    private final static boolean LOG_IME = false;
+    private final String TAG = "EmulatorView";
+    private final boolean LOG_KEY_EVENTS = false;
+    private final boolean LOG_IME = false;
 
     /**
      * We defer some initialization until we have been layed out in the view
@@ -109,6 +108,11 @@ public class EmulatorView extends View implements GestureDetector.OnGestureListe
      * Color scheme (default foreground/background colors).
      */
     private ColorScheme mColorScheme = BaseTextRenderer.defaultColorScheme;
+
+    /**
+     * Used to paint the cursor
+     */
+    private Paint mCursorPaint;
 
     private Paint mForegroundPaint;
 
@@ -295,6 +299,8 @@ public class EmulatorView extends View implements GestureDetector.OnGestureListe
      */
     public void attachSession(TermSession session) {
         mTextRenderer = null;
+        mCursorPaint = new Paint();
+        mCursorPaint.setARGB(255,128,128,128);
         mForegroundPaint = new Paint();
         mBackgroundPaint = new Paint();
         mTopRow = 0;
@@ -467,15 +473,11 @@ public class EmulatorView extends View implements GestureDetector.OnGestureListe
                 return true;
             }
 
-            public int getCursorCapsMode(int reqModes) {
+            public int getCursorCapsMode(int arg0) {
                 if (LOG_IME) {
-                    Log.w(TAG, "getCursorCapsMode(" + reqModes + ")");
+                    Log.w(TAG, "getCursorCapsMode(" + arg0 + ")");
                 }
-                int mode = 0;
-                if ((reqModes & TextUtils.CAP_MODE_CHARACTERS) != 0) {
-                    mode |= TextUtils.CAP_MODE_CHARACTERS;
-                }
-                return mode;
+                return 0;
             }
 
             public ExtractedText getExtractedText(ExtractedTextRequest arg0,
@@ -985,14 +987,8 @@ public class EmulatorView extends View implements GestureDetector.OnGestureListe
         // Translate the keyCode into an ASCII character.
 
         try {
-            int oldCombiningAccent = mKeyListener.getCombiningAccent();
-            int oldCursorMode = mKeyListener.getCursorMode();
             mKeyListener.keyDown(keyCode, event, getKeypadApplicationMode(),
                     TermKeyListener.isEventFromToggleDevice(event));
-            if (mKeyListener.getCombiningAccent() != oldCombiningAccent
-                    || mKeyListener.getCursorMode() != oldCursorMode) {
-                invalidate();
-            }
         } catch (IOException e) {
             // Ignore I/O exceptions
         }
@@ -1050,7 +1046,7 @@ public class EmulatorView extends View implements GestureDetector.OnGestureListe
             }
         }
 
-        if (handleHardwareControlKey(keyCode, event)) {
+        if (handleHardwareControlKey(keyCode, event.getAction() == KeyEvent.ACTION_DOWN)) {
             return true;
         }
 
@@ -1071,21 +1067,18 @@ public class EmulatorView extends View implements GestureDetector.OnGestureListe
                 Log.w(TAG, "handleControlKey " + keyCode);
             }
             mKeyListener.handleControlKey(down);
-            invalidate();
             return true;
         }
         return false;
     }
 
-    private boolean handleHardwareControlKey(int keyCode, KeyEvent event) {
+    private boolean handleHardwareControlKey(int keyCode, boolean down) {
         if (keyCode == TermKeyListener.KEYCODE_CTRL_LEFT ||
             keyCode == TermKeyListener.KEYCODE_CTRL_RIGHT) {
             if (LOG_KEY_EVENTS) {
-                Log.w(TAG, "handleHardwareControlKey " + keyCode);
+                Log.w(TAG, "handleControlKey " + keyCode);
             }
-            boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
-            mKeyListener.handleHardwareControlKey(down);
-            invalidate();
+            mKeyListener.handleControlKey(down);
             return true;
         }
         return false;
@@ -1097,7 +1090,6 @@ public class EmulatorView extends View implements GestureDetector.OnGestureListe
                 Log.w(TAG, "handleFnKey " + keyCode);
             }
             mKeyListener.handleFnKey(down);
-            invalidate();
             return true;
         }
         return false;
@@ -1111,12 +1103,10 @@ public class EmulatorView extends View implements GestureDetector.OnGestureListe
         if (mIsControlKeySent) {
             mIsControlKeySent = false;
             mKeyListener.handleControlKey(false);
-            invalidate();
         }
         if (mIsFnKeySent) {
             mIsFnKeySent = false;
             mKeyListener.handleFnKey(false);
-            invalidate();
         }
     }
 
@@ -1221,12 +1211,6 @@ public class EmulatorView extends View implements GestureDetector.OnGestureListe
         int cx = mEmulator.getCursorCol();
         int cy = mEmulator.getCursorRow();
         boolean cursorVisible = mCursorVisible && mEmulator.getShowCursor();
-        String effectiveImeBuffer = mImeBuffer;
-        int combiningAccent = mKeyListener.getCombiningAccent();
-        if (combiningAccent != 0) {
-            effectiveImeBuffer += String.valueOf((char) combiningAccent);
-        }
-        int cursorStyle = mKeyListener.getCursorMode();
         for (int i = mTopRow; i < endLine; i++) {
             int cursorX = -1;
             if (i == cy && cursorVisible) {
@@ -1244,7 +1228,7 @@ public class EmulatorView extends View implements GestureDetector.OnGestureListe
                     selx2 = mColumns;
                 }
             }
-            mTranscriptScreen.drawText(i, canvas, x, y, mTextRenderer, cursorX, selx1, selx2, effectiveImeBuffer, cursorStyle);
+            mTranscriptScreen.drawText(i, canvas, x, y, mTextRenderer, cursorX, selx1, selx2, mImeBuffer);
             y += mCharacterHeight;
         }
     }
@@ -1298,7 +1282,6 @@ public class EmulatorView extends View implements GestureDetector.OnGestureListe
     public void sendControlKey() {
         mIsControlKeySent = true;
         mKeyListener.handleControlKey(true);
-        invalidate();
     }
 
     /**
@@ -1308,7 +1291,6 @@ public class EmulatorView extends View implements GestureDetector.OnGestureListe
     public void sendFnKey() {
         mIsFnKeySent = true;
         mKeyListener.handleFnKey(true);
-        invalidate();
     }
 
     /**
