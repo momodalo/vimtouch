@@ -81,7 +81,6 @@ import android.widget.LinearLayout;
 import jackpal.androidterm.emulatorview.EmulatorView;
 import jackpal.androidterm.emulatorview.ColorScheme;
 import jackpal.androidterm.emulatorview.TermSession;
-import com.lamerman.FileDialog;
 
 import net.momodalo.app.vimtouch.compat.ActionBarCompat;
 import net.momodalo.app.vimtouch.compat.AndroidCompat;
@@ -417,10 +416,12 @@ public class VimTouch extends Activity implements ActionBarCompat.OnNavigationLi
                 mEmulatorView.onResume();
             }
         }else if (requestCode == REQUEST_OPEN){
+            /*
             if (resultCode == Activity.RESULT_OK) {
                 String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
                 mUrl = filePath;
             }
+            */
         }
     }
 

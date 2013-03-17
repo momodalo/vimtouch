@@ -1,7 +1,6 @@
 package net.momodalo.app.vimtouch;
 
 import android.app.Activity;
-import com.lamerman.FileDialog;
 import android.os.Bundle;
 import android.os.Environment;
 import android.content.Intent;
@@ -47,7 +46,6 @@ public class VimFileActivity extends Activity{
                 startActivity(intent);
             }catch (Exception e){
             }
-            String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
         }
         finish();
     }
