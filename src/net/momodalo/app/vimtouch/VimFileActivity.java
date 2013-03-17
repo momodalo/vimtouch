@@ -9,6 +9,8 @@ import java.io.File;
 import android.net.Uri;
 import android.util.Log;
 
+import com.ipaulpro.afilechooser.utils.FileUtils;
+
 public class VimFileActivity extends Activity{
     public static final String OPEN_TYPE = "open_type";
     public static final String OPEN_PATH = "open_path";
@@ -24,27 +26,28 @@ public class VimFileActivity extends Activity{
         int opentype = getIntent().getExtras().getInt(OPEN_TYPE, FILE_TABNEW);
         String path = getIntent().getExtras().getString(OPEN_PATH);
 
-        Intent intent = new Intent(getBaseContext(), VimFileDialog.class);
-        if(path != null)
-            intent.putExtra(FileDialog.START_PATH, path);
-        else
-            intent.putExtra(FileDialog.START_PATH,
-                        Environment.getExternalStorageDirectory().getPath());
-                                            
-        //can user select directories or not
-        intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
-                                                            
-        startActivityForResult(intent, opentype);
+        String title = "";
+        if(opentype == FILE_TABNEW) title = getString(R.string.tabnew_file);
+        if(opentype == FILE_NEW) title = getString(R.string.new_file);
+        if(opentype == FILE_VNEW) title = getString(R.string.vnew_file);
+		Intent target = FileUtils.createGetContentIntent();
+		Intent intent = Intent.createChooser(target, title);
+		startActivityForResult(intent, opentype);
 	}
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
+            final Uri uri = data.getData();
+
+            try {
+                final File file = FileUtils.getFile(uri);
+                Intent intent = new Intent(getBaseContext(), VimTouch.class);
+                intent.setData(Uri.fromFile(file));
+                intent.putExtra(OPEN_TYPE, requestCode);
+                startActivity(intent);
+            }catch (Exception e){
+            }
             String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
-            Intent intent = new Intent(getBaseContext(), VimTouch.class);
-            File file = new File(filePath.replace(" ", "\\ "));
-            intent.setData(Uri.fromFile(file));
-            intent.putExtra(OPEN_TYPE, requestCode);
-            startActivity(intent);
         }
         finish();
     }

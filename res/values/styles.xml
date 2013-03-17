@@ -32,5 +32,6 @@
         <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
     </style>
+    <style name="ChooserTheme" parent="android:Theme.Light" />
 </resources>
 
