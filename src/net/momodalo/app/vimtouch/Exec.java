@@ -57,7 +57,7 @@ public class Exec
     ) {
         dialogState = DIALOG_INPROGRESS;
         dialogDefaultState = default_button;
-        vimtouch.showDialog(type,title, message, buttons, default_button, textfield);
+        vimtouch.nativeShowDialog(type,title, message, buttons, default_button, textfield);
     }
 
     public static void quit() {
@@ -66,23 +66,23 @@ public class Exec
     }
 
     public static void setCurTab(int n){
-        vimtouch.setCurTab(n);
+        vimtouch.nativeSetCurTab(n);
     }
 
     public static void showTab(int n){
-        vimtouch.showTab(n);
+        vimtouch.nativeShowTab(n);
     }
 
     public static void setTabLabels(String[] labels){
-        vimtouch.setTabs(labels);
+        vimtouch.nativeSetTabs(labels);
     }
 
     public static void setClipText(String text){
-        vimtouch.setClipText(text);
+        vimtouch.nativeSetClipText(text);
     }
 
     public static String getClipText() throws InterruptedException {
-        vimtouch.syncClipText();
+        vimtouch.nativeSyncClipText();
         String clipText = vimtouch.getClipText();
 
         while (clipText == null) {

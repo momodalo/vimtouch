@@ -310,7 +310,7 @@ public class VimTouch extends SlidingFragmentActivity implements
         getSlidingMenu().setOnCloseListener(new SlidingMenu.OnCloseListener(){
             public void onClose(){
                 setTabLabels(mVimTabs);
-                realSetCurTab(mVimCurTab);
+                setCurTab(mVimCurTab);
             }
         });
 
@@ -717,7 +717,7 @@ public class VimTouch extends SlidingFragmentActivity implements
                 break;
             case MSG_DIALOG:
                 DialogObj obj = (DialogObj) msg.obj;
-                activity.realShowDialog(obj.type, obj.title, obj.message,
+                activity.showDialog(obj.type, obj.title, obj.message,
                                         obj.buttons, obj.def_button,
                                         obj.textfield);
                 break;
@@ -740,7 +740,7 @@ public class VimTouch extends SlidingFragmentActivity implements
                 break;
             case MSG_SHOWTAB:
                 int s = (int)msg.arg1;
-                activity.realShowTab(s);
+                activity.showTab(s);
                 break;
             default:
                 super.handleMessage(msg);
@@ -749,7 +749,7 @@ public class VimTouch extends SlidingFragmentActivity implements
     }
     private MsgHandler mHandler = new MsgHandler(this);
 
-    public void showDialog(int type, String title, String message, String buttons, int def_button, String textfield) {
+    public void nativeShowDialog(int type, String title, String message, String buttons, int def_button, String textfield) {
         DialogObj obj = new DialogObj();
         obj.type = type;
         obj.title = title;
@@ -762,7 +762,7 @@ public class VimTouch extends SlidingFragmentActivity implements
 
     private String mClipText;
 
-    public void syncClipText() {
+    public void nativeSyncClipText() {
         mHandler.sendMessage(mHandler.obtainMessage(MSG_SYNCCLIP));
     }
 
@@ -770,13 +770,13 @@ public class VimTouch extends SlidingFragmentActivity implements
         return mClipText;
     }
 
-    public void setClipText(String text) {
+    public void nativeSetClipText(String text) {
         mHandler.sendMessage(mHandler.obtainMessage(MSG_SETCLIP, text));
     }
 
     private AlertDialog.Builder actionBuilder;
 
-    private void realShowDialog(int type, String title, String message, String buttons, int def_button, String textfield) {
+    private void showDialog(int type, String title, String message, String buttons, int def_button, String textfield) {
         buttons = buttons.replaceAll("&", "");
         String button_array[] = buttons.split("\n");
 
@@ -982,7 +982,7 @@ public class VimTouch extends SlidingFragmentActivity implements
         mTabAdapter.notifyDataSetChanged();
     }
 
-    public void realSetCurTab(int n){
+    public void setCurTab(int n){
         ActionBarCompat actionbar = ActivityCompat.getActionBar(this);
         if(actionbar == null){
             mTabSpinner.setSelection(n);
@@ -993,10 +993,10 @@ public class VimTouch extends SlidingFragmentActivity implements
 
     public void setVimCurTab(int n){
         mVimCurTab = n;
-        realSetCurTab(n);
+        setCurTab(n);
     }
 
-    public void realShowTab(int n){
+    public void showTab(int n){
         //mTabSpinner.setVisibility(n>0?View.VISIBLE:View.GONE);
         ActionBarCompat actionbar = ActivityCompat.getActionBar(this);
         if(actionbar == null){
@@ -1006,15 +1006,15 @@ public class VimTouch extends SlidingFragmentActivity implements
         }
     }
 
-    public void setCurTab(int n){
+    public void nativeSetCurTab(int n){
         mHandler.sendMessage(mHandler.obtainMessage(MSG_SETCURTAB, n, 0));
     }
 
-    public void showTab(int n){
+    public void nativeShowTab(int n){
         mHandler.sendMessage(mHandler.obtainMessage(MSG_SHOWTAB, n, 0));
     }
 
-    public void setTabs(String[] array){
+    public void nativeSetTabs(String[] array){
         mHandler.sendMessage(mHandler.obtainMessage(MSG_SETTABS, array));
     }
 
@@ -1100,7 +1100,7 @@ public class VimTouch extends SlidingFragmentActivity implements
         }
         mTabAdapter.notifyDataSetChanged();
         
-        realShowTab(1);
+        showTab(1);
     }
 
     public void onFileSelected(File file){
