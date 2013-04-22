@@ -41,7 +41,7 @@ import android.widget.Toast;
  * 
  */
 public class FileChooserActivity extends FragmentActivity implements
-		OnBackStackChangedListener {
+		FileChoosedListener , OnBackStackChangedListener {
 
 	public static final String PATH = "path";
 	public static final String EXTERNAL_BASE_PATH = Environment
@@ -156,7 +156,7 @@ public class FileChooserActivity extends FragmentActivity implements
 	 * 
 	 * @param file The file that was selected
 	 */
-	protected void onFileSelected(File file) {
+	public void onFileSelected(File file) {
 		if (file != null) {
 			mPath = file.getAbsolutePath();
 			

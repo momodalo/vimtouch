@@ -85,7 +85,7 @@ public class FileListFragment extends ListFragment implements
 		if (adapter != null) {
 			File file = (File) adapter.getItem(position);
 			mPath = file.getAbsolutePath();
-			((FileChooserActivity) getActivity()).onFileSelected(file);
+			((FileChoosedListener) getActivity()).onFileSelected(file);
 		}
 	}
 
