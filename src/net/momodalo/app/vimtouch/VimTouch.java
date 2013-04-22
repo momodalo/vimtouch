@@ -152,7 +152,7 @@ public class VimTouch extends SlidingFragmentActivity implements
     private TextView mButtons[];
     private Spinner mTabSpinner;
     private String[] mVimTabs = null;
-    private int mVimCurTab = 0;
+    private int mVimCurTab = -1;
     private String mOpenCommand = "tabnew";
     private ArrayAdapter<CharSequence> mTabAdapter;
     private final static int QUICK_BUTTON_SIZE=9;
@@ -978,6 +978,11 @@ public class VimTouch extends SlidingFragmentActivity implements
     }
 
     public void setCurTab(int n){
+        if(n < 0){
+            showTab(0);
+            return;
+        }
+
         ActionBarCompat actionbar = ActivityCompat.getActionBar(this);
         if(actionbar == null){
             mTabSpinner.setSelection(n);
@@ -992,6 +997,7 @@ public class VimTouch extends SlidingFragmentActivity implements
     }
 
     public void showTab(int n){
+        if(n <= 0) mVimCurTab = -1;
         //mTabSpinner.setVisibility(n>0?View.VISIBLE:View.GONE);
         ActionBarCompat actionbar = ActivityCompat.getActionBar(this);
         if(actionbar == null){
