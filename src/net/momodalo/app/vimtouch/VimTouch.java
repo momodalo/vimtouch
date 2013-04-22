@@ -152,6 +152,7 @@ public class VimTouch extends SlidingFragmentActivity implements
     private TextView mButtons[];
     private Spinner mTabSpinner;
     private String[] mVimTabs = null;
+    private int mVimCurTab = 0;
     private ArrayAdapter<CharSequence> mTabAdapter;
     private final static int QUICK_BUTTON_SIZE=9;
 
@@ -309,6 +310,7 @@ public class VimTouch extends SlidingFragmentActivity implements
         getSlidingMenu().setOnCloseListener(new SlidingMenu.OnCloseListener(){
             public void onClose(){
                 setTabLabels(mVimTabs);
+                realSetCurTab(mVimCurTab);
             }
         });
 
@@ -728,7 +730,7 @@ public class VimTouch extends SlidingFragmentActivity implements
                 break;
             case MSG_SETCURTAB:
                 int n = (int)msg.arg1;
-                activity.realSetCurTab(n);
+                activity.setVimCurTab(n);
             case MSG_SETTABS:
                 String[] array = (String[])msg.obj;
                 if(array==null)
@@ -987,6 +989,11 @@ public class VimTouch extends SlidingFragmentActivity implements
         }else{
             actionbar.setSelectedNavigationItem(n);
         }
+    }
+
+    public void setVimCurTab(int n){
+        mVimCurTab = n;
+        realSetCurTab(n);
     }
 
     public void realShowTab(int n){
