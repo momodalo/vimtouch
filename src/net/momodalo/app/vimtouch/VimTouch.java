@@ -153,6 +153,7 @@ public class VimTouch extends SlidingFragmentActivity implements
     private Spinner mTabSpinner;
     private String[] mVimTabs = null;
     private int mVimCurTab = 0;
+    private String mOpenCommand = "tabnew";
     private ArrayAdapter<CharSequence> mTabAdapter;
     private final static int QUICK_BUTTON_SIZE=9;
 
@@ -912,23 +913,17 @@ public class VimTouch extends SlidingFragmentActivity implements
             downloadFullRuntime();
         */
         }else if (id == R.id.menu_new) {
-            Intent intent = new Intent(getBaseContext(), VimFileActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.putExtra(VimFileActivity.OPEN_TYPE, VimFileActivity.FILE_NEW);
-            intent.putExtra(VimFileActivity.OPEN_PATH, Exec.getcwd());
-            startActivity(intent);
+            item.setChecked(true);
+            mOpenCommand = "new";
+            showMenu();
         }else if (id == R.id.menu_vnew) {
-            Intent intent = new Intent(getBaseContext(), VimFileActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.putExtra(VimFileActivity.OPEN_TYPE, VimFileActivity.FILE_VNEW);
-            intent.putExtra(VimFileActivity.OPEN_PATH, Exec.getcwd());
-            startActivity(intent);
+            item.setChecked(true);
+            mOpenCommand = "vnew";
+            showMenu();
         }else if (id == R.id.menu_tabnew) {
-            Intent intent = new Intent(getBaseContext(), VimFileActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.putExtra(VimFileActivity.OPEN_TYPE, VimFileActivity.FILE_TABNEW);
-            intent.putExtra(VimFileActivity.OPEN_PATH, Exec.getcwd());
-            startActivity(intent);
+            item.setChecked(true);
+            mOpenCommand = "tabnew";
+            showMenu();
         } else if (id == R.id.menu_save) {
             Exec.doCommand("w");
         } else if (id == R.id.menu_keys) {
@@ -1110,7 +1105,7 @@ public class VimTouch extends SlidingFragmentActivity implements
 			if (file.isDirectory()) {
                 showDirectory(path);
 			} else {
-                Exec.doCommand("tabnew "+path);
+                Exec.doCommand(mOpenCommand+" "+path);
                 Exec.updateScreen();
                 showContent();
 			}
