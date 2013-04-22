@@ -281,12 +281,13 @@ public class TermView extends EmulatorView implements
             mZoomY = y;
 
             if(mLastX != -1 && Math.abs(x-mLastX) > getCharacterWidth() * 5 && !getZoom()){
+                /* the sliding left/right gesture has been replaced by sliding menu
                 setZoom(true);
                 mLastY = -1;
                 int cursorX = (int)(x/getCharacterWidth());
                 int cursorY = (int)(y/getCharacterHeight());
                 Exec.setCursorPos(cursorY, cursorX);
-
+                */
             } else if(mLastY != -1 && Math.abs(y-mLastY) > getCharacterHeight() * 2 && !getZoom()){
                 if(mTouchGesture){
                     if(mLastX != -1){

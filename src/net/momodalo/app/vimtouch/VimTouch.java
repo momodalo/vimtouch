@@ -77,6 +77,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import jackpal.androidterm.emulatorview.EmulatorView;
 import jackpal.androidterm.emulatorview.ColorScheme;
@@ -90,11 +91,23 @@ import net.momodalo.app.vimtouch.addons.RuntimeAddOn;
 import net.momodalo.app.vimtouch.addons.PluginFactory;
 import net.momodalo.app.vimtouch.addons.PluginAddOn;
 
+import com.ipaulpro.afilechooser.FileListFragment;
+import com.ipaulpro.afilechooser.FileChoosedListener;
+import com.slidingmenu.lib.SlidingMenu;
+import com.slidingmenu.lib.app.SlidingFragmentActivity;
+
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.FragmentManager.OnBackStackChangedListener;
+
+
 /**
  * A terminal emulator activity.
  */
 
-public class VimTouch extends Activity implements ActionBarCompat.OnNavigationListener, OnItemSelectedListener {
+public class VimTouch extends SlidingFragmentActivity implements 
+    ActionBarCompat.OnNavigationListener, 
+    OnItemSelectedListener , 
+    FileChoosedListener {
     /**
      * Set to true to add debugging code and logging.
      */
@@ -138,6 +151,7 @@ public class VimTouch extends Activity implements ActionBarCompat.OnNavigationLi
     private View mRightButtonBar;
     private TextView mButtons[];
     private Spinner mTabSpinner;
+    private String[] mVimTabs = null;
     private ArrayAdapter<CharSequence> mTabAdapter;
     private final static int QUICK_BUTTON_SIZE=9;
 
@@ -273,7 +287,37 @@ public class VimTouch extends Activity implements ActionBarCompat.OnNavigationLi
         if(Integer.valueOf(android.os.Build.VERSION.SDK) < 11)
             requestWindowFeature(Window.FEATURE_NO_TITLE);
 
+        setBehindContentView(R.layout.menu);
+        /* setup sliding menu */
         setContentView(R.layout.term_activity);
+
+        setSlidingActionBarEnabled(false);
+
+        getSlidingMenu().setMode(SlidingMenu.LEFT);
+        getSlidingMenu().setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
+        getSlidingMenu().setShadowWidthRes(R.dimen.shadow_width);
+        getSlidingMenu().setShadowDrawable(R.drawable.shadow);
+        getSlidingMenu().setBehindOffsetRes(R.dimen.slidingmenu_offset);
+        getSlidingMenu().setFadeDegree(0.35f);
+        //getSlidingMenu().attachToActivity(this, SlidingMenu.SLIDING_CONTENT);
+
+        getSupportFragmentManager()
+            .beginTransaction()
+            .replace(R.id.menu_frame, FileListFragment.newInstance("."))
+            .commit();
+
+        getSlidingMenu().setOnCloseListener(new SlidingMenu.OnCloseListener(){
+            public void onClose(){
+                setTabLabels(mVimTabs);
+            }
+        });
+
+        getSlidingMenu().setOnOpenListener(new SlidingMenu.OnOpenListener(){
+            public void onOpen(){
+                String path = Exec.getcwd();
+                showDirectory(path);
+            }
+        });
 
         mTopButtonBar = findViewById(R.id.top_bar);
         mBottomButtonBar = findViewById(R.id.bottom_bar);
@@ -689,12 +733,8 @@ public class VimTouch extends Activity implements ActionBarCompat.OnNavigationLi
                 String[] array = (String[])msg.obj;
                 if(array==null)
                     break;
-                ArrayAdapter<CharSequence> adapter = activity.getTabAdapter();
-                adapter.clear();
-                for (String str: array){
-                    adapter.add(str);
-                }
-                adapter.notifyDataSetChanged();
+                activity.setVimTabs(array);
+                activity.setTabLabels(array);
                 break;
             case MSG_SHOWTAB:
                 int s = (int)msg.arg1;
@@ -927,8 +967,17 @@ public class VimTouch extends Activity implements ActionBarCompat.OnNavigationLi
 
     }
 
-    public ArrayAdapter<CharSequence> getTabAdapter(){
-        return mTabAdapter;
+    public void setVimTabs(String[] array){
+        mVimTabs = array;
+    }
+
+    public void setTabLabels(String[] array){
+        if(array == null) return;
+        mTabAdapter.clear();
+        for (String str: array){
+            mTabAdapter.add(str);
+        }
+        mTabAdapter.notifyDataSetChanged();
     }
 
     public void realSetCurTab(int n){
@@ -963,11 +1012,17 @@ public class VimTouch extends Activity implements ActionBarCompat.OnNavigationLi
     }
 
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-        Exec.setTab(pos);
+        if(getSlidingMenu().isMenuShowing())
+            showDirectory(mTabAdapter.getItem(pos).toString());
+        else
+            Exec.setTab(pos);
     }
 
     public boolean onNavigationItemSelected(int pos, long id) {
-        Exec.setTab(pos);
+        if(getSlidingMenu().isMenuShowing())
+            showDirectory(mTabAdapter.getItem(pos).toString());
+        else
+            Exec.setTab(pos);
         return true;
     }
 
@@ -1019,4 +1074,42 @@ public class VimTouch extends Activity implements ActionBarCompat.OnNavigationLi
             dialog.show();
     }
 
+    private void showDirectory(String path) {
+	    FileListFragment explorerFragment = FileListFragment.newInstance(path);
+        getSupportFragmentManager()
+	        .beginTransaction()
+			.replace(R.id.menu_frame, explorerFragment)
+			.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+			.commit();
+
+        mTabAdapter.clear();
+        mTabAdapter.add(path);
+        String curr = path;
+        while (curr != null){
+            File file = new File(curr);
+            if(file.getParentFile() == null) break;
+            curr = file.getParentFile().getAbsolutePath();
+            mTabAdapter.add(curr);
+        }
+        mTabAdapter.notifyDataSetChanged();
+        
+        realShowTab(1);
+    }
+
+    public void onFileSelected(File file){
+        if (file != null) {
+			String path = file.getAbsolutePath();
+			
+			if (file.isDirectory()) {
+                showDirectory(path);
+			} else {
+                Exec.doCommand("tabnew "+path);
+                Exec.updateScreen();
+                showContent();
+			}
+		} else {
+			Toast.makeText(VimTouch.this, R.string.error_selecting_file, Toast.LENGTH_SHORT).show();
+		}
+
+    }
 }

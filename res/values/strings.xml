@@ -108,4 +108,6 @@
 
    <string name="service_notify_text">VimTouch is running</string>
    <string name="choose_file">Choose File</string>
+   
+   <string name="error_selecting_file">Error selecting File</string>    
 </resources>
