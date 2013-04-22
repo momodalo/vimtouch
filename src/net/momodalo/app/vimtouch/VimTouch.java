@@ -155,6 +155,7 @@ public class VimTouch extends SlidingFragmentActivity implements
     private int mVimCurTab = -1;
     private String mOpenCommand = "tabnew";
     private ArrayAdapter<CharSequence> mTabAdapter;
+    private String mLastDir = null;
     private final static int QUICK_BUTTON_SIZE=9;
 
     private int mControlKeyId = 0;
@@ -925,7 +926,13 @@ public class VimTouch extends SlidingFragmentActivity implements
             mOpenCommand = "tabnew";
             showMenu();
         } else if (id == R.id.menu_save) {
-            Exec.doCommand("w");
+            if(getSlidingMenu().isMenuShowing()){
+                showContent();
+                if(Exec.isInsertMode())
+                    mSession.write(27);
+                mSession.write(":w " + mLastDir + "/");
+            }else
+                Exec.doCommand("w");
         } else if (id == R.id.menu_keys) {
             if(mButtonBarLayout.isShown()){
                 mSettings.setQuickbarShow(false);
@@ -1102,6 +1109,7 @@ public class VimTouch extends SlidingFragmentActivity implements
         mTabAdapter.notifyDataSetChanged();
         
         showTab(1);
+        mLastDir = path;
     }
 
     public void onFileSelected(File file){
