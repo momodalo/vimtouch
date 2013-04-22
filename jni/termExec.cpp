@@ -250,8 +250,10 @@ static int create_subprocess(const char *cmd, const char *arg0, const char *arg1
 
         }
         thread_arg[1] = strdup(arg0);
-    }else 
+    }else {
+        chdir(getenv("HOME"));
         thread_arg[1] = NULL;
+    }
 
     pthread_t thread_id;
     pthread_attr_t attr;
