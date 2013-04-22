@@ -58,14 +58,14 @@
         android:layout_weight="1"
         android:orientation="horizontal">
 
-        <HorizontalScrollView
+        <ScrollView
             android:id="@+id/left_bar"
             android:visibility="gone"
             android:layout_weight="0"
             android:background="@drawable/bar_bg"
             android:layout_width="wrap_content"
             android:layout_height="match_parent">
-        </HorizontalScrollView>
+        </ScrollView>
         <ImageView 
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -81,14 +81,14 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:src="@drawable/list_divider_holo_dark" />
-        <HorizontalScrollView
+        <ScrollView
             android:id="@+id/right_bar"
             android:visibility="gone"
             android:layout_weight="0"
             android:background="@drawable/bar_bg"
             android:layout_width="wrap_content"
             android:layout_height="match_parent">
-        </HorizontalScrollView>
+        </ScrollView>
     </LinearLayout>
     <ImageView 
         android:layout_width="match_parent"
