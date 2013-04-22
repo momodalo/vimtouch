@@ -45,6 +45,16 @@ public class TermView extends EmulatorView implements
     private static final int CURSOR_BLINK_PERIOD = 1000;
     private static final int VISUAL_MODE_PERIOD = 1000;
 
+    public interface OnZoomListener {
+        void onZoom(boolean on);
+    }
+
+    private OnZoomListener mZoomListener = null;
+    public void setOnZoomListener(OnZoomListener listen) {
+        mZoomListener = listen;
+    }
+
+
     public boolean checkInsertMode() {
         boolean b = Exec.isInsertMode();
         if (b != mInserted){
@@ -239,6 +249,7 @@ public class TermView extends EmulatorView implements
     float mZoomY = 0.0f;
     public void setZoom(boolean z){
         mZoom = z;
+        if(mZoomListener != null) mZoomListener.onZoom(z);
     }
 
     public boolean getZoom(){
@@ -281,13 +292,11 @@ public class TermView extends EmulatorView implements
             mZoomY = y;
 
             if(mLastX != -1 && Math.abs(x-mLastX) > getCharacterWidth() * 5 && !getZoom()){
-                /* the sliding left/right gesture has been replaced by sliding menu
                 setZoom(true);
                 mLastY = -1;
                 int cursorX = (int)(x/getCharacterWidth());
                 int cursorY = (int)(y/getCharacterHeight());
                 Exec.setCursorPos(cursorY, cursorX);
-                */
             } else if(mLastY != -1 && Math.abs(y-mLastY) > getCharacterHeight() * 2 && !getZoom()){
                 if(mTouchGesture){
                     if(mLastX != -1){
@@ -392,14 +401,15 @@ public class TermView extends EmulatorView implements
 
         super.onDraw(canvas);
         if(mZoom){
+            float tx = 2 * getCharacterWidth() * ( 1 - 2 * mZoomX / getVisibleWidth());
             float h = getCharacterHeight()*2;
             canvas.scale(3.0f,3.0f,mZoomX, mZoomY);
             if(mZoomY > getVisibleHeight()/2){
-                canvas.translate(0.0f, (-mZoomY)/3 + h);
+                canvas.translate( tx, (-mZoomY)/3 + h);
             }else{
-                canvas.translate(0.0f, (getVisibleHeight()-mZoomY)/3 - h);
+                canvas.translate( tx, (getVisibleHeight()-mZoomY)/3 - h);
             }
-            canvas.clipRect(mZoomX - mZoomX/3+5, mZoomY-h, mZoomX+(getVisibleWidth()-mZoomX)/3-5,mZoomY+h);
+            canvas.clipRect(mZoomX - mZoomX/3-5, mZoomY-h, mZoomX+(getVisibleWidth()-mZoomX)/3+5,mZoomY+h);
             super.onDraw(canvas);
         }
     }

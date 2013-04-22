@@ -414,6 +414,11 @@ public class VimTouch extends SlidingFragmentActivity implements
             }
         });
         mEmulatorView = createEmulatorView(mSession);
+        mEmulatorView.setOnZoomListener( new TermView.OnZoomListener() {
+            public void onZoom(boolean on){
+                getSlidingMenu().setSlidingEnabled(!on);
+            }
+        });
         mMainLayout.addView(mEmulatorView);
 
         mEmulatorView.updateSize(true);
