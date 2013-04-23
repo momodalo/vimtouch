@@ -160,8 +160,14 @@ public class Exec
     public static native String getcwd();
     public static native String getCmdHistory(int i);
 
+    public final static int CMDLINE = 0x08;
+    public final static int INSERT = 0x10;
+    public static boolean isCmdLine(){
+        return (Exec.getState() & CMDLINE) != 0;
+    }
+
     public static boolean isInsertMode(){
-        return (Exec.getState() & 0x10) != 0;
+        return (Exec.getState() & INSERT) != 0;
     }
 }
 

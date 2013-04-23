@@ -76,7 +76,7 @@
    <string name="title_single_tap_esc_preference">Single Tap send ESC</string>
    <string name="summary_single_tap_esc_preference">Whether single tap to send ESC key is enabled.</string>
 
-   <string name="title_zoombottom_preference">Zoom Bottom Text</string>
+   <string name="title_zoombottom_preference">Zoom Command Line</string>
    <string name="summary_zoombottom_preference">Whether zoom bottom text is enabled.</string>
 
    <string name="new_file">Open(:new)</string>

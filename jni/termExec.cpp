@@ -528,6 +528,8 @@ static int DEF_JNI0(getCursorCol)
 {
     if(fake_gpm_fd[1] < 0) return 0;
 
+    if(State & CMDLINE)
+        return msg_col;
     return curwin->w_cursor.col;
 }
 

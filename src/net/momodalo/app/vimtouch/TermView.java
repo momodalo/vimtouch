@@ -39,6 +39,7 @@ public class TermView extends EmulatorView implements
     private int mCheckCount = 0;
     private VimInputConnection mInputConnection = null;
     private boolean mIMEComposing = false;
+    private boolean mZoomBottom = true;
 
     private static final int FLING_REFRESH_PERIOD = 50;
     private static final int SCREEN_CHECK_PERIOD = 1000;
@@ -101,7 +102,7 @@ public class TermView extends EmulatorView implements
         setBackKeyCharacter(settings.getBackKeyCharacter());
         setControlKeyCode(settings.getControlKeyCode());
         setFnKeyCode(settings.getFnKeyCode());
-        //setZoomBottom(settings.getZoomBottom());
+        mZoomBottom = settings.getZoomBottom();
         mSingleTapESC = settings.getSingleTapESC();
         mTouchGesture = settings.getTouchGesture();
 
@@ -410,6 +411,12 @@ public class TermView extends EmulatorView implements
                 canvas.translate( tx, (getVisibleHeight()-mZoomY)/3 - h);
             }
             canvas.clipRect(mZoomX - mZoomX/3-5, mZoomY-h, mZoomX+(getVisibleWidth()-mZoomX)/3+5,mZoomY+h);
+            super.onDraw(canvas);
+        }
+        if(mZoomBottom && Exec.isCmdLine()){
+            float cx = getVisibleWidth() - (Exec.getCursorCol()+2) * getCharacterWidth() * 3.0f;
+            canvas.scale(3.0f,3.0f, cx < 0.0f? cx : 0.0f, getVisibleHeight() - getCharacterHeight());
+            canvas.translate( cx < 0.0f? cx : 0.0f, (- getVisibleHeight() + getCharacterHeight() * 2)/3);
             super.onDraw(canvas);
         }
     }
