@@ -59,7 +59,7 @@
                   android:excludeFromRecents="true"
         />
         <activity android:name="InstallProgress"
-                  android:theme="@style/VimTheme"
+                  android:theme="@style/VimInstallTheme"
                   android:launchMode="singleInstance"
                   android:label="@string/install_activity"
         >
@@ -71,21 +71,6 @@
                 <data android:scheme="ftp" />
                 <data android:host="*" />
                 <data android:pathPattern=".*\\.vrz" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name="com.ipaulpro.afilechooser.FileChooserActivity"
-            android:exported="false"
-            android:icon="@drawable/app_vimtouch"
-            android:label="@string/choose_file"
-            android:theme="@style/ChooserTheme" >
-            <intent-filter>
-                <action android:name="android.intent.action.GET_CONTENT" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.OPENABLE" />
-
-                <data android:mimeType="*/*" />
             </intent-filter>
         </activity>
         <service android:name="VimTermService" />
