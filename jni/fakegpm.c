@@ -53,7 +53,6 @@ int Gpm_GetEvent(Gpm_Event *e){
         out_flush();
         shell_resized_check();
         redraw_later(CLEAR);
-        update_screen(CLEAR);
         out_flush();
     }else if(event.type == VIM_EVENT_TYPE_SETTAB){
         int nr = event.event.nums[0];
