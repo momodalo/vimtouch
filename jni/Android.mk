@@ -40,6 +40,7 @@ LOCAL_SRC_FILES:= \
   clipboard.c\
   exit.c\
   misc.c\
+  version.c\
   libiconv/lib/iconv.c \
   libiconv/libcharset/lib/localcharset.c \
   libiconv/lib/relocatable.c \
@@ -86,7 +87,6 @@ LOCAL_SRC_FILES:= \
   vim/src/term.c\
   vim/src/ui.c\
   vim/src/undo.c\
-  vim/src/version.c\
   vim/src/window.c\
   vim/src/netbeans.c\
   vim/src/memfile.c
