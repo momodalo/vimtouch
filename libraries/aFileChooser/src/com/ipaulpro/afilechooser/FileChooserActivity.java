@@ -117,6 +117,7 @@ public class FileChooserActivity extends FragmentActivity implements
 	 */
 	private void addFragment(String path) {
 		FileListFragment explorerFragment = FileListFragment.newInstance(mPath);
+        explorerFragment.setFileChoosedListener(this);
 		mFragmentManager.beginTransaction()
 				.add(R.id.explorer_fragment, explorerFragment).commit();
 	}
@@ -129,6 +130,7 @@ public class FileChooserActivity extends FragmentActivity implements
 	 */
 	private void replaceFragment(String path) {
 		FileListFragment explorerFragment = FileListFragment.newInstance(path);
+        explorerFragment.setFileChoosedListener(this);
 		mFragmentManager.beginTransaction()
 				.replace(R.id.explorer_fragment, explorerFragment)
 				.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
