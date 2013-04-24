@@ -63,6 +63,7 @@ public abstract class ActionBarCompat {
     public abstract void setSelectedNavigationItem(int position);
     public abstract void setTitle(int resId);
     public abstract void setTitle(CharSequence title);
+    public abstract void setDisplayShowTitleEnabled(boolean b);
     public abstract void show();
 }
 
@@ -140,6 +141,10 @@ class ActionBarApi11OrLater extends ActionBarCompat {
 
     public void setTitle(CharSequence title) {
         bar.setTitle(title);
+    }
+
+    public void setDisplayShowTitleEnabled(boolean b){
+        bar.setDisplayShowTitleEnabled(b);
     }
 
     public void show() {

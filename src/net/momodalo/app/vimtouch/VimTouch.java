@@ -351,6 +351,7 @@ public class VimTouch extends SlidingFragmentActivity implements
         */
 
         ActionBarCompat actionBar = ActivityCompat.getActionBar(this);
+        actionBar.setDisplayShowTitleEnabled(false);
         mTabSpinner = (Spinner)findViewById(R.id.tab_spinner);
         if(actionBar == null){
             mTabSpinner.setVisibility(View.VISIBLE);
