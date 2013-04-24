@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center|center_vertical"
         style="@android:style/Widget.ProgressBar.Horizontal"
-        android:layout_margin="3dp" />
+        android:layout_margin="15dp" />
     <TextView
         android:id="@+id/progress_text"
         android:layout_width="wrap_content"

@@ -127,6 +127,8 @@ public class VimTouch extends SlidingFragmentActivity implements
 
     private static final int REQUEST_INSTALL = 0;
     private static final int REQUEST_OPEN = 1;
+    private static final int REQUEST_BACKUP = 2;
+    private static final int REQUEST_VRZ = 3;
 
     /**
      * The tag we use when logging, so that our messages can be distinguished
@@ -938,6 +940,10 @@ public class VimTouch extends SlidingFragmentActivity implements
                 mSession.write(":w " + mLastDir + "/");
             }else
                 Exec.doCommand("w");
+        } else if (id == R.id.menu_backup) {
+            Intent intent = new Intent(getApplicationContext(), InstallProgress.class);
+            intent.setData(Uri.parse("backup://"+Environment.getExternalStorageDirectory()+"/"+"VimTouchBackup.vrz"));
+            startActivityForResult(intent, REQUEST_BACKUP);
         } else if (id == R.id.menu_keys) {
             if(mButtonBarLayout.isShown()){
                 mSettings.setQuickbarShow(false);
@@ -1120,9 +1126,26 @@ public class VimTouch extends SlidingFragmentActivity implements
     public void onFileSelected(File file){
         if (file != null) {
 			String path = file.getAbsolutePath();
+            String ext = path.substring(path.lastIndexOf('.')+1);
 			
 			if (file.isDirectory()) {
                 showDirectory(path);
+            }else if (ext.equals("vrz")) {
+                mLastDir = path;
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage(R.string.restore_message)
+                    .setTitle(R.string.restore_title)
+                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            Intent intent = new Intent(getApplicationContext(), InstallProgress.class);
+                            intent.setData(Uri.parse("file://"+mLastDir));
+                            startActivityForResult(intent, REQUEST_VRZ);
+                        }
+                    });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
 			} else {
                 Exec.doCommand(mOpenCommand+" "+path);
                 Exec.updateScreen();

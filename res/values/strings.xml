@@ -110,4 +110,8 @@
    <string name="choose_file">Choose File</string>
    
    <string name="error_selecting_file">Error selecting File</string>    
+   <string name="backup">Backup Vim files</string>    
+   <string name="backup_finish">Backup file VimTouchBackup.vrz is in the SD card now</string>    
+   <string name="restore_title">Restore VimTouch files</string>    
+   <string name="restore_message">Do you want to restore this file?</string>    
 </resources>

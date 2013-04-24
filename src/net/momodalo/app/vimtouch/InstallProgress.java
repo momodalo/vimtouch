@@ -23,16 +23,17 @@ import android.os.Message;
 
 import java.util.ArrayList;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.BufferedOutputStream;
 import java.io.InputStream;
-import java.io.FileOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 import java.security.MessageDigest;
 import java.security.DigestInputStream;
 import java.lang.ref.WeakReference;
@@ -229,9 +230,13 @@ public class InstallProgress extends Activity {
                           mUri.getScheme().equals("ftp")) {
                     downloadRuntime(mUri);
                 */
+                }else if (mUri.getScheme().equals("backup")){
+                    File output = new File(mUri.getPath());
+                    backupAll(output);
+                    showNotification(R.string.backup_finish);
                 }else if (mUri.getScheme().equals("file")) {
                     installLocalFile();
-                    showNotification();
+                    showNotification(R.string.install_finish);
                 }else if (mUri.getScheme().equals("plugin")){
                     PluginAddOn plugin = PluginFactory.getPluginById( mUri.getAuthority(), context);
                     try{
@@ -241,7 +246,7 @@ public class InstallProgress extends Activity {
                         installZip(input,fw, plugin.getDescription());
                         fw.close();
                         plugin.setInstalled(context,true);
-                        showNotification();
+                        showNotification(R.string.install_finish);
                     }catch(Exception e){
                     }
                 }else if (mUri.getScheme().equals("runtime")){
@@ -253,14 +258,14 @@ public class InstallProgress extends Activity {
                         installZip(input,fw, runtime.getDescription());
                         fw.close();
                         runtime.setInstalled(context,true);
-                        showNotification();
+                        showNotification(R.string.install_finish);
                     }catch(Exception e){
                     }
                 }else if (mUri.getScheme().equals("content")){
                     try{
                         InputStream attachment = getContentResolver().openInputStream(mUri);
                         installZip(attachment, null, " from other application");
-                        showNotification();
+                        showNotification(R.string.install_finish);
                     }catch(Exception e){
                     }
                 }
@@ -276,7 +281,7 @@ public class InstallProgress extends Activity {
                             installZip(input,fw, plugin.getDescription());
                             fw.close();
                             plugin.setInstalled(context,true);
-                            showNotification();
+                            showNotification(R.string.install_finish);
                         }catch(Exception e){
                         }
                     }
@@ -288,12 +293,12 @@ public class InstallProgress extends Activity {
         }).start();
     }
 
-    void showNotification() {
+    void showNotification(int desc) {
         String svc = NOTIFICATION_SERVICE;
         NotificationManager nm = (NotificationManager)getSystemService(svc);
 
         CharSequence from = "VimTouch";
-        CharSequence message = getString(R.string.install_finish);
+        CharSequence message = getString(desc);
 
         Notification notif = new Notification(R.drawable.notification, message,
                                               System.currentTimeMillis());
@@ -369,6 +374,60 @@ public class InstallProgress extends Activity {
         }
     }
 
+    private void backupAll(File dest){
+        String src = getApplicationContext().getFilesDir().getPath()+"/vim";
+
+        mProgressBar.setProgress(0);
+        String msgText = getString(R.string.backup);
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_SET_TEXT, msgText));
+
+        try {
+            ZipOutputStream zip = null;
+            FileOutputStream fileWriter = null;
+
+            fileWriter = new FileOutputStream(dest);
+            zip = new ZipOutputStream(fileWriter);
+            mProgressBar.setProgress(0);
+            addFolderToZip("", src, zip);
+            zip.flush();
+            zip.close();
+        }catch(Exception e){
+        }
+    }
+
+    private void addFileToZip(String path, String srcFile, ZipOutputStream zip) throws Exception {
+        File folder = new File(srcFile);
+        if (folder.isDirectory()) {
+            addFolderToZip(path, srcFile, zip);
+        } else {
+            byte[] buf = new byte[1024];
+            int len;
+            FileInputStream in = new FileInputStream(srcFile);
+            zip.putNextEntry(new ZipEntry(path + "/" + folder.getName()));
+            while ((len = in.read(buf)) > 0) {
+                zip.write(buf, 0, len);
+            }
+        }
+    }
+
+    private void addFolderToZip(String path, String srcFolder, ZipOutputStream zip) throws Exception {
+        File folder = new File(srcFolder);
+        int total = folder.list().length;
+        int done = 0;
+        if (path.equals("")) {
+            mProgressBar.setMax(total);
+        }
+
+        for (String fileName : folder.list()) {
+            if (path.equals("")) {
+                addFileToZip(folder.getName(), srcFolder + "/" + fileName, zip);
+                mProgressBar.setProgress(++done);
+            } else {
+                addFileToZip(path + "/" + folder.getName(), srcFolder + "/" + fileName, zip);
+            }
+        }
+    }
+
     private DownloadManager mDM;
     private long mEnqueue = -1;
     private BroadcastReceiver mReceiver = null;
@@ -396,7 +455,7 @@ public class InstallProgress extends Activity {
                                     try {
                                         InputStream attachment = getContentResolver().openInputStream(mUri);
                                         installZip(attachment, null, "downloads");
-                                        showNotification();
+                                        showNotification(R.string.install_finish);
                                     }catch(Exception e){}
                                     finish();
                                 }

@@ -40,6 +40,7 @@ public class TermView extends EmulatorView implements
     private VimInputConnection mInputConnection = null;
     private boolean mIMEComposing = false;
     private boolean mZoomBottom = true;
+    private int mFontSize = 0;
 
     private static final int FLING_REFRESH_PERIOD = 50;
     private static final int SCREEN_CHECK_PERIOD = 1000;
@@ -94,7 +95,10 @@ public class TermView extends EmulatorView implements
             scheme = new ColorScheme(settings.getColorScheme());
         }
 
-        setTextSize(settings.getFontSize());
+        if(mFontSize != settings.getFontSize()){
+            setTextSize(settings.getFontSize());
+            mFontSize = settings.getFontSize();
+        }
         setCursorStyle(settings.getCursorStyle(), settings.getCursorBlink());
         setUseCookedIME(settings.useCookedIME());
         mIMEComposing = settings.useCookedIME();
