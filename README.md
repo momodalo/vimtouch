@@ -11,13 +11,15 @@ VimTouch is a open source VIM port on Android. It supports full vim syntax and f
 - Touch to move cursor
 - Fling to scroll
 - Swipe to zoom
-- Two-fingers gesture to zoom in/out
+- Quick buttons
 - Unicode and multi-byte
-- Single tap to send "ESC"
 - Read email attachments
 - Single instance to open multiple files in vim windows
 - Real VIM runtime
 - Customizable VIM runtime (ex: can install syntax, doc, plugins)
+- Sliding File chooser
+- Backup/Restore your VIM runtime
+- Command History GUI by long press quick buttons
 
 ## Screenshot
 ![Screenshot](https://raw.github.com/momodalo/vimtouch/master/images/device-2013-04-25-045255.png)
