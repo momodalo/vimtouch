@@ -20,10 +20,10 @@ VimTouch is a open source VIM port on Android. It supports full vim syntax and f
 - Customizable VIM runtime (ex: can install syntax, doc, plugins)
 
 ## Screenshot
+![Screenshot](https://raw.github.com/momodalo/vimtouch/master/images/device-2013-04-25-045255.png)
 ![Screenshot](https://raw.github.com/momodalo/vimtouch/master/images/device-2013-04-24-204724.png)
 ![Screenshot](https://raw.github.com/momodalo/vimtouch/master/images/device-2013-04-24-204822.png)
 ![Screenshot](https://raw.github.com/momodalo/vimtouch/master/images/device-2013-04-24-205921.png )
-![Screenshot](https://raw.github.com/momodalo/vimtouch/master/images/device-2013-04-24-205936.png)
 
 ## Issues
 https://github.com/momodalo/vimtouch/issues
