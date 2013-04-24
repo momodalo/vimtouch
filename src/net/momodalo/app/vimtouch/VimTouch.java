@@ -91,11 +91,10 @@ import net.momodalo.app.vimtouch.addons.RuntimeAddOn;
 import net.momodalo.app.vimtouch.addons.PluginFactory;
 import net.momodalo.app.vimtouch.addons.PluginAddOn;
 
-import com.ipaulpro.afilechooser.FileListFragment;
-import com.ipaulpro.afilechooser.FileChoosedListener;
 import com.slidingmenu.lib.SlidingMenu;
 import com.slidingmenu.lib.app.SlidingFragmentActivity;
 
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.FragmentManager.OnBackStackChangedListener;
 
@@ -106,8 +105,7 @@ import android.support.v4.app.FragmentManager.OnBackStackChangedListener;
 
 public class VimTouch extends SlidingFragmentActivity implements 
     ActionBarCompat.OnNavigationListener, 
-    OnItemSelectedListener , 
-    FileChoosedListener {
+    OnItemSelectedListener {
     /**
      * Set to true to add debugging code and logging.
      */
@@ -125,10 +123,10 @@ public class VimTouch extends SlidingFragmentActivity implements
      */
     public static final boolean LOG_UNKNOWN_ESCAPE_SEQUENCES = DEBUG && true;
 
-    private static final int REQUEST_INSTALL = 0;
-    private static final int REQUEST_OPEN = 1;
-    private static final int REQUEST_BACKUP = 2;
-    private static final int REQUEST_VRZ = 3;
+    public static final int REQUEST_INSTALL = 0;
+    public static final int REQUEST_OPEN = 1;
+    public static final int REQUEST_BACKUP = 2;
+    public static final int REQUEST_VRZ = 3;
 
     /**
      * The tag we use when logging, so that our messages can be distinguished
@@ -136,6 +134,16 @@ public class VimTouch extends SlidingFragmentActivity implements
      * classes.
      */
     public static final String LOG_TAG = "VimTouch";
+
+    /* Sliding Menu interface */
+    public interface SlidingMenuInterface {
+        public void onOpen();
+        public void onClose();
+        public boolean onOptionsItemSelected(MenuItem item);
+        public boolean onNavigationItemSelected(int pos, long id);
+        public Fragment getFragment();
+    };
+    private SlidingMenuInterface mMenu = null;
 
     /**
      * Our main view. Displays the emulated terminal screen.
@@ -306,22 +314,21 @@ public class VimTouch extends SlidingFragmentActivity implements
         getSlidingMenu().setFadeDegree(0.35f);
         //getSlidingMenu().attachToActivity(this, SlidingMenu.SLIDING_CONTENT);
 
-        getSupportFragmentManager()
-            .beginTransaction()
-            .replace(R.id.menu_frame, FileListFragment.newInstance("."))
-            .commit();
+        mMenu = new FileListMenu(this);
+
+        setSlidingMenuFragment( mMenu.getFragment());
 
         getSlidingMenu().setOnCloseListener(new SlidingMenu.OnCloseListener(){
             public void onClose(){
                 setTabLabels(mVimTabs);
                 setCurTab(mVimCurTab);
+                mMenu.onClose();
             }
         });
 
         getSlidingMenu().setOnOpenListener(new SlidingMenu.OnOpenListener(){
             public void onOpen(){
-                String path = Exec.getcwd();
-                showDirectory(path);
+                mMenu.onOpen();
             }
         });
 
@@ -502,7 +509,11 @@ public class VimTouch extends SlidingFragmentActivity implements
         finish();
     }
 
-    private void write(String data) {
+    public void write(String data) {
+        mSession.write(data);
+    }
+
+    public void write(int data) {
         mSession.write(data);
     }
 
@@ -666,9 +677,16 @@ public class VimTouch extends SlidingFragmentActivity implements
                 opencmd = "tabnew";
                 break;
         }
-        Exec.doCommand(opencmd+" "+url);
-        Exec.updateScreen();
+        String old = mOpenCommand;
+        mOpenCommand = opencmd;
+        openNewFile(url);
+        mOpenCommand = old;
         mUrl = null;
+    }
+
+    public void openNewFile(String url){
+        Exec.doCommand(mOpenCommand+" "+url);
+        Exec.updateScreen();
     }
 
     @Override
@@ -890,6 +908,9 @@ public class VimTouch extends SlidingFragmentActivity implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+        if(getSlidingMenu().isMenuShowing() && mMenu.onOptionsItemSelected(item))
+            return super.onOptionsItemSelected(item);
+
         if (id == R.id.menu_preferences) {
             doPreferences();
         } else if (id == R.id.menu_fullscreen) {
@@ -933,13 +954,7 @@ public class VimTouch extends SlidingFragmentActivity implements
             mOpenCommand = "tabnew";
             showMenu();
         } else if (id == R.id.menu_save) {
-            if(getSlidingMenu().isMenuShowing()){
-                showContent();
-                if(Exec.isInsertMode())
-                    mSession.write(27);
-                mSession.write(":w " + mLastDir + "/");
-            }else
-                Exec.doCommand("w");
+            Exec.doCommand("w");
         } else if (id == R.id.menu_backup) {
             Intent intent = new Intent(getApplicationContext(), InstallProgress.class);
             intent.setData(Uri.parse("backup://"+Environment.getExternalStorageDirectory()+"/"+"VimTouchBackup.vrz"));
@@ -980,6 +995,10 @@ public class VimTouch extends SlidingFragmentActivity implements
             getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
 
+    }
+
+    public ArrayAdapter<CharSequence> getTabAdapter(){
+        return mTabAdapter;
     }
 
     public void setVimTabs(String[] array){
@@ -1039,14 +1058,14 @@ public class VimTouch extends SlidingFragmentActivity implements
 
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
         if(getSlidingMenu().isMenuShowing())
-            showDirectory(mTabAdapter.getItem(pos).toString());
+            mMenu.onNavigationItemSelected(pos, 0);
         else
             Exec.setTab(pos);
     }
 
     public boolean onNavigationItemSelected(int pos, long id) {
         if(getSlidingMenu().isMenuShowing())
-            showDirectory(mTabAdapter.getItem(pos).toString());
+            mMenu.onNavigationItemSelected(pos, id);
         else
             Exec.setTab(pos);
         return true;
@@ -1100,60 +1119,11 @@ public class VimTouch extends SlidingFragmentActivity implements
             dialog.show();
     }
 
-    private void showDirectory(String path) {
-	    FileListFragment explorerFragment = FileListFragment.newInstance(path);
+    void setSlidingMenuFragment(Fragment frag){
         getSupportFragmentManager()
 	        .beginTransaction()
-			.replace(R.id.menu_frame, explorerFragment)
+			.replace(R.id.menu_frame, frag)
 			.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
 			.commit();
-
-        mTabAdapter.clear();
-        mTabAdapter.add(path);
-        String curr = path;
-        while (curr != null){
-            File file = new File(curr);
-            if(file.getParentFile() == null) break;
-            curr = file.getParentFile().getAbsolutePath();
-            mTabAdapter.add(curr);
-        }
-        mTabAdapter.notifyDataSetChanged();
-        
-        showTab(1);
-        mLastDir = path;
-    }
-
-    public void onFileSelected(File file){
-        if (file != null) {
-			String path = file.getAbsolutePath();
-            String ext = path.substring(path.lastIndexOf('.')+1);
-			
-			if (file.isDirectory()) {
-                showDirectory(path);
-            }else if (ext.equals("vrz")) {
-                mLastDir = path;
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setMessage(R.string.restore_message)
-                    .setTitle(R.string.restore_title)
-                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            Intent intent = new Intent(getApplicationContext(), InstallProgress.class);
-                            intent.setData(Uri.parse("file://"+mLastDir));
-                            startActivityForResult(intent, REQUEST_VRZ);
-                        }
-                    });
-
-                AlertDialog dialog = builder.create();
-                dialog.show();
-
-			} else {
-                Exec.doCommand(mOpenCommand+" "+path);
-                Exec.updateScreen();
-                showContent();
-			}
-		} else {
-			Toast.makeText(VimTouch.this, R.string.error_selecting_file, Toast.LENGTH_SHORT).show();
-		}
-
     }
 }
