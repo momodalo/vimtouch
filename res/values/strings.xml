@@ -15,7 +15,7 @@
  * limitations under the License.
 -->
 <resources>
-   <string name="application_vimtouch">Vi IMproved Touch</string>
+   <string name="application_vimtouch">VimTouch</string>
    <string name="preferences">Preferences</string>
    <string name="toggle_soft_keyboard">Toggle soft keyboard</string>
 
