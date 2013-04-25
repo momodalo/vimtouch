@@ -47,6 +47,8 @@ public class FileListMenu implements VimTouch.SlidingMenuInterface, FileChoosedL
             mVim.write(":w " + mLastDir + "/");
             return true;
         } else if (id == R.id.menu_toggle_soft_keyboard) {
+            Exec.doCommand("cd "+mLastDir);
+			Toast.makeText(mVim, ":cd "+mLastDir, Toast.LENGTH_SHORT).show();
             return true;
         } else if (id == R.id.menu_ESC) {
             mVim.showContent();
