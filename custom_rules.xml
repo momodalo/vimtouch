@@ -1,5 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project default="help">
+    <target name="x86-release">
+        <property name="version" value="x86" />
+        <antcall target="config"/>
+        <antcall target="release"/>
+    </target>
+    <target name="config" depends="default-armeabi">
+        <antcall target="manifest"/>
+        <antcall target="jni_mk"/>
+    </target>
+    <target name="default-armeabi" unless="version">
+        <property name="version" value="armeabi" />
+    </target>
+    <target name="config-x86">
+        <property name="version" value="x86" />
+        <antcall target="config"/>
+    </target>
+    <target name="manifest">
+        <copy tofile="${basedir}/AndroidManifest.xml" overwrite="true">
+            <fileset file="${basedir}/AndroidManifest.xml.${version}"/>
+            <filterset>
+                <filter token="CONFIG.APP_VERSION" value="${app.version}" />
+                <filter token="CONFIG.APP_VERSION_CODE" value="${app.versioncode}" />
+            </filterset>
+        </copy>
+    </target>
+    <target name="jni_mk">
+        <copy tofile="${basedir}/jni/Application.mk" overwrite="true">
+            <fileset file="${basedir}/jni/Application.mk.${version}" />
+        </copy>
+    </target>
     <target name="-post-compile">
         <exec executable="./run" failonerror="true" >
             <arg line="buildnative" />

@@ -31,4 +31,6 @@ $SDK/tools/android update lib-project -p libraries/emulatorview/ -t $android_pla
 $SDK/tools/android update lib-project -p libraries/FileExplorer/ -t $android_platform
 $SDK/tools/android update project -p . -t $android_platform
 
+ant config
+
 # You're now ready to `$NDK/ndk-build` and `ant debug`
