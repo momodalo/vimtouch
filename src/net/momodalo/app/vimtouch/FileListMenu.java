@@ -3,6 +3,7 @@ package net.momodalo.app.vimtouch;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Environment;
 import android.net.Uri;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
@@ -24,14 +25,14 @@ public class FileListMenu implements VimTouch.SlidingMenuInterface, FileChoosedL
     }
 
     public Fragment getFragment(){
-	    FileListFragment explorerFragment = FileListFragment.newInstance(".");
+        mLastDir = Environment.getExternalStorageDirectory().getAbsolutePath();
+	    FileListFragment explorerFragment = FileListFragment.newInstance(mLastDir);
         explorerFragment.setFileChoosedListener(this);
         return (Fragment)explorerFragment;
     }
 
     public void onOpen(){
-        String path = Exec.getcwd();
-        showDirectory(path);
+        setupTab(mLastDir);
     }
 
     public void onClose(){
@@ -63,6 +64,10 @@ public class FileListMenu implements VimTouch.SlidingMenuInterface, FileChoosedL
 	    FileListFragment explorerFragment = FileListFragment.newInstance(path);
         explorerFragment.setFileChoosedListener(this);
         mVim.setSlidingMenuFragment((Fragment)explorerFragment);
+        setupTab(path);
+    }
+
+    private void setupTab(String path){
 
         ArrayAdapter<CharSequence> adapter = mVim.getTabAdapter();
 
@@ -78,6 +83,7 @@ public class FileListMenu implements VimTouch.SlidingMenuInterface, FileChoosedL
         adapter.notifyDataSetChanged();
         
         mVim.showTab(1);
+        mVim.setCurTab(0);
         mLastDir = path;
     }
 
