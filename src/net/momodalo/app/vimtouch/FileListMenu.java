@@ -32,7 +32,7 @@ public class FileListMenu implements VimTouch.SlidingMenuInterface, FileChoosedL
     }
 
     public void onOpen(){
-        setupTab(mLastDir);
+        showDirectory(mLastDir);
     }
 
     public void onClose(){
@@ -70,7 +70,6 @@ public class FileListMenu implements VimTouch.SlidingMenuInterface, FileChoosedL
     }
 
     private void setupTab(String path){
-
         ArrayAdapter<CharSequence> adapter = mVim.getTabAdapter();
 
         adapter.clear();
