@@ -161,11 +161,13 @@ public class VimTouch extends SlidingFragmentActivity implements
     private View mRightButtonBar;
     private TextView mButtons[];
     private Spinner mTabSpinner;
+    private Menu mOptionMenu = null;
     private String[] mVimTabs = null;
     private int mVimCurTab = -1;
     private String mOpenCommand = "tabnew";
     private ArrayAdapter<CharSequence> mTabAdapter;
     private String mLastDir = null;
+    private boolean mFullscreen = false;
     private final static int QUICK_BUTTON_SIZE=9;
 
     private int mControlKeyId = 0;
@@ -286,6 +288,10 @@ public class VimTouch extends SlidingFragmentActivity implements
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         mSettings = new VimSettings(getResources(), mPrefs);
+
+        if(mSettings.getFullscreen() != ((getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_FULLSCREEN ) != 0)) {
+            doToggleFullscreen();
+        }
 
         mUrl = getIntentUrl(getIntent());
 
@@ -609,9 +615,6 @@ public class VimTouch extends SlidingFragmentActivity implements
         else
             mButtonBar.setVisibility(View.GONE);
 
-        if(mSettings.getFullscreen() != ((getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_FULLSCREEN ) != 0)) {
-            doToggleFullscreen();
-        }
     }
 
     @Override
@@ -863,6 +866,7 @@ public class VimTouch extends SlidingFragmentActivity implements
         }
         mSettings.setFullscreen(ret);
         getWindow().setAttributes(attrs); 
+        mFullscreen = ret;
         return ret;
     }
 
@@ -901,8 +905,9 @@ public class VimTouch extends SlidingFragmentActivity implements
 
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        menu.findItem(R.id.menu_fullscreen).setChecked(mSettings.getFullscreen());
+        menu.findItem(R.id.menu_fullscreen).setChecked(mFullscreen);
         menu.findItem(R.id.menu_keys).setChecked(mSettings.getQuickbarShow());
+        mOptionMenu = menu;
         return true;
     }
 
@@ -994,6 +999,15 @@ public class VimTouch extends SlidingFragmentActivity implements
     private void doToggleSoftKeyboard() {
         InputMethodManager imm = (InputMethodManager)
             getSystemService(Context.INPUT_METHOD_SERVICE);
+
+        // force leave fullscreen first
+        WindowManager.LayoutParams attrs = getWindow().getAttributes(); 
+        if((attrs.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN ) != 0) {
+            attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            getWindow().setAttributes(attrs); 
+            mFullscreen = false;
+            mOptionMenu.findItem(R.id.menu_fullscreen).setChecked(mFullscreen);
+        }
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
 
     }
