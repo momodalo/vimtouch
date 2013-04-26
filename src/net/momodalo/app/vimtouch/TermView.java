@@ -295,7 +295,8 @@ public class TermView extends EmulatorView implements
                 int cursorX = (int)(x/getCharacterWidth());
                 int cursorY = (int)(y/getCharacterHeight());
                 Exec.setCursorPos(cursorY, cursorX);
-            } else if(mLastY != -1 && Math.abs(y-mLastY) > getCharacterHeight() * 2 && !getZoom()){
+            } else if(mLastY != -1 && ( mLastX == -1 || (Math.abs(y-mLastY) > getCharacterHeight() * 2)) && !getZoom()){
+                int scrolls = (int)((mLastY - y)/getCharacterHeight());
                 if(mTouchGesture){
                     if(mLastX != -1){
                         int cursorX = (int)(x/getCharacterWidth());
@@ -303,10 +304,10 @@ public class TermView extends EmulatorView implements
                         Exec.setCursorPos(cursorY, cursorX);
                     }
                     //Exec.mouseDown( mDownY, mDownX);
-                    Exec.scrollBy((int)((mLastY - y)/getCharacterHeight()));
+                    if(scrolls != 0)Exec.scrollBy(scrolls);
                     if(mInputConnection!=null)mInputConnection.notifyTextChange();
                 }
-                mLastY = y;
+                if(scrolls != 0)mLastY = y;
                 mLastX = -1;
             }else if (getZoom()){
                 long time = ev.getEventTime();
