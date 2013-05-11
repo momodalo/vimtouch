@@ -959,6 +959,10 @@ public class VimTouch extends SlidingFragmentActivity implements
             item.setChecked(true);
             mOpenCommand = "tabnew";
             showMenu();
+        }else if (id == R.id.menu_diff) {
+            item.setChecked(true);
+            mOpenCommand = "vert diffsplit";
+            showMenu();
         } else if (id == R.id.menu_save) {
             Exec.doCommand("w");
         } else if (id == R.id.menu_backup) {

@@ -82,6 +82,7 @@
    <string name="new_file">Open(:new)</string>
    <string name="vnew_file">Open(:vnew)</string>
    <string name="tabnew_file">Open(:tabnew)</string>
+   <string name="diff_file">Diff(:vert diffsplit)</string>
    <string name="esc_key">ESC</string>
    <string name="more_key">Quick Keys</string>
    <string name="save_file">Save</string>
