@@ -357,7 +357,6 @@ public class VimTouch extends SlidingFragmentActivity implements
         */
 
         ActionBarCompat actionBar = ActivityCompat.getActionBar(this);
-        actionBar.setDisplayShowTitleEnabled(false);
         mTabSpinner = (Spinner)findViewById(R.id.tab_spinner);
         if(actionBar == null){
             mTabSpinner.setVisibility(View.VISIBLE);
@@ -370,6 +369,7 @@ public class VimTouch extends SlidingFragmentActivity implements
         }else{
             mTabSpinner.setVisibility(View.GONE);
             actionBar.setNavigationMode(ActionBarCompat.NAVIGATION_MODE_LIST);
+            actionBar.setDisplayShowTitleEnabled(false);
             mTabAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item);
             mTabAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
