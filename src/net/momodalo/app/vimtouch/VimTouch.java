@@ -689,7 +689,7 @@ public class VimTouch extends SlidingFragmentActivity implements
     }
 
     public void openNewFile(String url){
-        Exec.doCommand(mOpenCommand+" "+url);
+        Exec.doCommand(mOpenCommand+" "+url.replaceAll(" ", "\\\\ "));
         Exec.updateScreen();
     }
 
