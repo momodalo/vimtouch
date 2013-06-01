@@ -29,6 +29,7 @@ echo $android_platform
 
 $SDK/tools/android update lib-project -p libraries/emulatorview/ -t $android_platform
 $SDK/tools/android update lib-project -p libraries/FileExplorer/ -t $android_platform
+$SDK/tools/android update lib-project -p libraries/SlidingMenu/ -t $android_platform
 $SDK/tools/android update project -p . -t $android_platform
 
 ant config
