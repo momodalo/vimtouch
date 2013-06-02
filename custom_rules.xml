@@ -4,6 +4,7 @@
         <property name="version" value="x86" />
         <antcall target="config"/>
         <antcall target="release"/>
+        <copy file="${out.dir}/VimTouch-release.apk" tofile="${out.dir}/VimTouch-x86-release.apk" overwrite="true"/>
     </target>
     <target name="config" depends="default-armeabi">
         <antcall target="manifest"/>
