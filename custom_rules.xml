@@ -35,5 +35,9 @@
         <exec executable="./run" failonerror="true" >
             <arg line="buildnative" />
         </exec>
+        <condition property="version" else="armeabi">
+              <isset property="version"/>
+        </condition>
+        <copy tofile="${basedir}/libs/${version}/libvimexec.so" file="${basedir}/libs/${version}/vim" overwrite="true" />
     </target>
 </project>

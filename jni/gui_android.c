@@ -27,15 +27,6 @@ gui_mch_browse(
 #endif
 
 #if defined( FEAT_GUI_DIALOG ) || defined( PROTO )
-int vimtouch_Exec_getDialogState();
-void vimtouch_Exec_showDialog(
-	int	type,
-	char_u	*title,
-	char_u	*message,
-	char_u	*buttons,
-	int	default_button,
-	char_u	*textfield);
-
     int
 gui_mch_dialog(
 	int	type,
@@ -48,13 +39,8 @@ gui_mch_dialog(
     if(title == NULL){
         title = "VimTouch";
     }
-    vimtouch_Exec_showDialog(type,title, message, buttons, default_button, textfield);
-    int state = vimtouch_Exec_getDialogState();
-    while(state < 0) {
-        usleep(100000);
-        state = vimtouch_Exec_getDialogState();
-    }
-    return state;
+    vimtouch_show_dialog(type,title, message, buttons, default_button, textfield);
+    return vimtouch_dialog_result();
 }
 #endif
 
@@ -66,7 +52,7 @@ int gui_tab_showing = 1;
 gui_mch_show_tabline(int showit)
 {
     gui_tab_showing = showit;
-    vimtouch_Exec_showTab(showit);
+    vimtouch_show_tab(showit);
 }
 
     int
@@ -117,14 +103,14 @@ gui_mch_update_tabline(void)
 	tabLabels[nr-1] = strdup(NameBuff);
     }
 
-    vimtouch_Exec_setTabLabels(tabLabels, numTabs);
-    vimtouch_Exec_setCurTab(curtabidx-1);
+    vimtouch_set_tab_labels(tabLabels, numTabs);
+    vimtouch_set_curtab(curtabidx-1);
 }
 
     void
 gui_mch_set_curtab(int nr)
 {
-    vimtouch_Exec_setCurTab(nr-1);
+    vimtouch_set_curtab(nr-1);
 }
 
 /*

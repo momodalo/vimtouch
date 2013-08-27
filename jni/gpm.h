@@ -179,8 +179,28 @@ extern int Gpm_Wgetch();
 #define VIM_EVENT_TYPE_RESIZE 6
 #define VIM_EVENT_TYPE_CURSOR 7
 #define VIM_EVENT_TYPE_SETTAB 8
+#define VIM_EVENT_TYPE_CLIPBOARD 9
+#define VIM_EVENT_TYPE_DIALOG 10
+#define VIM_EVENT_TYPE_SYNC 11
+#define VIM_EVENT_TYPE_HISTORY 12
 
 #include "vim.h"
+
+void vimtouch_sync();
+void vimtouch_get_clipboard( VimClipboard *cbd );
+int vimtouch_dialog_result();
+void vimtouch_set_clipboard(VimClipboard *cbd);
+void vimtouch_set_curtab(int nr);
+void vimtouch_set_tab_labels(u_char** labels, int num);
+void vimtouch_show_tab(int showit);
+void vimtouch_show_dialog(
+	int	type,
+	char_u	*title,
+	char_u	*message,
+	char_u	*buttons,
+	int	default_button,
+	char_u	*textfield);
+
 
 typedef struct VimEvnet{
     int type;

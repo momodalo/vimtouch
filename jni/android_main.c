@@ -156,7 +156,9 @@ static char *(main_errors[]) =
 #define ME_INVALID_ARG		5
 };
 
-int AndroidMain (argc, argv)
+extern char* gpm_socket_name;
+
+int main(argc, argv)
     int		argc;
     char	**argv;
 {
@@ -167,6 +169,13 @@ int AndroidMain (argc, argv)
     int		i;
 #endif
 
+    char* ptr = strrchr(argv[1], '/');
+    *ptr = '\0';
+    ptr++;
+    gpm_socket_name = strdup(ptr);
+
+    sprintf((char*)default_vimruntime_dir, "%s/vim/", argv[1]);
+    sprintf((char*)default_vim_dir, "%s/vim/", argv[1]);
     /*
      * Do any system-specific initialisations.  These can NOT use IObuff or
      * NameBuff.  Thus emsg2() cannot be called!
@@ -177,8 +186,8 @@ int AndroidMain (argc, argv)
      * functions without a lot of arguments.  "argc" and "argv" are also
      * copied, so that they can be changed. */
     vim_memset(&params, 0, sizeof(params));
-    params.argc = argc;
-    params.argv = argv;
+    params.argc = argc-1;
+    params.argv = &argv[1];
     params.want_full_screen = TRUE;
 #ifdef FEAT_EVAL
     params.use_debug_break_level = -1;
@@ -1228,7 +1237,7 @@ getout(exitval)
 	garbage_collect();
 #endif
 
-    android_exit(exitval);
+    exit(exitval);
 }
 
 #ifndef NO_VIM_MAIN

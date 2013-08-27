@@ -1093,6 +1093,8 @@ public class VimTouch extends SlidingFragmentActivity implements
     public void onNothingSelected(AdapterView<?> parent) {
     }
 
+    TextView mHistoryButtons[] = new TextView[10];
+
     public void showCmdHistory() {
 
         final Dialog dialog = new Dialog(this,R.style.DialogSlideAnim);
@@ -1117,25 +1119,37 @@ public class VimTouch extends SlidingFragmentActivity implements
         LayoutInflater inflater = LayoutInflater.from(this);
         boolean exists = false;
 
-        for (int i = 1; i <= 10; i++){
+        for (int i = 0; i < 10; i++){
             TextView button = (TextView)inflater.inflate(R.layout.histbutton, layout, false);
-            String cmd = Exec.getCmdHistory(i);
-            if(cmd.length() == 0) break;
-            exists = true;
-            button.setText(":"+cmd);
+            //String cmd = Exec.getCmdHistory(i);
+            //if(cmd.length() == 0) break;
+            //exists = true;
+            //button.setText(":"+cmd);
             button.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v){
                     TextView text = (TextView)v;
                     CharSequence cmd = text.getText();
-                    Exec.doCommand(cmd.subSequence(1,cmd.length()).toString());
+                    if(cmd.length() > 1);
+                        Exec.doCommand(cmd.subSequence(1,cmd.length()).toString());
                     dialog.dismiss();
                 }
             });
             layout.addView((View)button);
+            button.setVisibility(View.GONE);
+            mHistoryButtons[i] = button;
         }
+        Exec.getHistory();
 
-        if(exists)
-            dialog.show();
+        //if(exists)
+        dialog.show();
+    }
+
+    public void setHistoryItem(int i, String text) {
+        TextView button = mHistoryButtons[i];
+        if(button == null) return;
+        
+        button.setText(":"+text);
+        button.setVisibility(View.VISIBLE);
     }
 
     void setSlidingMenuFragment(Fragment frag){

@@ -27,7 +27,6 @@ import net.momodalo.app.vimtouch.compat.FileCompat;
 public class VimTermSession extends TermSession {
     private VimSettings mSettings;
 
-    private int mProcId;
     private FileDescriptor mTermFd;
     private Thread mWatcherThread;
 
@@ -91,8 +90,8 @@ public class VimTermSession extends TermSession {
         mWatcherThread = new Thread() {
              @Override
              public void run() {
-                Log.i(VimTouch.LOG_TAG, "waiting for: " + mProcId);
-                int result = Exec.waitFor(mProcId);
+                Log.i(VimTouch.LOG_TAG, "waiting for exec vim" );
+                int result = Exec.nativeWait();
                 Log.i(VimTouch.LOG_TAG, "Subprocess exited: " + result);
                 mMsgHandler.sendMessage(mMsgHandler.obtainMessage(PROCESS_EXITED, result));
              }
@@ -108,8 +107,6 @@ public class VimTermSession extends TermSession {
 
     private void initializeSession() {
         VimSettings settings = mSettings;
-
-        int[] processId = new int[1];
 
         String path = System.getenv("PATH");
         if (settings.doPathExtensions()) {
@@ -138,8 +135,7 @@ public class VimTermSession extends TermSession {
             env[2] = "HOME="+mApp;
 
 
-        createSubprocess(processId, settings.getShell(), env);
-        mProcId = processId[0];
+        createSubprocess(settings.getShell(), env);
 
         setTermOut(new FileOutputStream(mTermFd));
         setTermIn(new FileInputStream(mTermFd));
@@ -177,9 +173,9 @@ public class VimTermSession extends TermSession {
         }
     }
 
-    private void createSubprocess(int[] processId, String shell, String[] env) {
+    private void createSubprocess(String shell, String[] env) {
 
-        mTermFd = Exec.createSubprocess(mApp, mUrl, null, env, processId);
+        mTermFd = Exec.createSubprocess(mApp, mUrl, null, env);
     }
 
     private ArrayList<String> parse(String cmd) {
