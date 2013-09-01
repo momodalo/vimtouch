@@ -14,11 +14,18 @@
      limitations under the License.
 -->
 
-<resources>
+<resources
+    xmlns:vimtouch="http://schemas.android.com/apk/res/net.momodalo.app.vimtouch"
+>
     <style name="VimInstallTheme" parent="@android:style/Theme.Holo.Light.Dialog">
     </style>
     <style name="VimTheme" parent="@android:style/Theme.Holo.Light">
         <item name="android:windowFrame">@null</item>
+        <item name="quickBarBackground">@drawable/bar_bg</item>
+    </style>
+    <style name="VimDarkTheme" parent="@android:style/Theme.Holo">
+        <item name="android:windowFrame">@null</item>
+        <item name="quickBarBackground">@drawable/bar_bg_dark</item>
     </style>
 </resources>
 

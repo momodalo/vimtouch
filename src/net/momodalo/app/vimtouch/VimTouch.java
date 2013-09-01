@@ -298,11 +298,16 @@ public class VimTouch extends SlidingFragmentActivity implements
 
     @Override
     public void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
-        Log.e(VimTouch.LOG_TAG, "onCreate");
-
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         mSettings = new VimSettings(getResources(), mPrefs);
+
+        if(mSettings.getDarkTheme())
+            setTheme(R.style.VimDarkTheme);
+        else
+            setTheme(R.style.VimTheme);
+
+        super.onCreate(icicle);
+        Log.e(VimTouch.LOG_TAG, "onCreate");
 
         if(mSettings.getFullscreen() != ((getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_FULLSCREEN ) != 0)) {
             doToggleFullscreen();

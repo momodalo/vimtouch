@@ -65,6 +65,12 @@
                 android:summary="@string/summary_su_root_preference" />
 
         <CheckBoxPreference
+                android:key="dark_theme"
+                android:defaultValue="@bool/pref_dark_theme_default"
+                android:title="@string/title_dark_theme_preference"
+                android:summary="@string/summary_dark_theme_preference" />
+
+        <CheckBoxPreference
                 android:key="touch_gesture"
                 android:defaultValue="@bool/pref_touch_gesture_default"
                 android:title="@string/title_touch_gesture_preference"

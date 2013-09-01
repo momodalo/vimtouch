@@ -96,6 +96,9 @@
    <string name="title_su_root_preference">Set user as root</string>
    <string name="summary_su_root_preference">Execute vim with "su" command to grant root access</string>
 
+   <string name="title_dark_theme_preference">Set Dark Theme</string>
+   <string name="summary_dark_theme_preference">Style VimTouch with Dark Theme</string>
+
    <string name="extra_downloads">Extra Downloads</string>
 
    <string name="vim_md5">4ca08ccbe3f4cf2caa9443795d324ac2</string>

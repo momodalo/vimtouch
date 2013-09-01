@@ -49,6 +49,7 @@ public class VimSettings {
     private boolean mQuickbarShow;
     private boolean mFullscreen;
     private boolean mSuRoot;
+    private boolean mDarkTheme;
 
     private String mPrependPath = null;
     private String mAppendPath = null;
@@ -79,6 +80,7 @@ public class VimSettings {
     public static final String QUICKBARSHOW_KEY = "quickbar_show";
     public static final String FULLSCREEN_KEY = "fullscreen";
     public static final String SUROOT_KEY = "su_root";
+    public static final String DARKTHEME_KEY = "dark_theme";
 
     public static final int WHITE = 0xffffffff;
     public static final int BLACK = 0xff000000;
@@ -199,6 +201,7 @@ public class VimSettings {
         mQuickbarShow = readBooleanPref(QUICKBARSHOW_KEY, mQuickbarShow);
         mFullscreen = readBooleanPref(FULLSCREEN_KEY, mFullscreen);
         mSuRoot = readBooleanPref(SUROOT_KEY, mSuRoot);
+        mDarkTheme = readBooleanPref(DARKTHEME_KEY, mDarkTheme);
         mLastVersionCode = mPrefs.getLong(LASTVERSION_KEY, 0);
         mPrefs = null;  // we leak a Context if we hold on to this
     }
@@ -385,5 +388,13 @@ public class VimSettings {
 
     public void setSuRoot( boolean b) {
         mSuRoot = b;
+    }
+
+    public boolean getDarkTheme() {
+        return mDarkTheme;
+    }
+
+    public void setDarkTheme( boolean b) {
+        mDarkTheme = b;
     }
 }
