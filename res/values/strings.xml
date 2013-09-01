@@ -93,6 +93,9 @@
    <string name="summary_quickbar_pos_preference">Choose position of quickbar</string>
    <string name="dialog_title_quickbar_pos_preference">Quickbar Position</string>
 
+   <string name="title_su_root_preference">Set user as root</string>
+   <string name="summary_su_root_preference">Execute vim with "su" command to grant root access</string>
+
    <string name="extra_downloads">Extra Downloads</string>
 
    <string name="vim_md5">4ca08ccbe3f4cf2caa9443795d324ac2</string>
@@ -115,4 +118,7 @@
    <string name="backup_finish">Backup file VimTouchBackup.vrz is in the SD card now</string>    
    <string name="restore_title">Restore VimTouch files</string>    
    <string name="restore_message">Do you want to restore this file?</string>    
+
+   <string name="title_need_restart">VimTouch needs restart</string>
+   <string name="message_need_restart">Enable/disable root access needs restart VimTouch to take effect</string>
 </resources>

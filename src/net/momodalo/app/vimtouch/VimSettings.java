@@ -48,6 +48,7 @@ public class VimSettings {
     private long mLastVersionCode;
     private boolean mQuickbarShow;
     private boolean mFullscreen;
+    private boolean mSuRoot;
 
     private String mPrependPath = null;
     private String mAppendPath = null;
@@ -77,6 +78,7 @@ public class VimSettings {
     public static final String LASTVERSION_KEY = "last_version";
     public static final String QUICKBARSHOW_KEY = "quickbar_show";
     public static final String FULLSCREEN_KEY = "fullscreen";
+    public static final String SUROOT_KEY = "su_root";
 
     public static final int WHITE = 0xffffffff;
     public static final int BLACK = 0xff000000;
@@ -196,6 +198,7 @@ public class VimSettings {
         mQuickbarPos = readIntPref(QUICKBARPOS_KEY, mQuickbarPos,4);
         mQuickbarShow = readBooleanPref(QUICKBARSHOW_KEY, mQuickbarShow);
         mFullscreen = readBooleanPref(FULLSCREEN_KEY, mFullscreen);
+        mSuRoot = readBooleanPref(SUROOT_KEY, mSuRoot);
         mLastVersionCode = mPrefs.getLong(LASTVERSION_KEY, 0);
         mPrefs = null;  // we leak a Context if we hold on to this
     }
@@ -374,5 +377,13 @@ public class VimSettings {
 
     public void setFullscreen( boolean b) {
         mFullscreen = b;
+    }
+
+    public boolean getSuRoot() {
+        return mSuRoot;
+    }
+
+    public void setSuRoot( boolean b) {
+        mSuRoot = b;
     }
 }

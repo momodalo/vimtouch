@@ -105,6 +105,12 @@ public class VimTermSession extends TermSession {
         setDefaultUTF8Mode(settings.defaultToUTF8Mode());
     }
 
+    private boolean mSuRoot = false;
+
+    public boolean getSuRoot()  {
+        return mSuRoot;
+    }
+
     private void initializeSession() {
         VimSettings settings = mSettings;
 
@@ -135,6 +141,7 @@ public class VimTermSession extends TermSession {
             env[2] = "HOME="+mApp;
 
 
+        mSuRoot = settings.getSuRoot();
         createSubprocess(settings.getShell(), env);
 
         setTermOut(new FileOutputStream(mTermFd));
@@ -175,7 +182,7 @@ public class VimTermSession extends TermSession {
 
     private void createSubprocess(String shell, String[] env) {
 
-        mTermFd = Exec.createSubprocess(mApp, mUrl, null, env);
+        mTermFd = Exec.createSubprocess(mApp, mUrl, mSuRoot?"/system/xbin/su":null, env);
     }
 
     private ArrayList<String> parse(String cmd) {

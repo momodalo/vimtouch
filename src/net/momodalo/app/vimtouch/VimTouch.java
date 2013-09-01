@@ -577,6 +577,17 @@ public class VimTouch extends SlidingFragmentActivity implements
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         ColorScheme colorScheme = new ColorScheme(mSettings.getColorScheme());
 
+        if(mSession.getSuRoot() != mSettings.getSuRoot()){
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.title_need_restart)
+                .setMessage(R.string.message_need_restart)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                    }
+                });
+            builder.create().show();
+        }
+
         mEmulatorView.setDensity(metrics);
         mEmulatorView.updatePrefs(mSettings);
 

@@ -24,4 +24,5 @@
    <integer name="pref_quickbar_pos_default">1</integer>
    <bool name="pref_quickbar_show_default">true</bool>
    <bool name="pref_fullscreen_default">false</bool>
+   <bool name="pref_su_root_default">false</bool>
 </resources>

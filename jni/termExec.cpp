@@ -164,13 +164,13 @@ static void *thread_wrapper ( void* value)
         sprintf(path, "%s/../lib/libvimexec.so", thread_arg[1]);
 
         int i=0;
-        /*
-        argv[i++] = "/system/xbin/su";
-        argv[i++] = "-c";
-        */
+        if(thread_arg[3]){
+            argv[i++] = thread_arg[3];
+            argv[i++] = "-c";
+        }
         argv[i++] = path;
         argv[i++] = sock;
-        argv[i++] = (char*)thread_arg[3];
+        argv[i++] = (char*)thread_arg[4];
         argv[i++] = NULL;
 
         //AndroidMain(2, (char**)argv);
@@ -232,10 +232,11 @@ static int create_subprocess(const char *cmd, const char* sock, const char *arg0
     sprintf(path, "%s/bin/"TARGET_ARCH_ABI"/:%s", cmd, getenv("PATH"));
     setenv("PATH", path, 1);
 
-    char** thread_arg = (char**)malloc(sizeof(char*)*3);
+    char** thread_arg = (char**)malloc(sizeof(char*)*4);
     thread_arg[0] = strdup(devname);
     thread_arg[1] = strdup(cmd);
     thread_arg[2] = strdup(sock);
+    thread_arg[3] = arg1?strdup(arg1):NULL;
     if(arg0){
         struct stat st;
         if(stat(arg0, &st) == 0){
@@ -248,10 +249,10 @@ static int create_subprocess(const char *cmd, const char* sock, const char *arg0
             }
 
         }
-        thread_arg[3] = strdup(arg0);
+        thread_arg[4] = strdup(arg0);
     }else {
         chdir(getenv("HOME"));
-        thread_arg[3] = NULL;
+        thread_arg[4] = NULL;
     }
 
     pthread_t thread_id;

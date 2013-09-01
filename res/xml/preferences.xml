@@ -59,6 +59,12 @@
             android:title="@string/vim_preferences">
 
         <CheckBoxPreference
+                android:key="su_root"
+                android:defaultValue="@bool/pref_su_root_default"
+                android:title="@string/title_su_root_preference"
+                android:summary="@string/summary_su_root_preference" />
+
+        <CheckBoxPreference
                 android:key="touch_gesture"
                 android:defaultValue="@bool/pref_touch_gesture_default"
                 android:title="@string/title_touch_gesture_preference"
