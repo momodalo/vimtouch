@@ -52,6 +52,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.KeyCharacterMap;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -69,6 +70,7 @@ import android.app.DownloadManager.Request;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.app.Dialog;
+import android.app.Instrumentation;
 import android.view.Window;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -201,10 +203,20 @@ public class VimTouch extends SlidingFragmentActivity implements
         }
     };
 
+    private int mapControlChar(int result) {
+        if (result >= 'a' && result <= 'z') {
+            result = (char) (result - 'a' + '\001');
+        } else if (result >= 'A' && result <= 'Z') {
+            result = (char) (result - 'A' + '\001');
+        }
+        return result;
+    }
+
     View.OnClickListener mClickListener = new View.OnClickListener() {
         public void onClick(View v){
             TextView textview = (TextView)v;
             CharSequence cmd = textview.getText();
+            final String cmdstr = cmd.toString();
             if(cmd.charAt(0) == ':'){
                 if(cmd.length() > 1){
                     Exec.doCommand(cmd.subSequence(1,cmd.length()).toString());
@@ -213,6 +225,9 @@ public class VimTouch extends SlidingFragmentActivity implements
                         mSession.write(27);
                     mSession.write(cmd.toString());
                 }
+            }else if(cmdstr.startsWith("<ctrl+")){
+                mSession.write(mapControlChar((int)cmd.charAt(6)));
+                //Exec.doCommand(cmd.subSequence(1,cmd.length()).toString());
             }else
                 mSession.write(cmd.toString());
             Exec.updateScreen();
