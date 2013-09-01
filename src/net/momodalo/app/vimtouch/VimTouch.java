@@ -764,7 +764,10 @@ public class VimTouch extends SlidingFragmentActivity implements
                                         obj.textfield);
                 break;
             case MSG_SYNCCLIP:
-                activity.mClipText = clipMgr(activity).getText().toString();
+                if(clipMgr(activity).getText() == null)
+                    activity.mClipText = "";
+                else
+                    activity.mClipText = clipMgr(activity).getText().toString();
                 break;
             case MSG_SETCLIP:
                 activity.mClipText = (String)msg.obj;

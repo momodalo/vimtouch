@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/socket.h>
+#include <netinet/tcp.h>
 #include <sys/ioctl.h>
 #include <stdio.h>
 #include <string.h>
@@ -43,7 +44,7 @@ int Gpm_Open(Gpm_Connect *c, int a){
     sprintf(&addr.sun_path[1],"%s/%s", LOCAL_SOCKET_SERVER_NAME,gpm_socket_name);
     len = offsetof(struct sockaddr_un, sun_path) + 1 + strlen(&addr.sun_path[1]);
 
-    sk = socket(PF_LOCAL, SOCK_STREAM, 0);
+    sk = socket(PF_LOCAL, SOCK_STREAM, TCP_NODELAY);
     if (sk < 0) {
         err = errno;
         errno = err;
@@ -168,6 +169,9 @@ int vimtouch_dialog_result(){
 void vimtouch_get_clipboard( VimClipboard *cbd ){
     VimEvent event;
     int n = -1;
+
+    write(gpm_fd, "GETCLIP:", 8);
+
     n = vimtouch_eventloop(VIM_EVENT_TYPE_CLIPBOARD, &event);
     if(n > 0){
         char* clip_text = event.event.cmd;
