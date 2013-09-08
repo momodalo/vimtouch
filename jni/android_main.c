@@ -1237,7 +1237,7 @@ getout(exitval)
 	garbage_collect();
 #endif
 
-    exit(exitval);
+    mch_exit(exitval);
 }
 
 #ifndef NO_VIM_MAIN
