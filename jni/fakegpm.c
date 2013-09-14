@@ -119,7 +119,6 @@ int Gpm_GetEvent(Gpm_Event *e){
         int i = 1;
         for(i = 1; i <= 10; i++){
             sprintf(buf, "HISTORY:%d,%s\n",i-1,get_history_entry(HIST_CMD,i));
-            LOGE("%s", buf);
             write(gpm_fd,buf,strlen(buf));
         }
     }
