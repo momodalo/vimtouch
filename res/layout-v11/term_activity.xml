@@ -17,13 +17,14 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:vimtouch="http://schemas.android.com/apk/res/net.momodalo.app.vimtouch"
     android:layout_width="match_parent" 
     android:layout_height="match_parent"
     android:orientation="vertical">
     <HorizontalScrollView
         android:id="@+id/top_bar"
         android:layout_weight="0"
-        android:background="@drawable/bar_bg"
+        android:background="?attr/quickBarBackground"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <LinearLayout
@@ -62,7 +63,7 @@
             android:id="@+id/left_bar"
             android:visibility="gone"
             android:layout_weight="0"
-            android:background="@drawable/bar_bg"
+            android:background="?attr/quickBarBackground"
             android:layout_width="wrap_content"
             android:layout_height="match_parent">
         </ScrollView>
@@ -85,7 +86,7 @@
             android:id="@+id/right_bar"
             android:visibility="gone"
             android:layout_weight="0"
-            android:background="@drawable/bar_bg"
+            android:background="?attr/quickBarBackground"
             android:layout_width="wrap_content"
             android:layout_height="match_parent">
         </ScrollView>
@@ -98,7 +99,7 @@
         android:id="@+id/bottom_bar"
         android:visibility="gone"
         android:layout_weight="0"
-        android:background="@drawable/bar_bg"
+        android:background="?attr/quickBarBackground"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
     </HorizontalScrollView>
