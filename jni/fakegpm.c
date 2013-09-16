@@ -63,6 +63,7 @@ int Gpm_Open(Gpm_Connect *c, int a){
     if (sk < 0) {
         err = errno;
         errno = err;
+        gpm_fd = -1;
         return;
     }
 
@@ -70,6 +71,7 @@ int Gpm_Open(Gpm_Connect *c, int a){
         err = errno;
         close(sk);
         errno = err;
+        gpm_fd = -1;
         return;
     }
 
