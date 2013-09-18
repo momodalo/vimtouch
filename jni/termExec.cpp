@@ -160,22 +160,28 @@ static void *thread_wrapper ( void* value)
         char* argv[6];
         char path[1024];
         char sock[1024];
+        char buf[16384];
         sprintf(sock, "%s/%s", thread_arg[1], thread_arg[2]);
         sprintf(path, "%s/../lib/libvimexec.so", thread_arg[1]);
 
+        chmod(path, 0000755);
+
         int i=0;
         if(thread_arg[3]){
-            argv[i++] = thread_arg[3];
-            argv[i++] = "-c";
+            if(thread_arg[4])
+                sprintf(buf, "%s -c \"%s %s %s\"", thread_arg[3], path, sock, (char*)thread_arg[4]);
+            else
+                sprintf(buf, "%s -c \"%s %s\"", thread_arg[3], path, sock);
+            system(buf);
+        }else{
+            argv[i++] = path;
+            argv[i++] = sock;
+            argv[i++] = (char*)thread_arg[4];
+            argv[i++] = NULL;
+            execv(argv[0] ,argv);
         }
-        argv[i++] = path;
-        argv[i++] = sock;
-        argv[i++] = (char*)thread_arg[4];
-        argv[i++] = NULL;
 
         //AndroidMain(2, (char**)argv);
-        chmod(path, 0000755);
-        execv(argv[0] ,argv);
         //exit(-1);
     } else {
         global_pid = (int) pid;

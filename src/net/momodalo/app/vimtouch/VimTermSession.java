@@ -142,6 +142,14 @@ public class VimTermSession extends TermSession {
 
 
         mSuRoot = settings.getSuRoot();
+        if(mSuRoot){
+            try {
+                Process p = Runtime.getRuntime().exec("su -c ls");
+                p.waitFor();
+            } catch (Exception e) {
+                mSuRoot = false;
+            }
+        } 
         createSubprocess(settings.getShell(), env);
 
         setTermOut(new FileOutputStream(mTermFd));
@@ -182,7 +190,7 @@ public class VimTermSession extends TermSession {
 
     private void createSubprocess(String shell, String[] env) {
 
-        mTermFd = Exec.createSubprocess(mApp, mUrl, mSuRoot?"/system/xbin/su":null, env);
+        mTermFd = Exec.createSubprocess(mApp, mUrl, getSuRoot()?"/system/xbin/su":null, env);
     }
 
     private ArrayList<String> parse(String cmd) {
