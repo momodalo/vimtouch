@@ -22,15 +22,10 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.UUID;
 
-import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
-import android.content.Intent;
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
-import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 
 /**
  * Utility methods for creating and managing a subprocess.
@@ -44,7 +39,7 @@ import android.view.View;
 public class Exec
 {
     static {
-        System.loadLibrary("vimtouch");
+		System.loadLibrary("vimtouch");
     }
 
     static final String TAG = "Exec";

@@ -16,98 +16,85 @@
 
 package net.momodalo.app.vimtouch;
 
-import java.util.ArrayList;
+import jackpal.androidterm.emulatorview.ColorScheme;
+import jackpal.androidterm.emulatorview.TermSession;
+
 import java.io.BufferedInputStream;
-import java.io.InputStream;
-import java.io.FileOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
+import net.momodalo.app.vimtouch.addons.PluginAddOn;
+import net.momodalo.app.vimtouch.addons.PluginFactory;
+import net.momodalo.app.vimtouch.compat.AndroidCompat;
+import net.momodalo.app.vimtouch.compat.SlidingSherlockFragmentActivity;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.res.Configuration;
-import android.content.ServiceConnection;
-import android.content.ComponentName;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
-import android.preference.PreferenceManager;
-import android.provider.MediaStore;
-import android.text.ClipboardManager;
-import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.view.KeyCharacterMap;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Spinner;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ArrayAdapter;
-import android.content.DialogInterface;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageInfo;
-import android.os.IBinder;
+import android.app.Dialog;
 import android.app.DownloadManager;
 import android.app.DownloadManager.Query;
 import android.app.DownloadManager.Request;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.IntentFilter;
-import android.app.Dialog;
-import android.app.Instrumentation;
-import android.view.Window;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.preference.PreferenceManager;
+import android.provider.MediaStore;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.text.ClipboardManager;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.TextView;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
-import android.widget.Toast;
+import android.widget.Spinner;
+import android.widget.TextView;
 
-import jackpal.androidterm.emulatorview.EmulatorView;
-import jackpal.androidterm.emulatorview.ColorScheme;
-import jackpal.androidterm.emulatorview.TermSession;
-
-import net.momodalo.app.vimtouch.compat.ActionBarCompat;
-import net.momodalo.app.vimtouch.compat.AndroidCompat;
-import net.momodalo.app.vimtouch.compat.ActivityCompat;
-import net.momodalo.app.vimtouch.addons.RuntimeFactory;
-import net.momodalo.app.vimtouch.addons.RuntimeAddOn;
-import net.momodalo.app.vimtouch.addons.PluginFactory;
-import net.momodalo.app.vimtouch.addons.PluginAddOn;
-
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.slidingmenu.lib.SlidingMenu;
-import com.slidingmenu.lib.app.SlidingFragmentActivity;
-
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.FragmentManager.OnBackStackChangedListener;
 
 
 /**
  * A terminal emulator activity.
  */
 
-public class VimTouch extends SlidingFragmentActivity implements 
-    ActionBarCompat.OnNavigationListener, 
-    OnItemSelectedListener {
+public class VimTouch extends SlidingSherlockFragmentActivity implements
+		OnItemSelectedListener, OnNavigationListener {
     /**
      * Set to true to add debugging code and logging.
      */
@@ -296,7 +283,8 @@ public class VimTouch extends SlidingFragmentActivity implements
         return url;
     }
 
-    @Override
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	@Override
     public void onCreate(Bundle icicle) {
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         mSettings = new VimSettings(getResources(), mPrefs);
@@ -376,32 +364,22 @@ public class VimTouch extends SlidingFragmentActivity implements
         });
         */
 
-        ActionBarCompat actionBar = ActivityCompat.getActionBar(this);
+		ActionBar actionBar = getSupportActionBar();
         mTabSpinner = (Spinner)findViewById(R.id.tab_spinner);
-        if(actionBar == null){
-            mTabSpinner.setVisibility(View.VISIBLE);
-            // add tab spinner
-            mTabSpinner.setOnItemSelectedListener(this);
-            mTabAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item);
-            mTabAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-            mTabSpinner.setAdapter(mTabAdapter);
-        }else{
             mTabSpinner.setVisibility(View.GONE);
-            actionBar.setNavigationMode(ActionBarCompat.NAVIGATION_MODE_LIST);
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
             actionBar.setDisplayShowTitleEnabled(false);
             mTabAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item);
             mTabAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
             actionBar.setListNavigationCallbacks(mTabAdapter, this);
-        }
 
         mMainLayout = (LinearLayout)findViewById(R.id.main_layout);
 
         if(checkVimRuntime())
             startEmulator();
 
-        Exec.vimtouch = this;
+		Exec.vimtouch = this;
     }
 
     public void onDestroy() {
@@ -884,8 +862,8 @@ public class VimTouch extends SlidingFragmentActivity implements
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getSupportMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
@@ -1073,12 +1051,7 @@ public class VimTouch extends SlidingFragmentActivity implements
             return;
         }
 
-        ActionBarCompat actionbar = ActivityCompat.getActionBar(this);
-        if(actionbar == null){
-            mTabSpinner.setSelection(n);
-        }else{
-            actionbar.setSelectedNavigationItem(n);
-        }
+		getSupportActionBar().setSelectedNavigationItem(n);
     }
 
     public void setVimCurTab(int n){
@@ -1089,12 +1062,9 @@ public class VimTouch extends SlidingFragmentActivity implements
     public void showTab(int n){
         if(n <= 0) mVimCurTab = -1;
         //mTabSpinner.setVisibility(n>0?View.VISIBLE:View.GONE);
-        ActionBarCompat actionbar = ActivityCompat.getActionBar(this);
-        if(actionbar == null){
-            mTabSpinner.setVisibility(n>0?View.VISIBLE:View.GONE);
-        }else{
-            actionbar.setNavigationMode(n>0?ActionBarCompat.NAVIGATION_MODE_LIST:ActionBarCompat.NAVIGATION_MODE_STANDARD);
-        }
+		getSupportActionBar().setNavigationMode(
+				n > 0 ? ActionBar.NAVIGATION_MODE_LIST
+						: ActionBar.NAVIGATION_MODE_STANDARD);
     }
 
     public void nativeSetCurTab(int n){
@@ -1129,7 +1099,8 @@ public class VimTouch extends SlidingFragmentActivity implements
 
     TextView mHistoryButtons[] = new TextView[10];
 
-    public void showCmdHistory() {
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	public void showCmdHistory() {
 
         final Dialog dialog = new Dialog(this,R.style.DialogSlideAnim);
 

@@ -15,13 +15,11 @@
 -->
 
 <resources>
-    <style name="VimTheme" parent="@android:style/Theme.Black">
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowFrame">@null</item>
+    <style name="VimTheme" parent="style/Theme.Sherlock.Light">
+        <item name="quickBarBackground">@drawable/bar_bg</item>
     </style>
-    <style name="VimDarkTheme" parent="@android:style/Theme.Black">
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowFrame">@null</item>
+    <style name="VimDarkTheme" parent="style/Theme.Sherlock">
+        <item name="quickBarBackground">@drawable/bar_bg_dark</item>
     </style>
     <style name="VimInstallTheme" parent="@style/VimTheme">
     </style>
