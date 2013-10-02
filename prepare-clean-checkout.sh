@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SDK=$ANDROID_SDK_HOME
+SDK=$ANDROID_HOME
 
 if [ -f $SDK/tools/android ] ; then
     echo Android SDK found, OK
