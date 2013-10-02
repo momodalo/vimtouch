@@ -34,4 +34,4 @@ $SDK/tools/android update project -p . -t $android_platform
 
 ant config
 
-# You're now ready to `$NDK/ndk-build` and `ant debug`
+# You're now ready to run `ant debug`
