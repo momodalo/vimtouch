@@ -20,7 +20,11 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
@@ -64,7 +68,8 @@ public class Exec
     }
 
     public static void showDialog(
-        int	type, String title, String message, String buttons, int	default_button, String textfield
+int type, String title, String message,
+			String buttons, int default_button, String textfield
     ) {
         dialogState = DIALOG_INPROGRESS;
         dialogDefaultState = default_button;
@@ -246,8 +251,42 @@ public class Exec
             return mSocketName;
         }
 
-        public void run() {
-            try{
+		private static final Pattern COMMAND_REXP = Pattern
+				.compile("([A-Z ]{7}):");
+
+		/**
+		 * Splits str with commands by regexp. Puts commands and values into
+		 * List
+		 * 
+		 * @param str
+		 * @return
+		 */
+		private List<String> splitCommands(String str) {
+			Matcher m = COMMAND_REXP.matcher(str);
+			String name = null;
+			List<String> result = new ArrayList<String>();
+			while (m.find()) {
+				StringBuffer sb = new StringBuffer();
+				m.appendReplacement(sb, "");
+				if (null != name) {
+					// Not a first time, name is set
+					result.add(name);
+					result.add(sb.toString());
+				}
+				name = m.group(1).trim();
+			}
+			StringBuffer sb = new StringBuffer();
+			m.appendTail(sb);
+			if (null != name) {
+				// Last time, name (if set) and tail as a value
+				result.add(name);
+				result.add(sb.toString());
+			}
+			return result;
+		}
+
+		public void run() {
+			try {
                 while (!isInterrupted()) {
 
                     if (null == mServerSocket){
@@ -284,7 +323,6 @@ public class Exec
                     }   
 
                     int bytesRead;
-
                     while (mReceiver != null) {
                         try {
                             bytesRead = input.read(mBuffer, 0, mBufferSize );
@@ -295,38 +333,44 @@ public class Exec
                         }
 
                         if(bytesRead <= 0)continue;
-
-                        android.util.Log.e("TEST", "make sring "+bytesRead);
                         String str = new String(mBuffer, 0, bytesRead);
+						List<String> parts = splitCommands(str);
                         Log.d(TAG, "get "+str);
+						for (int i = 0; i < parts.size() - 1; i += 2) {
+							// Process commands (name, value, name, value ...)
+							String name = parts.get(i);
+							String value = parts.get(i + 1).trim();
+							if (name.equals("SETCTAB")) {
+								setCurTab(Integer.parseInt(value));
+							} else if (name.equals("SYNC")) {
+								String[] array = value.split(",");
+								syncVim(Integer.parseInt(array[0]),
+										Integer.parseInt(array[1]),
+										Integer.parseInt(array[2]));
+							} else if (name.equals("SHOWTAB")) {
+								showTab(Integer.parseInt(value));
+							} else if (name.equals("SETLBLS")) {
+								setTabLabels(value.split(","));
+							} else if (name.equals("SETCLIP")) {
+								setClipText(value);
+							} else if (name.equals("GETCLIP")) {
+								try {
+									returnClipText(getClipText());
+								} catch (Exception e) {
+									returnClipText("");
+								}
+							} else if (name.equals("SDIALOG")) {
+								String[] array = value.split(",");
+								showDialog(Integer.parseInt(array[0]),
+										array[1], array[2], array[3],
+										Integer.parseInt(array[4]), array[5]);
+							} else if (name.equals("HISTORY")) {
+								vimtouch.setHistoryItem(
+										Integer.parseInt(value.substring(0, 1)),
+										value.substring(2));
+							}
+						}
 
-                        if(str.startsWith("SETCTAB:")){
-                            setCurTab(Integer.parseInt(str.substring(8)));
-                        }else if (str.startsWith("SYNC   :")){
-                            String[] array = str.substring(8).split(",");
-                            syncVim(Integer.parseInt(array[0]),Integer.parseInt(array[1]),Integer.parseInt(array[2]));
-                        }else if (str.startsWith("SHOWTAB:")){
-                            showTab(Integer.parseInt(str.substring(8)));
-                        }else if (str.startsWith("SETLBLS:")){
-                            setTabLabels(str.substring(8).split(","));
-                        }else if (str.startsWith("SETCLIP:")){
-                            setClipText(str.substring(8));
-                        }else if (str.startsWith("GETCLIP:")){
-                            try{
-                                returnClipText(getClipText());
-                            }catch(Exception e){
-                                returnClipText("");
-                            }
-                        }else if (str.startsWith("SDIALOG:")){
-                            String[] array = str.substring(8).split(",");
-                            showDialog(Integer.parseInt(array[0]), array[1], array[2], array[3], Integer.parseInt(array[4]), array[5]);
-                        }else if (str.startsWith("HISTORY:")){
-                            String[] hists = str.split("\n");
-                            for ( String hist: hists){
-                                if(hist.startsWith("HISTORY:"))
-                                    vimtouch.setHistoryItem(Integer.parseInt(hist.substring(8,9)), hist.substring(10));
-                            }
-                        }
                     }
                 }
                 Log.d(TAG, "The LocalSocketServer thread is going to stop !!!");
@@ -356,7 +400,7 @@ public class Exec
             }
         }
 
-        public void stopServer(){
+		public void stopServer() {
             if (mServerSocket != null) {
                 try {
                     // mark thread as interrupted
