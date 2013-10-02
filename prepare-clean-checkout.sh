@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SDK=$ANDROID_SDK_HOME
+SDK=$ANDROID_HOME
 
 if [ -f $SDK/tools/android ] ; then
     echo Android SDK found, OK
@@ -20,18 +20,18 @@ wget http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz
 tar xzvf libiconv-1.14.tar.gz
 mv libiconv-1.14 libiconv
 rm libiconv-1.14.tar.gz
-git clone git@github.com:momodalo/android_external_libncurses.git -b vimtouch libncurses
+git clone https://github.com/momodalo/android_external_libncurses.git -b vimtouch libncurses
 cd ..
 
 # extract latest platform:
 android_platform=`ls -1 $SDK/platforms | sort -t- -k2n | tail -1`
 echo $android_platform
 
+ant config
+
 $SDK/tools/android update lib-project -p libraries/emulatorview/ -t $android_platform
 $SDK/tools/android update lib-project -p libraries/aFileChooser/ -t $android_platform
 $SDK/tools/android update lib-project -p libraries/SlidingMenu/ -t $android_platform
 $SDK/tools/android update project -p . -t $android_platform
 
-ant config
-
-# You're now ready to `$NDK/ndk-build` and `ant debug`
+# You're now ready to run `ant debug`

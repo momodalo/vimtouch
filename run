@@ -1,6 +1,6 @@
 #!/bin/bash
 
-NDK=$ANDROID_NDK_ROOT
+NDK=$ANDROID_NDK
 SDK=`grep sdk.dir local.properties | tr '=' '\n' | tail -1`
 package="net.momodalo.app.vimtouch"
 
