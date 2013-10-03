@@ -75,6 +75,9 @@
             android:layout_width="match_parent" 
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:padding="0dp"
+            android:layout_margin="0dp"
+            android:orientation="vertical"
             android:id="@+id/main_layout">
         </LinearLayout>
         <ImageView 
