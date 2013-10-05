@@ -26,6 +26,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.momodalo.app.vimtouch.ext.manager.IntegrationManager;
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
@@ -174,6 +175,9 @@ int type, String title, String message,
     public static native void setSocket(int fd);
     public static native void returnClipText(String text);
     public static native void returnDialog(int s);
+    public static native void returnExtensionResult(String text);
+
+	public static native void sendAndroidEvent(int type, String object);
 
     public static native void getHistory();
 
@@ -349,6 +353,8 @@ int type, String title, String message,
 										Integer.parseInt(array[2]));
 							} else if (name.equals("SHOWTAB")) {
 								showTab(Integer.parseInt(value));
+							} else if (name.equals("ANDROID")) {
+								processExtensionCommand(value);
 							} else if (name.equals("SETLBLS")) {
 								setTabLabels(value.split(","));
 							} else if (name.equals("SETCLIP")) {
@@ -417,5 +423,18 @@ int type, String title, String message,
         }
 
     }
+
+	private static void processExtensionCommand(String value) {
+		int space = value.indexOf(' ');
+		if (-1 == space) {
+			returnExtensionResult("");
+			return;
+		}
+		String type = value.substring(0, space);
+		String params = value.substring(space+1);
+		Log.i(TAG, "Extension command: "+type+" - "+params);
+		returnExtensionResult(IntegrationManager.getInstance().process(type,
+				params));
+	}
 }
 

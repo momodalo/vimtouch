@@ -183,6 +183,8 @@ extern int Gpm_Wgetch();
 #define VIM_EVENT_TYPE_DIALOG 10
 #define VIM_EVENT_TYPE_SYNC 11
 #define VIM_EVENT_TYPE_HISTORY 12
+#define VIM_EVENT_TYPE_ANDROID 14
+#define VIM_EVENT_TYPE_ANDROID_SEND 15
 
 #include "vim.h"
 

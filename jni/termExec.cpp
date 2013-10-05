@@ -647,6 +647,36 @@ static void DEF_JNI(returnClipText, jstring text)
     env->ReleaseStringUTFChars(text, str);
 }
 
+static void DEF_JNI(returnExtensionResult, jstring text)
+{
+    if(global_socket < 0) return ;
+
+    if(!text) return;
+    const char* str = env->GetStringUTFChars(text, NULL);
+    if(!str) return;
+
+    VimEvent e;
+    e.type = VIM_EVENT_TYPE_ANDROID;
+    strcpy(e.event.cmd, str);
+    write(global_socket,(void*)&e, sizeof(e));
+
+    env->ReleaseStringUTFChars(text, str);
+}
+
+
+static void DEF_JNI(sendAndroidEvent, jint type, jstring object)
+{
+    if(global_socket < 0) return ;
+    if(!object) return;
+    VimEvent e;
+    e.type = VIM_EVENT_TYPE_ANDROID_SEND;
+	e.event.num = type;
+    const char* str_obj = env->GetStringUTFChars(object, NULL);
+    strcpy((char*)&e.event.nums[1], str_obj);
+    env->ReleaseStringUTFChars(object, str_obj);
+    write(global_socket,(void*)&e, sizeof(e));
+}
+
 
 void DEF_JNI ( setSocket,int fd)
 {
@@ -706,6 +736,8 @@ static JNINativeMethod method_table[] = {
     DECL_JNI(getHistory),
     DECL_JNI(setSocket),
     DECL_JNI(returnClipText),
+    DECL_JNI(returnExtensionResult),
+    DECL_JNI(sendAndroidEvent),
     DECL_JNI(returnDialog),
 };
 
