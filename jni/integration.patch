@@ -1,0 +1,67 @@
+commit 157c1d530ab9deb33ea02a670a76e971a52c2b94
+Author: Konstantin Vorobyev <kvorobyev@gmail.com>
+Date:   Sun Oct 6 08:54:13 2013 +0900
+
+    Android integration
+
+diff --git a/vim/src/eval.c b/vim/src/eval.c
+index fc01006..d6c9c1d 100644
+--- a/vim/src/eval.c
++++ b/vim/src/eval.c
+@@ -362,6 +362,8 @@ static struct vimvar
+     {VV_NAME("operator",	 VAR_STRING), VV_RO},
+     {VV_NAME("searchforward",	 VAR_NUMBER), 0},
+     {VV_NAME("oldfiles",	 VAR_LIST), 0},
++    {VV_NAME("android_type",	 VAR_NUMBER), VV_RO},
++    {VV_NAME("android_object",	 VAR_STRING), VV_RO},
+ };
+ 
+ /* shorthand */
+@@ -475,6 +477,7 @@ static int call_func __ARGS((char_u *funcname, int len, typval_T *rettv, int arg
+ static void emsg_funcname __ARGS((char *ermsg, char_u *name));
+ static int non_zero_arg __ARGS((typval_T *argvars));
+ 
++static void f_android __ARGS((typval_T *argvars, typval_T *rettv));
+ #ifdef FEAT_FLOAT
+ static void f_abs __ARGS((typval_T *argvars, typval_T *rettv));
+ static void f_acos __ARGS((typval_T *argvars, typval_T *rettv));
+@@ -7649,6 +7652,7 @@ static struct fst
+     {"acos",		1, 1, f_acos},	/* WJMc */
+ #endif
+     {"add",		2, 2, f_add},
++    {"android",		2, 2, f_android},
+     {"append",		2, 2, f_append},
+     {"argc",		0, 0, f_argc},
+     {"argidx",		0, 0, f_argidx},
+@@ -16178,6 +16182,16 @@ setwinvar(argvars, rettv, off)
+     }
+ }
+ 
++    static void
++f_android(argvars, rettv)
++    typval_T	*argvars;
++    typval_T	*rettv;
++{
++    rettv->vval.v_string = vim_android(
++		       get_tv_string(&argvars[0]), get_tv_string(&argvars[1]));
++    rettv->v_type = VAR_STRING;
++}
++
+ /*
+  * "shellescape({string})" function
+  */
+diff --git a/vim/src/vim.h b/vim/src/vim.h
+index b9ce325..60b6382 100644
+--- a/vim/src/vim.h
++++ b/vim/src/vim.h
+@@ -1842,7 +1842,9 @@ typedef int proftime_T;	    /* dummy for function prototypes */
+ #define VV_OP		52
+ #define VV_SEARCHFORWARD 53
+ #define VV_OLDFILES	54
+-#define VV_LEN		55	/* number of v: vars */
++#define VV_AD_EVENT	55
++#define VV_AD_OBJECT	56
++#define VV_LEN		57	/* number of v: vars */
+ 
+ #ifdef FEAT_CLIPBOARD
+ 
