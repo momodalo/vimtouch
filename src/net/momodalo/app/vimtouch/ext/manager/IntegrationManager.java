@@ -8,8 +8,11 @@ import net.momodalo.app.vimtouch.ext.FieldReaderException;
 import net.momodalo.app.vimtouch.ext.IncomingTransfer;
 import net.momodalo.app.vimtouch.ext.OutgoingTransfer;
 import net.momodalo.app.vimtouch.ext.Transferable;
+import android.util.Log;
 
 public class IntegrationManager {
+
+	private static final String TAG = "Integration";
 
 	private IntegrationManager() {
 	}
@@ -60,6 +63,7 @@ public class IntegrationManager {
 			}
 			output = ext.process(inp);
 		} catch (IntegrationExtensionException e) {
+			Log.w(TAG, "Error processing input:", e);
 			output = new IntegrationError(e.getMessage());
 		}
 		OutgoingTransfer ot = new OutgoingTransfer();
@@ -70,7 +74,7 @@ public class IntegrationManager {
 	}
 
 	public int nextEvent() {
-		return nextEvent++;
+		return ++nextEvent;
 	}
 
 	public void sendEvent(int type, Transferable object) {

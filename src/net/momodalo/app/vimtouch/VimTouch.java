@@ -34,8 +34,8 @@ import net.momodalo.app.vimtouch.addons.PluginAddOn;
 import net.momodalo.app.vimtouch.addons.PluginFactory;
 import net.momodalo.app.vimtouch.compat.AndroidCompat;
 import net.momodalo.app.vimtouch.compat.SlidingSherlockFragmentActivity;
-import net.momodalo.app.vimtouch.ext.impl.EmptyTransferable;
 import net.momodalo.app.vimtouch.ext.manager.IntegrationManager;
+import net.momodalo.app.vimtouch.ext.manager.impl.TimerExtension;
 import net.momodalo.app.vimtouch.ext.manager.impl.ToastExtension;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -389,6 +389,7 @@ public class VimTouch extends SlidingSherlockFragmentActivity implements
 
 	private void createExtensions() {
 		IntegrationManager.getInstance().addExtension(new ToastExtension(this));
+		IntegrationManager.getInstance().addExtension(new TimerExtension(this));
 	}
 
 	public void onDestroy() {
