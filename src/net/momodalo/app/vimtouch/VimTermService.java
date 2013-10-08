@@ -16,17 +16,15 @@
 
 package net.momodalo.app.vimtouch;
 
-import android.app.Service;
-import android.os.Binder;
-import android.os.IBinder;
-import android.content.Intent;
-import android.util.Log;
+import jackpal.androidterm.emulatorview.TermSession;
+import net.momodalo.app.vimtouch.compat.ServiceForegroundCompat;
 import android.app.Notification;
 import android.app.PendingIntent;
-
-import jackpal.androidterm.emulatorview.TermSession;
-
-import net.momodalo.app.vimtouch.compat.ServiceForegroundCompat;
+import android.app.Service;
+import android.content.Intent;
+import android.os.Binder;
+import android.os.IBinder;
+import android.util.Log;
 
 public class VimTermService extends Service implements TermSession.FinishCallback
 {
@@ -64,7 +62,10 @@ public class VimTermService extends Service implements TermSession.FinishCallbac
         compat = new ServiceForegroundCompat(this);
 
         /* Put the service in the foreground. */
-        Notification notification = new Notification(R.drawable.notification, getText(R.string.service_notify_text), System.currentTimeMillis());
+		Notification notification = new Notification(
+				R.drawable.ic_vim_notification,
+				getText(R.string.service_notify_text),
+				System.currentTimeMillis());
         notification.flags |= Notification.FLAG_ONGOING_EVENT;
         Intent notifyIntent = new Intent(this, VimTouch.class);
         notifyIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

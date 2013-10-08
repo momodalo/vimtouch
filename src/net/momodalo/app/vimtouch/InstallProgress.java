@@ -1,48 +1,46 @@
 package net.momodalo.app.vimtouch;
 
-import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
-import android.widget.ProgressBar;
-import android.net.Uri;
-import android.content.SharedPreferences;
-import android.app.DownloadManager;
-import android.app.DownloadManager.Query;
-import android.app.DownloadManager.Request;
-import android.content.BroadcastReceiver;
-import android.content.IntentFilter;
-import android.database.Cursor;
-import android.widget.TextView;
-import android.os.Handler;
-import android.os.Message;
-
-import java.util.ArrayList;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.BufferedOutputStream;
-import java.io.InputStream;
-import java.io.File;
 import java.io.FileWriter;
+import java.io.InputStream;
+import java.lang.ref.WeakReference;
+import java.math.BigInteger;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-import java.security.MessageDigest;
-import java.security.DigestInputStream;
-import java.lang.ref.WeakReference;
-import java.math.BigInteger;
 
-import net.momodalo.app.vimtouch.addons.RuntimeFactory;
-import net.momodalo.app.vimtouch.addons.RuntimeAddOn;
-import net.momodalo.app.vimtouch.addons.PluginFactory;
 import net.momodalo.app.vimtouch.addons.PluginAddOn;
+import net.momodalo.app.vimtouch.addons.PluginFactory;
+import net.momodalo.app.vimtouch.addons.RuntimeAddOn;
+import net.momodalo.app.vimtouch.addons.RuntimeFactory;
+import android.app.Activity;
+import android.app.DownloadManager;
+import android.app.DownloadManager.Query;
+import android.app.DownloadManager.Request;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 public class InstallProgress extends Activity {
     public static final String LOG_TAG = "VIM Installation";
@@ -300,8 +298,8 @@ public class InstallProgress extends Activity {
         CharSequence from = "VimTouch";
         CharSequence message = getString(desc);
 
-        Notification notif = new Notification(R.drawable.notification, message,
-                                              System.currentTimeMillis());
+		Notification notif = new Notification(R.drawable.ic_vim_notification,
+				message, System.currentTimeMillis());
 
         // The PendingIntent to launch our activity if the user selects this
         // notification
