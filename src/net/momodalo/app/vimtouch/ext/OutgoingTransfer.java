@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.momodalo.app.vimtouch.ext.Transferable.FieldType;
+import net.momodalo.app.vimtouch.ext.impl.write.BooleanFieldWriter;
 import net.momodalo.app.vimtouch.ext.impl.write.DoubleFieldWriter;
 import net.momodalo.app.vimtouch.ext.impl.write.ListFieldWriter;
 import net.momodalo.app.vimtouch.ext.impl.write.MapFieldWriter;
@@ -58,6 +59,10 @@ public class OutgoingTransfer {
 
 	public void writeDouble(String name, Double value) {
 		writeField(name, value, new DoubleFieldWriter());
+	}
+
+	public void writeBoolean(String name, boolean value) {
+		writeField(name, value, new BooleanFieldWriter());
 	}
 
 	public <T> void writeList(String name, List<T> list, FieldWriter<T> writer) {

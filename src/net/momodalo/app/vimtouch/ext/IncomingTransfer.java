@@ -65,11 +65,6 @@ public class IncomingTransfer {
 			index++;
 			return null;
 		}
-		if (reader.getType().getCode() != type) {
-			// Invalid reader
-			throw new FieldReaderException("Invalid type: " + type + " - "
-					+ index);
-		}
 		T value = reader.read(this);
 		reader.set(value);
 		return value;

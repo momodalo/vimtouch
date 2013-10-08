@@ -114,7 +114,7 @@ public class TimerExtension implements
 				timerHandler.removeCallbacks(handler);
 				handlers.remove(input.getSubscription());
 			}
-			Log.i(TAG, "Removed subscription");
+			Log.i(TAG, "Removed subscription: " + handler);
 			return new TimerOutput(input.getSubscription());
 		}
 		int subscription = IntegrationManager.getInstance().nextEvent();

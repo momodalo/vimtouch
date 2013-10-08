@@ -29,12 +29,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.List;
 
 import net.momodalo.app.vimtouch.addons.PluginAddOn;
 import net.momodalo.app.vimtouch.addons.PluginFactory;
 import net.momodalo.app.vimtouch.compat.AndroidCompat;
 import net.momodalo.app.vimtouch.compat.SlidingSherlockFragmentActivity;
 import net.momodalo.app.vimtouch.ext.manager.IntegrationManager;
+import net.momodalo.app.vimtouch.ext.manager.impl.QuickbarExtension;
 import net.momodalo.app.vimtouch.ext.manager.impl.TimerExtension;
 import net.momodalo.app.vimtouch.ext.manager.impl.ToastExtension;
 import android.annotation.TargetApi;
@@ -390,6 +392,8 @@ public class VimTouch extends SlidingSherlockFragmentActivity implements
 	private void createExtensions() {
 		IntegrationManager.getInstance().addExtension(new ToastExtension(this));
 		IntegrationManager.getInstance().addExtension(new TimerExtension(this));
+		IntegrationManager.getInstance().addExtension(
+				new QuickbarExtension(this));
 	}
 
 	public void onDestroy() {
@@ -558,24 +562,38 @@ public class VimTouch extends SlidingSherlockFragmentActivity implements
 
     }
 
-    private void updateButtons(){
+	public void setButtons(List<String> buttons) {
+		int index = 0;
+		for (String line : buttons) {
+			if (line.length() == 0)
+				continue;
+			if (index < mButtonBarLayout.getChildCount()) {
+				TextView textview = (TextView) mButtonBarLayout
+						.getChildAt(index);
+				textview.setText(line);
+				textview.setVisibility(View.VISIBLE);
+			} else {
+				addQuickbarButton(line);
+			}
+			index++;
+		}
+		for (int i = index; i < mButtonBarLayout.getChildCount(); i++) {
+			mButtonBarLayout.getChildAt(i).setVisibility(View.GONE);
+		}
+	}
+
+	public void updateButtons() {
         defaultButtons(false);
         try {
             FileReader fileReader = new FileReader(getQuickbarFile());
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             String line = null;
-            int index = 0;
+			List<String> buttons = new ArrayList<String>();
             while ((line = bufferedReader.readLine()) != null) {
-                if(line.length() == 0)continue;
-                if(index < mButtonBarLayout.getChildCount()){
-                    TextView textview = (TextView)mButtonBarLayout.getChildAt(index);
-                    textview.setText(line);
-                }else{
-                    addQuickbarButton(line);
-                }
-                index++;
+				buttons.add(line);
             }
             bufferedReader.close();
+			setButtons(buttons);
         }catch (IOException e){
         }
     }
