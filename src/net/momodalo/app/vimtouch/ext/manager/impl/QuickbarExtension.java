@@ -83,7 +83,7 @@ public class QuickbarExtension implements
 				if (input.setDefault) {
 					vimTouch.updateButtons();
 				} else {
-					vimTouch.setButtons(input.items);
+					vimTouch.setCustomButtons(input.items);
 				}
 			}
 		});

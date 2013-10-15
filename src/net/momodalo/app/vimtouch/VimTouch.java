@@ -173,6 +173,8 @@ public class VimTouch extends SlidingSherlockFragmentActivity implements
 
     private final static String DEFAULT_INITIAL_COMMAND =
         "export PATH=/data/local/bin:$PATH";
+
+	private static final String KEY_QUICKBAR = "quickbarContents";
     private String mInitialCommand;
 
     private SharedPreferences mPrefs;
@@ -184,6 +186,8 @@ public class VimTouch extends SlidingSherlockFragmentActivity implements
 
     private Intent TSIntent;
     private VimTermService mService;
+
+	private ArrayList<String> quickbarContents = null;
     private ServiceConnection mTSConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             VimTermService.TSBinder binder = (VimTermService.TSBinder) service;
@@ -562,7 +566,12 @@ public class VimTouch extends SlidingSherlockFragmentActivity implements
 
     }
 
-	public void setButtons(List<String> buttons) {
+	public void setCustomButtons(List<String> buttons) {
+		quickbarContents = new ArrayList<String>(buttons);
+		setButtons(buttons);
+	}
+
+	private void setButtons(List<String> buttons) {
 		int index = 0;
 		for (String line : buttons) {
 			if (line.length() == 0)
@@ -583,6 +592,8 @@ public class VimTouch extends SlidingSherlockFragmentActivity implements
 	}
 
 	public void updateButtons() {
+		Log.i(LOG_TAG, "updateButtons");
+		quickbarContents = null;
         defaultButtons(false);
         try {
             FileReader fileReader = new FileReader(getQuickbarFile());
@@ -623,7 +634,9 @@ public class VimTouch extends SlidingSherlockFragmentActivity implements
         mButtonBar.setVisibility(View.GONE);
         ((ViewGroup)mButtonBar).removeView(mButtonBarLayout);
 
-        updateButtons();
+		if (null == quickbarContents) {
+			updateButtons();
+		}
         
         int pos = mSettings.getQuickbarPosition();
 
