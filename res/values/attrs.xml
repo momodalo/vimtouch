@@ -19,5 +19,6 @@
 <resources>
      <declare-styleable name="EmulatorView">
     </declare-styleable>
-    <attr name="quickBarBackground" format="reference"/>        
+    <attr name="quickBarBackground" format="reference"/>
+    <item name="quickbar_button_keys" type="id"/>        
 </resources>

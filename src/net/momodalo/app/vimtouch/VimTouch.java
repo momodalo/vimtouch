@@ -36,6 +36,7 @@ import net.momodalo.app.vimtouch.addons.PluginFactory;
 import net.momodalo.app.vimtouch.compat.AndroidCompat;
 import net.momodalo.app.vimtouch.compat.SlidingSherlockFragmentActivity;
 import net.momodalo.app.vimtouch.ext.manager.IntegrationManager;
+import net.momodalo.app.vimtouch.ext.manager.impl.InputExtension;
 import net.momodalo.app.vimtouch.ext.manager.impl.QuickbarExtension;
 import net.momodalo.app.vimtouch.ext.manager.impl.TimerExtension;
 import net.momodalo.app.vimtouch.ext.manager.impl.ToastExtension;
@@ -175,6 +176,7 @@ public class VimTouch extends SlidingSherlockFragmentActivity implements
         "export PATH=/data/local/bin:$PATH";
 
 	private static final String KEY_QUICKBAR = "quickbarContents";
+
     private String mInitialCommand;
 
     private SharedPreferences mPrefs;
@@ -211,24 +213,25 @@ public class VimTouch extends SlidingSherlockFragmentActivity implements
     View.OnClickListener mClickListener = new View.OnClickListener() {
         public void onClick(View v){
             TextView textview = (TextView)v;
-            CharSequence cmd = textview.getText();
-            final String cmdstr = cmd.toString();
-            if(cmd.charAt(0) == ':'){
-                if(cmd.length() > 1){
-                    Exec.doCommand(cmd.subSequence(1,cmd.length()).toString());
+			final String cmdstr = (String) textview
+					.getTag(R.id.quickbar_button_keys);
+			if (cmdstr.charAt(0) == ':') {
+				if (cmdstr.length() > 1) {
+					Exec.doCommand(cmdstr.substring(1, cmdstr.length()));
                 }else{
                     if(Exec.isInsertMode())
                         mSession.write(27);
-                    mSession.write(cmd.toString());
+					mSession.write(cmdstr);
                 }
             }else if(cmdstr.startsWith("<ctrl+")){
-                mSession.write(mapControlChar((int)cmd.charAt(6)));
+				mSession.write(mapControlChar((int) cmdstr.charAt(6)));
                 //Exec.doCommand(cmd.subSequence(1,cmd.length()).toString());
             }else
-                mSession.write(cmd.toString());
+				parseKeys(mSession, cmdstr);
             Exec.updateScreen();
             mEmulatorView.lateCheckInserted();
         }
+
     };
     View.OnLongClickListener mLongClickListener = new View.OnLongClickListener() {
         public boolean onLongClick(View v){
@@ -291,6 +294,81 @@ public class VimTouch extends SlidingSherlockFragmentActivity implements
         }
         return url;
     }
+
+	protected void parseKeys(VimTermSession session, String cmdstr) {
+		int from = 0;
+		int to = 0;
+		while (to < cmdstr.length()) {
+			if (cmdstr.charAt(to) == '<') {
+				// Begin sequence?
+				int end = cmdstr.indexOf('>', to);
+				if (-1 != end && end > to + 1) {
+					// Have something in between
+					// Write what we have
+					session.write(cmdstr.substring(from, to));
+					if (cmdstr.substring(to + 1, to + 3).equals("C-")) {
+						// Ctrl+...
+						session.write(mapControlChar(cmdstr.charAt(to + 3)));
+					} else {
+						// Special char
+						int code = mapSpecialChar(cmdstr.substring(to + 1, end));
+						if (-2 == code) {
+							// Skip
+						} else if (-1 == code) {
+							Log.e(LOG_TAG,
+									"Unrecognized char: "
+											+ cmdstr.substring(to + 1, end));
+						} else {
+							session.write(code);
+						}
+					}
+					// Process next after seq
+					from = to = end + 1;
+					if (from >= cmdstr.length()) {
+						// No more chars
+						return;
+					}
+					continue;
+				}
+			}
+			to++;
+		}
+		if (to > from) {
+			session.write(cmdstr.substring(from, to));
+		}
+	}
+
+	private int mapSpecialChar(String code) {
+		if (code.equals("BS"))
+			return 8;
+		if (code.equals("Tab"))
+			return 9;
+		if (code.equals("CR"))
+			return 13;
+		if (code.equals("Esc"))
+			return 27;
+		if (code.equals("Space"))
+			return 32;
+		if (code.equals("lt"))
+			return '<';
+		if (code.equals("Bslash"))
+			return 92;
+		if (code.equals("Bar"))
+			return 124;
+		if (code.equals("Del"))
+			return 127;
+		if (code.equals("kOn")) {
+			// Keyboard ON
+			showIme();
+			return -2;
+		}
+		if (code.equals("kOff")) {
+			// Keyboard OFF
+			hideIme();
+			return -2;
+		}
+		return -1;
+	}
 
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	@Override
@@ -398,6 +476,7 @@ public class VimTouch extends SlidingSherlockFragmentActivity implements
 		IntegrationManager.getInstance().addExtension(new TimerExtension(this));
 		IntegrationManager.getInstance().addExtension(
 				new QuickbarExtension(this));
+		IntegrationManager.getInstance().addExtension(new InputExtension(this));
 	}
 
 	public void onDestroy() {
@@ -540,12 +619,12 @@ public class VimTouch extends SlidingSherlockFragmentActivity implements
         mSession.write(data);
     }
 
-    private void addQuickbarButton(String text) { 
+	private TextView addQuickbarButton(String text) {
         TextView button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
-        button.setText(text);
         button.setOnClickListener(mClickListener);
         button.setOnLongClickListener(mLongClickListener);
         mButtonBarLayout.addView((View)button);
+		return button;
     }
 
     private void defaultButtons(boolean force) {
@@ -574,16 +653,27 @@ public class VimTouch extends SlidingSherlockFragmentActivity implements
 	private void setButtons(List<String> buttons) {
 		int index = 0;
 		for (String line : buttons) {
+			line = line.trim();
 			if (line.length() == 0)
 				continue;
+			TextView textview = null;
+			String caption = line;
+			String keys = line;
+			int spaceIndex = line.indexOf(' ');
+			if (-1 != spaceIndex) {
+				// Have caption
+				keys = line.substring(0, spaceIndex);
+				caption = line.substring(spaceIndex + 1);
+			}
 			if (index < mButtonBarLayout.getChildCount()) {
-				TextView textview = (TextView) mButtonBarLayout
+				textview = (TextView) mButtonBarLayout
 						.getChildAt(index);
-				textview.setText(line);
 				textview.setVisibility(View.VISIBLE);
 			} else {
-				addQuickbarButton(line);
+				textview = addQuickbarButton(line);
 			}
+			textview.setText(caption);
+			textview.setTag(R.id.quickbar_button_keys, keys);
 			index++;
 		}
 		for (int i = index; i < mButtonBarLayout.getChildCount(); i++) {
@@ -704,6 +794,13 @@ public class VimTouch extends SlidingSherlockFragmentActivity implements
             getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mEmulatorView.getWindowToken(), 0);
     }
+
+	public void showIme() {
+		if (mEmulatorView == null)
+			return;
+		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.showSoftInput(mEmulatorView, InputMethodManager.SHOW_FORCED);
+	}
 
     @Override
     protected void onNewIntent(Intent intent) {
