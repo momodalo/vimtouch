@@ -3,11 +3,12 @@ package net.momodalo.app.vimtouch.ext.manager;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.kvj.vimtouch.ext.FieldReaderException;
+import org.kvj.vimtouch.ext.IncomingTransfer;
+import org.kvj.vimtouch.ext.OutgoingTransfer;
+import org.kvj.vimtouch.ext.Transferable;
+
 import net.momodalo.app.vimtouch.Exec;
-import net.momodalo.app.vimtouch.ext.FieldReaderException;
-import net.momodalo.app.vimtouch.ext.IncomingTransfer;
-import net.momodalo.app.vimtouch.ext.OutgoingTransfer;
-import net.momodalo.app.vimtouch.ext.Transferable;
 import android.util.Log;
 
 public class IntegrationManager {

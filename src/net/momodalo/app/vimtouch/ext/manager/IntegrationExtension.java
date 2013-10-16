@@ -1,6 +1,6 @@
 package net.momodalo.app.vimtouch.ext.manager;
 
-import net.momodalo.app.vimtouch.ext.Transferable;
+import org.kvj.vimtouch.ext.Transferable;
 
 public interface IntegrationExtension<I extends Transferable, O extends Transferable> {
 	

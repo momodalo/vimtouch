@@ -1,9 +1,10 @@
 package net.momodalo.app.vimtouch.ext.manager;
 
-import net.momodalo.app.vimtouch.ext.IncomingTransfer;
-import net.momodalo.app.vimtouch.ext.OutgoingTransfer;
-import net.momodalo.app.vimtouch.ext.Transferable;
-import net.momodalo.app.vimtouch.ext.impl.read.StringFieldReader;
+import org.kvj.vimtouch.ext.IncomingTransfer;
+import org.kvj.vimtouch.ext.OutgoingTransfer;
+import org.kvj.vimtouch.ext.Transferable;
+import org.kvj.vimtouch.ext.impl.read.StringFieldReader;
+
 
 public class IntegrationError implements Transferable {
 

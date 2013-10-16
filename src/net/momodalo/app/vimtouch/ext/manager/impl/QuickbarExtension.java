@@ -4,16 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.momodalo.app.vimtouch.VimTouch;
-import net.momodalo.app.vimtouch.ext.IncomingTransfer;
-import net.momodalo.app.vimtouch.ext.OutgoingTransfer;
-import net.momodalo.app.vimtouch.ext.Transferable;
-import net.momodalo.app.vimtouch.ext.impl.EmptyTransferable;
-import net.momodalo.app.vimtouch.ext.impl.read.BooleanFieldReader;
-import net.momodalo.app.vimtouch.ext.impl.read.ListFieldReader;
-import net.momodalo.app.vimtouch.ext.impl.read.StringFieldReader;
 import net.momodalo.app.vimtouch.ext.manager.IntegrationExtension;
 import net.momodalo.app.vimtouch.ext.manager.IntegrationExtensionException;
 import net.momodalo.app.vimtouch.ext.manager.impl.QuickbarExtension.QuickbarInput;
+
+import org.kvj.vimtouch.ext.IncomingTransfer;
+import org.kvj.vimtouch.ext.OutgoingTransfer;
+import org.kvj.vimtouch.ext.Transferable;
+import org.kvj.vimtouch.ext.impl.EmptyTransferable;
+import org.kvj.vimtouch.ext.impl.read.BooleanFieldReader;
+import org.kvj.vimtouch.ext.impl.read.ListFieldReader;
+import org.kvj.vimtouch.ext.impl.read.StringFieldReader;
 
 public class QuickbarExtension implements
 		IntegrationExtension<QuickbarInput, EmptyTransferable> {

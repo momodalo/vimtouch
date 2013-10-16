@@ -4,15 +4,17 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.momodalo.app.vimtouch.ext.IncomingTransfer;
-import net.momodalo.app.vimtouch.ext.impl.event.EventRequest;
-import net.momodalo.app.vimtouch.ext.impl.event.EventResponse;
-import net.momodalo.app.vimtouch.ext.impl.read.NumberFieldReader;
 import net.momodalo.app.vimtouch.ext.manager.IntegrationExtension;
 import net.momodalo.app.vimtouch.ext.manager.IntegrationExtensionException;
 import net.momodalo.app.vimtouch.ext.manager.IntegrationManager;
 import net.momodalo.app.vimtouch.ext.manager.impl.TimerExtension.TimerInput;
 import net.momodalo.app.vimtouch.ext.manager.impl.TimerExtension.TimerOutput;
+
+import org.kvj.vimtouch.ext.IncomingTransfer;
+import org.kvj.vimtouch.ext.impl.event.EventRequest;
+import org.kvj.vimtouch.ext.impl.event.EventResponse;
+import org.kvj.vimtouch.ext.impl.read.NumberFieldReader;
+
 import android.content.Context;
 import android.os.Handler;
 import android.util.Log;

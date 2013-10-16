@@ -1,14 +1,16 @@
 package net.momodalo.app.vimtouch.ext.manager.impl;
 
 import net.momodalo.app.vimtouch.VimTouch;
-import net.momodalo.app.vimtouch.ext.IncomingTransfer;
-import net.momodalo.app.vimtouch.ext.OutgoingTransfer;
-import net.momodalo.app.vimtouch.ext.Transferable;
-import net.momodalo.app.vimtouch.ext.impl.read.StringFieldReader;
 import net.momodalo.app.vimtouch.ext.manager.IntegrationExtension;
 import net.momodalo.app.vimtouch.ext.manager.IntegrationExtensionException;
 import net.momodalo.app.vimtouch.ext.manager.impl.ToastExtension.ToastInput;
 import net.momodalo.app.vimtouch.ext.manager.impl.ToastExtension.ToastOutput;
+
+import org.kvj.vimtouch.ext.IncomingTransfer;
+import org.kvj.vimtouch.ext.OutgoingTransfer;
+import org.kvj.vimtouch.ext.Transferable;
+import org.kvj.vimtouch.ext.impl.read.StringFieldReader;
+
 import android.widget.Toast;
 
 public class ToastExtension implements

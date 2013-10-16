@@ -1,0 +1,7 @@
+# generated files
+bin/
+gen/
+libs/
+obj/
+
+.settings
