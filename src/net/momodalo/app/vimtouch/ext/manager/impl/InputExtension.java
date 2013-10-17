@@ -1,8 +1,6 @@
 package net.momodalo.app.vimtouch.ext.manager.impl;
 
 import net.momodalo.app.vimtouch.VimTouch;
-import net.momodalo.app.vimtouch.ext.manager.IntegrationExtension;
-import net.momodalo.app.vimtouch.ext.manager.IntegrationExtensionException;
 import net.momodalo.app.vimtouch.ext.manager.impl.InputExtension.InputExtensionInput;
 
 import org.kvj.vimtouch.ext.IncomingTransfer;
@@ -10,6 +8,8 @@ import org.kvj.vimtouch.ext.OutgoingTransfer;
 import org.kvj.vimtouch.ext.Transferable;
 import org.kvj.vimtouch.ext.impl.EmptyTransferable;
 import org.kvj.vimtouch.ext.impl.read.StringFieldReader;
+import org.kvj.vimtouch.ext.manager.IntegrationExtension;
+import org.kvj.vimtouch.ext.manager.IntegrationExtensionException;
 
 public class InputExtension implements
 		IntegrationExtension<InputExtensionInput, EmptyTransferable> {

@@ -1,4 +1,4 @@
-package net.momodalo.app.vimtouch.ext.manager;
+package org.kvj.vimtouch.ext.manager;
 
 import org.kvj.vimtouch.ext.IncomingTransfer;
 import org.kvj.vimtouch.ext.OutgoingTransfer;

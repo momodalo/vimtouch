@@ -432,9 +432,9 @@ int type, String title, String message,
 		}
 		String type = value.substring(0, space);
 		String params = value.substring(space+1);
-		Log.i(TAG, "Extension command: "+type+" - "+params);
-		returnExtensionResult(IntegrationManager.getInstance().process(type,
-				params));
+		// Log.i(TAG, "Extension command: "+type+" - "+params);
+		returnExtensionResult(IntegrationManager.getInstance(vimtouch).process(
+				type, params));
 	}
 }
 

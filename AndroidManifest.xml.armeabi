@@ -74,5 +74,10 @@
             </intent-filter>
         </activity>
         <service android:name="VimTermService" />
+        <service android:name=".ext.manager.IntegrationProviderService" android:exported="true">
+            <intent-filter>
+                <action android:name="vimtouch.REMOTE_PROVIDER"/>
+            </intent-filter>
+        </service>
     </application>
 </manifest>
