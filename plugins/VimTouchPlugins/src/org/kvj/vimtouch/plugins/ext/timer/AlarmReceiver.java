@@ -1,11 +1,11 @@
 package org.kvj.vimtouch.plugins.ext.timer;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.content.WakefulBroadcastReceiver;
 import android.util.Log;
 
-public class AlarmReceiver extends BroadcastReceiver {
+public class AlarmReceiver extends WakefulBroadcastReceiver {
 
 	private static final String TAG = "AlarmReceiver";
 
@@ -14,7 +14,7 @@ public class AlarmReceiver extends BroadcastReceiver {
 		Log.i(TAG, "Timer via Alarm manager!");
 		Intent svcIntent = new Intent(context, TimerExtensionService.class);
 		svcIntent.putExtras(intent);
-		context.startService(svcIntent);
+		startWakefulService(context, svcIntent);
 	}
 
 }

@@ -1,17 +1,17 @@
 package org.kvj.vimtouch.plugins.ext.timer;
 
-import android.app.Service;
+import android.app.IntentService;
 import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
-public class TimerExtensionService extends Service {
+public class TimerExtensionService extends IntentService {
 
 	private static final String TAG = "TimerService";
 	private TimerExtension extension = null;
 
 	public TimerExtensionService() {
-		super();
+		super("TimerExtensionService");
 	}
 
 	@Override
@@ -21,14 +21,8 @@ public class TimerExtensionService extends Service {
 	}
 
 	@Override
-	public IBinder onBind(Intent arg0) {
+	public IBinder onBind(Intent intent) {
 		return extension;
-	}
-
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		extension.onAlarm(intent);
-		return super.onStartCommand(intent, flags, startId);
 	}
 
 	@Override
@@ -36,6 +30,12 @@ public class TimerExtensionService extends Service {
 		super.onDestroy();
 		Log.i(TAG, "Destroying Service");
 		extension.stop();
+	}
+
+	@Override
+	protected void onHandleIntent(Intent intent) {
+		extension.onAlarm(intent);
+		AlarmReceiver.completeWakefulIntent(intent);
 	}
 
 }
