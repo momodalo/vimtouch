@@ -10,17 +10,23 @@
 
 # generated files
 bin/
-gen/
-libs/
 obj/
+libs/
+.gradle
+build
+gradle*
+.idea
+*.iml
 
 # Local configuration file (sdk path, etc)
 local.properties
 
 # Downloaded subprojects
-jni/libiconv/
-jni/libncurses/
-jni/vim/
+jni/libiconv*
+jni/libncurses*
+jni/vim*
 
 # Vim session file
 vim-session
+atlassian*.xml
+

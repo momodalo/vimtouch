@@ -4,3 +4,6 @@
 [submodule "libraries/lima1"]
 	path = libraries/lima1
 	url = https://github.com/kvj/Lima1.git
+[submodule "libraries/Lima1"]
+	path = libraries/Lima1
+	url = git@github:kvj/Lima1Common.git
