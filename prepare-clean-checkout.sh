@@ -1,14 +1,5 @@
 #!/bin/sh
 
-SDK=$ANDROID_SDK_HOME
-
-if [ -f $SDK/tools/android ] ; then
-    echo Android SDK found, OK
-else
-    echo Android SDK not found. Please export ANDROID_SDK_HOME. Exiting.
-    exit
-fi
-
 cd jni
 wget ftp://ftp.vim.org/pub/vim/unix/vim-7.3.tar.bz2
 tar jxvf vim-7.3.tar.bz2
@@ -25,15 +16,3 @@ rm libiconv-1.14.tar.gz
 git clone git@github.com:momodalo/android_external_libncurses.git -b vimtouch libncurses
 cd ..
 
-# extract latest platform:
-android_platform=`ls -1 $SDK/platforms | sort -t- -k2n | tail -1`
-echo $android_platform
-
-$SDK/tools/android update lib-project -p libraries/emulatorview/ -t $android_platform
-$SDK/tools/android update lib-project -p libraries/aFileChooser/ -t $android_platform
-$SDK/tools/android update lib-project -p libraries/SlidingMenu/ -t $android_platform
-$SDK/tools/android update project -p . -t $android_platform
-
-ant config
-
-# You're now ready to `$NDK/ndk-build` and `ant debug`

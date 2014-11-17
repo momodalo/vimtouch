@@ -12,6 +12,7 @@
 bin/
 obj/
 libs/
+native/
 .gradle
 build
 gradle*

@@ -1,6 +1,6 @@
-include ':Lima1', ':emulatorview', ':aFileChooser', ':BasePlugin'
+include ':Lima1', ':emulatorview', ':aFileChooser', ':BasePlugin', ':AutoUpdateApk'
 
-// project(':AutoUpdateApk').projectDir = file("../AutoUpdateApk")
+project(':AutoUpdateApk').projectDir = file("../AutoUpdateApk")
 project(':Lima1').projectDir = file("libraries/Lima1")
 project(':emulatorview').projectDir = file("libraries/emulatorview")
 project(':aFileChooser').projectDir = file("libraries/aFileChooser")

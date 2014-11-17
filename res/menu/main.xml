@@ -15,61 +15,61 @@
  * limitations under the License.
 -->
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/menu_toggle_soft_keyboard"
-        android:showAsAction="ifRoom"
+        app:showAsAction="ifRoom"
         android:icon="@android:drawable/ic_menu_edit"
         android:title="@string/toggle_soft_keyboard" />
     <item android:id="@+id/menu_ESC"
-        android:showAsAction="ifRoom"
+        app:showAsAction="ifRoom"
         android:title="@string/esc_key" />
     <item android:id="@+id/menu_quit"
-        android:showAsAction="ifRoom"
+        app:showAsAction="ifRoom"
         android:title="@string/quit_file" />
     <group android:checkableBehavior="all">
         <item android:id="@+id/menu_keys"
-            android:showAsAction="never"
+            app:showAsAction="never"
             android:title="@string/more_key" />
         <item android:id="@+id/menu_fullscreen"
-            android:showAsAction="never"
+            app:showAsAction="never"
             android:title="@string/toggle_fullscreen" />
         <item android:id="@+id/menu_ime_composing"
-            android:showAsAction="never"
+            app:showAsAction="never"
             android:title="@string/ime_composing" />
     </group>
     <item android:id="@+id/menu_save"
-        android:showAsAction="ifRoom"
+        app:showAsAction="ifRoom"
         android:icon="@android:drawable/ic_menu_save"
         android:title="@string/save_file" />
     <group android:checkableBehavior="single" android:id="@+id/menu_new_type">
         <item android:id="@+id/menu_new"
-            android:showAsAction="never"
+            app:showAsAction="never"
             android:title="@string/new_file" />
         <item android:id="@+id/menu_vnew"
-            android:showAsAction="never"
+            app:showAsAction="never"
             android:title="@string/vnew_file" />
         <item android:id="@+id/menu_tabnew"
-            android:showAsAction="never"
+            app:showAsAction="never"
             android:checked="true"
             android:title="@string/tabnew_file" />
         <item android:id="@+id/menu_diff"
-            android:showAsAction="never"
+            app:showAsAction="never"
             android:title="@string/diff_file" />
     </group>
     <item android:id="@+id/menu_vimrc"
-        android:showAsAction="ifRoom|withText"
+        app:showAsAction="ifRoom|withText"
         android:title="@string/vimrc" />
     <item android:id="@+id/menu_quickbar"
-        android:showAsAction="ifRoom|withText"
+        app:showAsAction="ifRoom|withText"
         android:title="@string/menu_quickbar" />
     <item android:id="@+id/menu_preferences"
-        android:showAsAction="ifRoom|withText"
+        app:showAsAction="ifRoom|withText"
         android:icon="@android:drawable/ic_menu_preferences"
         android:title="@string/preferences" />
     <item android:id="@+id/menu_backup"
-        android:showAsAction="never"
+        app:showAsAction="never"
         android:title="@string/backup" />
     <item android:id="@+id/menu_extra_downloads"
-        android:showAsAction="ifRoom|withText"
+        app:showAsAction="ifRoom|withText"
         android:title="@string/extra_downloads" />
 </menu>
