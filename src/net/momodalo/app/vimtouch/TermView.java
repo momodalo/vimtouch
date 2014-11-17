@@ -19,6 +19,7 @@ import android.view.KeyEvent;
 
 import java.lang.Runnable;
 import java.lang.reflect.Field;
+
 import jackpal.androidterm.emulatorview.ColorScheme;
 import jackpal.androidterm.emulatorview.EmulatorView;
 import jackpal.androidterm.emulatorview.TermSession;

@@ -16,9 +16,6 @@
 
 package net.momodalo.app.vimtouch;
 
-import jackpal.androidterm.emulatorview.ColorScheme;
-import jackpal.androidterm.emulatorview.TermSession;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,7 +31,6 @@ import java.util.List;
 import net.momodalo.app.vimtouch.addons.PluginAddOn;
 import net.momodalo.app.vimtouch.addons.PluginFactory;
 import net.momodalo.app.vimtouch.compat.AndroidCompat;
-import net.momodalo.app.vimtouch.compat.SlidingSherlockFragmentActivity;
 import net.momodalo.app.vimtouch.ext.manager.IntegrationManager;
 import net.momodalo.app.vimtouch.ext.manager.impl.InputExtension;
 import net.momodalo.app.vimtouch.ext.manager.impl.QuickbarExtension;
@@ -69,11 +65,15 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.text.ClipboardManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -87,19 +87,17 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
-import com.slidingmenu.lib.SlidingMenu;
+
+import jackpal.androidterm.emulatorview.ColorScheme;
+import jackpal.androidterm.emulatorview.TermSession;
 
 
 /**
  * A terminal emulator activity.
  */
 
-public class VimTouch extends SlidingSherlockFragmentActivity implements
-		OnItemSelectedListener, OnNavigationListener {
+public class VimTouch extends ActionBarActivity implements
+		OnItemSelectedListener, ActionBar.OnNavigationListener {
     /**
      * Set to true to add debugging code and logging.
      */
@@ -131,8 +129,6 @@ public class VimTouch extends SlidingSherlockFragmentActivity implements
 
     /* Sliding Menu interface */
     public interface SlidingMenuInterface {
-        public void onOpen();
-        public void onClose();
         public boolean onOptionsItemSelected(MenuItem item);
         public boolean onNavigationItemSelected(int pos, long id);
         public Fragment getFragment();
@@ -400,37 +396,14 @@ public class VimTouch extends SlidingSherlockFragmentActivity implements
         if(Integer.valueOf(android.os.Build.VERSION.SDK) < 11)
             requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        setBehindContentView(R.layout.menu);
         /* setup sliding menu */
         setContentView(R.layout.term_activity);
 
-        setSlidingActionBarEnabled(false);
-
-        getSlidingMenu().setMode(SlidingMenu.LEFT);
-        getSlidingMenu().setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
-        getSlidingMenu().setShadowWidthRes(R.dimen.shadow_width);
-        getSlidingMenu().setShadowDrawable(R.drawable.shadow);
-        getSlidingMenu().setBehindOffsetRes(R.dimen.slidingmenu_offset);
-        getSlidingMenu().setFadeDegree(0.35f);
         //getSlidingMenu().attachToActivity(this, SlidingMenu.SLIDING_CONTENT);
 
         mMenu = new FileListMenu(this);
 
-        setSlidingMenuFragment( mMenu.getFragment());
-
-        getSlidingMenu().setOnCloseListener(new SlidingMenu.OnCloseListener(){
-            public void onClose(){
-                setTabLabels(mVimTabs);
-                setCurTab(mVimCurTab);
-                mMenu.onClose();
-            }
-        });
-
-        getSlidingMenu().setOnOpenListener(new SlidingMenu.OnOpenListener(){
-            public void onOpen(){
-                mMenu.onOpen();
-            }
-        });
+        setSlidingMenuFragment(mMenu.getFragment());
 
         mTopButtonBar = findViewById(R.id.top_bar);
         mBottomButtonBar = findViewById(R.id.bottom_bar);
@@ -515,6 +488,11 @@ public class VimTouch extends SlidingSherlockFragmentActivity implements
     }
 
     private void startEmulator() {
+        File appDir = new File(getApplicationContext().getFilesDir().getParentFile(), "lib");
+        File[] files = appDir.listFiles();
+        for (File file : files) {
+            Log.w("File", file.getPath());
+        }
         String appPath = getApplicationContext().getFilesDir().getPath();
         mSession = new VimTermSession (appPath, mUrl, mSettings, "");
         mSession.setFinishCallback(new TermSession.FinishCallback () {
@@ -526,11 +504,6 @@ public class VimTouch extends SlidingSherlockFragmentActivity implements
             }
         });
         mEmulatorView = createEmulatorView(mSession);
-        mEmulatorView.setOnZoomListener( new TermView.OnZoomListener() {
-            public void onZoom(boolean on){
-                getSlidingMenu().setSlidingEnabled(!on);
-            }
-        });
         mMainLayout.addView(mEmulatorView);
 
         mEmulatorView.updateSize(true);
@@ -1002,7 +975,7 @@ public class VimTouch extends SlidingSherlockFragmentActivity implements
 
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getSupportMenuInflater().inflate(R.menu.main, menu);
+		getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
@@ -1065,9 +1038,6 @@ public class VimTouch extends SlidingSherlockFragmentActivity implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if(getSlidingMenu().isMenuShowing() && mMenu.onOptionsItemSelected(item))
-            return super.onOptionsItemSelected(item);
-
         if (id == R.id.menu_preferences) {
             doPreferences();
         } else if (id == R.id.menu_fullscreen) {
@@ -1101,19 +1071,15 @@ public class VimTouch extends SlidingSherlockFragmentActivity implements
         }else if (id == R.id.menu_new) {
             item.setChecked(true);
             mOpenCommand = "new";
-            showMenu();
         }else if (id == R.id.menu_vnew) {
             item.setChecked(true);
             mOpenCommand = "vnew";
-            showMenu();
         }else if (id == R.id.menu_tabnew) {
             item.setChecked(true);
             mOpenCommand = "tabnew";
-            showMenu();
         }else if (id == R.id.menu_diff) {
             item.setChecked(true);
             mOpenCommand = "vert diffsplit";
-            showMenu();
         } else if (id == R.id.menu_save) {
             Exec.doCommand("w");
         } else if (id == R.id.menu_backup) {
@@ -1219,17 +1185,11 @@ public class VimTouch extends SlidingSherlockFragmentActivity implements
     }
 
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-        if(getSlidingMenu().isMenuShowing())
-            mMenu.onNavigationItemSelected(pos, 0);
-        else
-            Exec.setTab(pos);
+        Exec.setTab(pos);
     }
 
     public boolean onNavigationItemSelected(int pos, long id) {
-        if(getSlidingMenu().isMenuShowing())
-            mMenu.onNavigationItemSelected(pos, id);
-        else
-            Exec.setTab(pos);
+        Exec.setTab(pos);
         return true;
     }
 

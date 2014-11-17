@@ -145,6 +145,7 @@ static void *thread_wrapper ( void* value)
     }
 
     if(pid == 0){
+        LOGI("pid = 0");
 
         int pts;
 
@@ -168,9 +169,9 @@ static void *thread_wrapper ( void* value)
 
         int i=0;
         if(thread_arg[3]){
-            if(thread_arg[4])
+            if(thread_arg[4]) {
                 sprintf(buf, "%s -c \"%s %s %s\"", thread_arg[3], path, sock, (char*)thread_arg[4]);
-            else
+            } else
                 sprintf(buf, "%s -c \"%s %s\"", thread_arg[3], path, sock);
             system(buf);
         }else{
@@ -184,6 +185,7 @@ static void *thread_wrapper ( void* value)
         //AndroidMain(2, (char**)argv);
         //exit(-1);
     } else {
+        LOGI("global_pid");
         global_pid = (int) pid;
     }
 

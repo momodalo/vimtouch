@@ -8,10 +8,10 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
+import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
-import com.actionbarsherlock.view.MenuItem;
 import com.ipaulpro.afilechooser.FileChoosedListener;
 import com.ipaulpro.afilechooser.FileListFragment;
 
@@ -40,7 +40,6 @@ public class FileListMenu implements VimTouch.SlidingMenuInterface, FileChoosedL
     public boolean onOptionsItemSelected(MenuItem item){
         int id = item.getItemId();
         if (id == R.id.menu_save) {
-            mVim.showContent();
             if(Exec.isInsertMode())
                 mVim.write(27);
             mVim.write(":w " + mLastDir + "/");
@@ -50,7 +49,6 @@ public class FileListMenu implements VimTouch.SlidingMenuInterface, FileChoosedL
 			Toast.makeText(mVim, ":cd "+mLastDir, Toast.LENGTH_SHORT).show();
             return true;
         } else if (id == R.id.menu_ESC) {
-            mVim.showContent();
             return true;
         }
         return false;
@@ -112,7 +110,6 @@ public class FileListMenu implements VimTouch.SlidingMenuInterface, FileChoosedL
 
 			} else {
                 mVim.openNewFile(path);
-                mVim.showContent();
 			}
 		} else {
 			Toast.makeText(mVim, R.string.error_selecting_file, Toast.LENGTH_SHORT).show();

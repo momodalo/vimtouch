@@ -1,108 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-/* Copyright 2007, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
-**
-**     http://www.apache.org/licenses/LICENSE-2.0 
-**
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
-** limitations under the License.
-*/
--->
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" 
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-    <HorizontalScrollView
-        android:id="@+id/top_bar"
-        android:layout_weight="0"
-        android:background="@drawable/bar_bg"
+<android.support.v4.widget.DrawerLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  style="@style/VimTheme"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:orientation="vertical">
+        <HorizontalScrollView
+                android:id="@+id/top_bar"
+                android:layout_weight="0"
+                android:background="?attr/quickBarBackground"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            <LinearLayout
+                    android:id="@+id/button_bar_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:divider="?android:attr/actionBarDivider"
+                    android:dividerPadding="12dip"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+            </LinearLayout>
+        </HorizontalScrollView>
+        <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/list_divider_holo_dark" />
+
+        <Spinner
+                android:id="@+id/tab_spinner"
+                android:layout_width="200sp"
+                android:textSize="18sp"
+                android:textColor="#DDDDDD"
+                android:gravity="center"
+                android:padding="2sp"
+                android:visibility="gone"
+                android:layout_height="30sp" />
         <LinearLayout
-            android:id="@+id/button_bar_layout"
-            android:layout_width="wrap_content" 
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:divider="?android:attr/actionBarDivider"
-            android:dividerPadding="12dip"
-            android:gravity="center_vertical" 
-            android:orientation="horizontal">
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/h_main_layout"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+            <ScrollView
+                    android:id="@+id/left_bar"
+                    android:visibility="gone"
+                    android:layout_weight="0"
+                    android:background="?attr/quickBarBackground"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent">
+            </ScrollView>
+            <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/list_divider_holo_dark" />
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:padding="0dp"
+                    android:layout_margin="0dp"
+                    android:orientation="vertical"
+                    android:id="@+id/main_layout">
+            </LinearLayout>
+            <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/list_divider_holo_dark" />
+            <ScrollView
+                    android:id="@+id/right_bar"
+                    android:visibility="gone"
+                    android:layout_weight="0"
+                    android:background="?attr/quickBarBackground"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent">
+            </ScrollView>
         </LinearLayout>
-    </HorizontalScrollView>
-    <ImageView 
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:src="@drawable/list_divider_holo_dark" />
-
-    <Spinner 
-        android:id="@+id/tab_spinner"
-        android:layout_width="200sp"
-        android:textSize="18sp"
-        android:textColor="#DDDDDD"
-        android:gravity="center"
-        android:padding="2sp"
-        android:visibility="gone"
-        android:layout_height="30sp" />
-    <LinearLayout 
-        android:layout_width="match_parent" 
-        android:layout_height="match_parent"
-        android:id="@+id/h_main_layout"
-        android:layout_weight="1"
-        android:orientation="horizontal">
-
-        <ScrollView
-            android:id="@+id/left_bar"
-            android:visibility="gone"
-            android:layout_weight="0"
-            android:background="@drawable/bar_bg"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent">
-        </ScrollView>
-        <ImageView 
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:src="@drawable/list_divider_holo_dark" />
-
-        <LinearLayout
-            android:layout_width="match_parent" 
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:padding="0dp"
-            android:layout_margin="0dp"
-            android:orientation="vertical"
-            android:id="@+id/main_layout">
-        </LinearLayout>
-        <ImageView 
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:src="@drawable/list_divider_holo_dark" />
-        <ScrollView
-            android:id="@+id/right_bar"
-            android:visibility="gone"
-            android:layout_weight="0"
-            android:background="@drawable/bar_bg"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent">
-        </ScrollView>
+        <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/list_divider_holo_dark" />
+        <HorizontalScrollView
+                android:id="@+id/bottom_bar"
+                android:visibility="gone"
+                android:layout_weight="0"
+                android:background="?attr/quickBarBackground"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+        </HorizontalScrollView>
     </LinearLayout>
-    <ImageView 
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:src="@drawable/list_divider_holo_dark" />
-    <HorizontalScrollView
-        android:id="@+id/bottom_bar"
-        android:visibility="gone"
-        android:layout_weight="0"
-        android:background="@drawable/bar_bg"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </HorizontalScrollView>
-</LinearLayout>
+    <FrameLayout
+            android:id="@+id/menu_frame"
+            android:layout_width="240dp"
+            android:layout_height="match_parent">
+
+    </FrameLayout>
+
+</android.support.v4.widget.DrawerLayout>
