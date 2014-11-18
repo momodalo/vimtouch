@@ -32,6 +32,8 @@ import android.support.v4.app.FragmentManager.OnBackStackChangedListener;
 import android.support.v4.app.FragmentTransaction;
 import android.widget.Toast;
 
+import com.ipaulpro.afilechooser.utils.FileInfo;
+
 /**
  * Main Activity that handles the FileListFragments 
  * 
@@ -158,14 +160,14 @@ public class FileChooserActivity extends FragmentActivity implements
 	 * 
 	 * @param file The file that was selected
 	 */
-	public void onFileSelected(File file) {
+	public void onFileSelected(FileInfo file) {
 		if (file != null) {
-			mPath = file.getAbsolutePath();
+			mPath = file.getFile().getAbsolutePath();
 			
-			if (file.isDirectory()) {
+			if (file.getFile().isDirectory()) {
 				replaceFragment(mPath);
 			} else {
-				finishWithResult(file);	
+				finishWithResult(file.getFile());
 			}
 		} else {
 			Toast.makeText(FileChooserActivity.this, R.string.error_selecting_file, Toast.LENGTH_SHORT).show();

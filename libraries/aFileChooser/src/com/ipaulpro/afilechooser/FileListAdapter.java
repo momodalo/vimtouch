@@ -28,6 +28,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.ipaulpro.afilechooser.utils.FileInfo;
+
 /**
  * List adapter for Files.
  * 
@@ -41,18 +43,18 @@ public class FileListAdapter extends BaseAdapter {
 	private final static int ICON_FOLDER = R.drawable.ic_folder;
 	private final static int ICON_FILE = R.drawable.ic_file;
 
-	private List<File> mFiles = new ArrayList<File>();
+	private List<FileInfo> mFiles = new ArrayList<FileInfo>();
 	private LayoutInflater mInflater;
 
 	public FileListAdapter(Context context) {
 		mInflater = LayoutInflater.from(context);
 	}
 
-	public ArrayList<File> getListItems() {
-		return (ArrayList<File>) mFiles;
+	public List<FileInfo> getListItems() {
+		return mFiles;
 	}
 
-	public void setListItems(List<File> files) {
+	public void setListItems(List<FileInfo> files) {
 		this.mFiles = files;
 		notifyDataSetChanged();
 	}
@@ -61,15 +63,11 @@ public class FileListAdapter extends BaseAdapter {
 		return mFiles.size();
 	}
 
-	public void add(File file) {
-		mFiles.add(file);
-	}
-
 	public void clear() {
 		mFiles.clear();
 	}
 
-	public Object getItem(int position) {
+	public FileInfo getItem(int position) {
 		return mFiles.get(position);
 	}
 
@@ -91,13 +89,13 @@ public class FileListAdapter extends BaseAdapter {
 		}
 
 		// Get the file at the current position
-		final File file = (File) getItem(position);
+		final FileInfo file = (FileInfo) getItem(position);
 
 		// Set the TextView as the file name
-		holder.nameView.setText(file.getName());
+		holder.nameView.setText(file.getTitle());
 
 		// If the item is not a directory, use the file icon
-		holder.iconView.setImageResource(file.isDirectory() ? ICON_FOLDER
+		holder.iconView.setImageResource(file.getFile().isDirectory() ? ICON_FOLDER
 				: ICON_FILE);
 
 		return row;

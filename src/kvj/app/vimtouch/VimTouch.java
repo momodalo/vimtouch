@@ -44,8 +44,10 @@ import android.os.IBinder;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.text.ClipboardManager;
@@ -96,16 +98,18 @@ import kvj.app.vimtouch.ext.manager.impl.ToastExtension;
  */
 
 public class VimTouch extends ActionBarActivity implements
-		OnItemSelectedListener, ActionBar.OnNavigationListener {
+                                                OnItemSelectedListener,
+                                                ActionBar.OnNavigationListener {
+
     /**
      * Set to true to add debugging code and logging.
      */
     public static final boolean DEBUG = false;
 
     /**
-     * Set to true to log each character received from the remote process to the
-     * android log, which makes it easier to debug some kinds of problems with
-     * emulating escape sequences and control codes.
+     * Set to true to log each character received from the remote process to the android log, which
+     * makes it easier to debug some kinds of problems with emulating escape sequences and control
+     * codes.
      */
     public static final boolean LOG_CHARACTERS_FLAG = DEBUG && true;
 
@@ -120,18 +124,22 @@ public class VimTouch extends ActionBarActivity implements
     public static final int REQUEST_VRZ = 3;
 
     /**
-     * The tag we use when logging, so that our messages can be distinguished
-     * from other messages in the log. Public because it's used by several
-     * classes.
+     * The tag we use when logging, so that our messages can be distinguished from other messages in
+     * the log. Public because it's used by several classes.
      */
     public static final String LOG_TAG = "VimTouch";
 
     /* Sliding Menu interface */
     public interface SlidingMenuInterface {
+
         public boolean onOptionsItemSelected(MenuItem item);
+
         public boolean onNavigationItemSelected(int pos, long id);
+
         public Fragment getFragment();
-    };
+    }
+
+    ;
     private SlidingMenuInterface mMenu = null;
 
     /**
@@ -141,6 +149,8 @@ public class VimTouch extends ActionBarActivity implements
     private VimTermSession mSession;
     private VimSettings mSettings;
     private LinearLayout mMainLayout;
+    private DrawerLayout mDrawerLayout = null;
+    private ActionBarDrawerToggle actionBarDrawerToggle = null;
 
     private LinearLayout mButtonBarLayout;
     private View mButtonBar;
@@ -157,7 +167,7 @@ public class VimTouch extends ActionBarActivity implements
     private ArrayAdapter<CharSequence> mTabAdapter;
     private String mLastDir = null;
     private boolean mFullscreen = false;
-    private final static int QUICK_BUTTON_SIZE=9;
+    private final static int QUICK_BUTTON_SIZE = 9;
 
     private int mControlKeyId = 0;
 
@@ -169,7 +179,7 @@ public class VimTouch extends ActionBarActivity implements
     private final static String DEFAULT_INITIAL_COMMAND =
         "export PATH=/data/local/bin:$PATH";
 
-	private static final String KEY_QUICKBAR = "quickbarContents";
+    private static final String KEY_QUICKBAR = "quickbarContents";
 
     private String mInitialCommand;
 
@@ -183,7 +193,7 @@ public class VimTouch extends ActionBarActivity implements
     private Intent TSIntent;
     private VimTermService mService;
 
-	private ArrayList<String> quickbarContents = null;
+    private ArrayList<String> quickbarContents = null;
     private ServiceConnection mTSConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             VimTermService.TSBinder binder = (VimTermService.TSBinder) service;
@@ -205,47 +215,51 @@ public class VimTouch extends ActionBarActivity implements
     }
 
     View.OnClickListener mClickListener = new View.OnClickListener() {
-        public void onClick(View v){
-            TextView textview = (TextView)v;
-			final String cmdstr = (String) textview
-					.getTag(R.id.quickbar_button_keys);
-			if (cmdstr.charAt(0) == ':') {
-				if (cmdstr.length() > 1) {
-					Exec.doCommand(cmdstr.substring(1, cmdstr.length()));
-                }else{
-                    if(Exec.isInsertMode())
+        public void onClick(View v) {
+            TextView textview = (TextView) v;
+            final String cmdstr = (String) textview
+                .getTag(R.id.quickbar_button_keys);
+            if (cmdstr.charAt(0) == ':') {
+                if (cmdstr.length() > 1) {
+                    Exec.doCommand(cmdstr.substring(1, cmdstr.length()));
+                } else {
+                    if (Exec.isInsertMode()) {
                         mSession.write(27);
-					mSession.write(cmdstr);
+                    }
+                    mSession.write(cmdstr);
                 }
-            }else if(cmdstr.startsWith("<ctrl+")){
-				mSession.write(mapControlChar((int) cmdstr.charAt(6)));
+            } else if (cmdstr.startsWith("<ctrl+")) {
+                mSession.write(mapControlChar((int) cmdstr.charAt(6)));
                 //Exec.doCommand(cmd.subSequence(1,cmd.length()).toString());
-            }else
-				parseKeys(mSession, cmdstr);
+            } else {
+                parseKeys(mSession, cmdstr);
+            }
             Exec.updateScreen();
             mEmulatorView.lateCheckInserted();
         }
 
     };
     View.OnLongClickListener mLongClickListener = new View.OnLongClickListener() {
-        public boolean onLongClick(View v){
+        public boolean onLongClick(View v) {
             showCmdHistory();
             return true;
         }
     };
 
-    private String getIntentUrl(Intent intent){
-        if(intent == null || intent.getScheme() == null) return null;
+    private String getIntentUrl(Intent intent) {
+        if (intent == null || intent.getScheme() == null) {
+            return null;
+        }
         String url = null;
-        if(intent.getScheme().equals("file")) {
+        if (intent.getScheme().equals("file")) {
             url = intent.getData().getPath();
-        }else if (intent.getScheme().equals("content")){
-              
-             String tmpPath = "tmp";
-             try {
+        } else if (intent.getScheme().equals("content")) {
+
+            String tmpPath = "tmp";
+            try {
                 InputStream attachment = getContentResolver().openInputStream(intent.getData());
 
-                if(attachment.available() > 50000){
+                if (attachment.available() > 50000) {
                     tmpPath = "";
                     new AlertDialog.Builder(this).
                         setTitle(R.string.dialog_title_content_error).
@@ -256,30 +270,36 @@ public class VimTouch extends ActionBarActivity implements
 
                 String attachmentFileName = "NoFile";
                 if (intent != null && intent.getData() != null) {
-                    Cursor c = getContentResolver().query( intent.getData(), null, null, null, null);
+                    Cursor c = getContentResolver().query(intent.getData(), null, null, null, null);
                     c.moveToFirst();
-                    final int fileNameColumnId = c.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME);
-                    if (fileNameColumnId >= 0)
+                    final int
+                        fileNameColumnId =
+                        c.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME);
+                    if (fileNameColumnId >= 0) {
                         attachmentFileName = c.getString(fileNameColumnId);
+                    }
                 }
 
                 String str[] = attachmentFileName.split("\\.");
 
                 File outFile;
-                if(str.length >= 2)
-                    outFile=File.createTempFile(str[0], "."+str[1], getDir(tmpPath, MODE_PRIVATE));
-                else
-                    outFile=File.createTempFile(attachmentFileName,"", getDir(tmpPath, MODE_PRIVATE));
+                if (str.length >= 2) {
+                    outFile =
+                        File.createTempFile(str[0], "." + str[1], getDir(tmpPath, MODE_PRIVATE));
+                } else {
+                    outFile =
+                        File.createTempFile(attachmentFileName, "", getDir(tmpPath, MODE_PRIVATE));
+                }
                 tmpPath = outFile.getAbsolutePath();
 
                 FileOutputStream f = new FileOutputStream(outFile);
-                                                                          
+
                 byte[] buffer = new byte[1024];
-                while (attachment.read(buffer) > 0){
+                while (attachment.read(buffer) > 0) {
                     f.write(buffer);
                 }
                 f.close();
-            }catch (Exception e){
+            } catch (Exception e) {
                 tmpPath = null;
                 Log.e(VimTouch.LOG_TAG, e.toString());
             }
@@ -289,96 +309,108 @@ public class VimTouch extends ActionBarActivity implements
         return url;
     }
 
-	protected void parseKeys(VimTermSession session, String cmdstr) {
-		int from = 0;
-		int to = 0;
-		while (to < cmdstr.length()) {
-			if (cmdstr.charAt(to) == '<') {
-				// Begin sequence?
-				int end = cmdstr.indexOf('>', to);
-				if (-1 != end && end > to + 1) {
-					// Have something in between
-					// Write what we have
-					session.write(cmdstr.substring(from, to));
-					if (cmdstr.substring(to + 1, to + 3).equals("C-")) {
-						// Ctrl+...
-						session.write(mapControlChar(cmdstr.charAt(to + 3)));
-					} else {
-						// Special char
-						int code = mapSpecialChar(cmdstr.substring(to + 1, end));
-						if (-2 == code) {
-							// Skip
-						} else if (-1 == code) {
-							Log.e(LOG_TAG,
-									"Unrecognized char: "
-											+ cmdstr.substring(to + 1, end));
-						} else {
-							session.write(code);
-						}
-					}
-					// Process next after seq
-					from = to = end + 1;
-					if (from >= cmdstr.length()) {
-						// No more chars
-						return;
-					}
-					continue;
-				}
-			}
-			to++;
-		}
-		if (to > from) {
-			session.write(cmdstr.substring(from, to));
-		}
-	}
+    protected void parseKeys(VimTermSession session, String cmdstr) {
+        int from = 0;
+        int to = 0;
+        while (to < cmdstr.length()) {
+            if (cmdstr.charAt(to) == '<') {
+                // Begin sequence?
+                int end = cmdstr.indexOf('>', to);
+                if (-1 != end && end > to + 1) {
+                    // Have something in between
+                    // Write what we have
+                    session.write(cmdstr.substring(from, to));
+                    if (cmdstr.substring(to + 1, to + 3).equals("C-")) {
+                        // Ctrl+...
+                        session.write(mapControlChar(cmdstr.charAt(to + 3)));
+                    } else {
+                        // Special char
+                        int code = mapSpecialChar(cmdstr.substring(to + 1, end));
+                        if (-2 == code) {
+                            // Skip
+                        } else if (-1 == code) {
+                            Log.e(LOG_TAG,
+                                  "Unrecognized char: "
+                                  + cmdstr.substring(to + 1, end));
+                        } else {
+                            session.write(code);
+                        }
+                    }
+                    // Process next after seq
+                    from = to = end + 1;
+                    if (from >= cmdstr.length()) {
+                        // No more chars
+                        return;
+                    }
+                    continue;
+                }
+            }
+            to++;
+        }
+        if (to > from) {
+            session.write(cmdstr.substring(from, to));
+        }
+    }
 
-	private int mapSpecialChar(String code) {
-		if (code.equals("BS"))
-			return 8;
-		if (code.equals("Tab"))
-			return 9;
-		if (code.equals("CR"))
-			return 13;
-		if (code.equals("Esc"))
-			return 27;
-		if (code.equals("Space"))
-			return 32;
-		if (code.equals("lt"))
-			return '<';
-		if (code.equals("Bslash"))
-			return 92;
-		if (code.equals("Bar"))
-			return 124;
-		if (code.equals("Del"))
-			return 127;
-		if (code.equals("kOn")) {
-			// Keyboard ON
-			showIme();
-			return -2;
-		}
-		if (code.equals("kOff")) {
-			// Keyboard OFF
-			hideIme();
-			return -2;
-		}
-		return -1;
-	}
+    private int mapSpecialChar(String code) {
+        if (code.equals("BS")) {
+            return 8;
+        }
+        if (code.equals("Tab")) {
+            return 9;
+        }
+        if (code.equals("CR")) {
+            return 13;
+        }
+        if (code.equals("Esc")) {
+            return 27;
+        }
+        if (code.equals("Space")) {
+            return 32;
+        }
+        if (code.equals("lt")) {
+            return '<';
+        }
+        if (code.equals("Bslash")) {
+            return 92;
+        }
+        if (code.equals("Bar")) {
+            return 124;
+        }
+        if (code.equals("Del")) {
+            return 127;
+        }
+        if (code.equals("kOn")) {
+            // Keyboard ON
+            showIme();
+            return -2;
+        }
+        if (code.equals("kOff")) {
+            // Keyboard OFF
+            hideIme();
+            return -2;
+        }
+        return -1;
+    }
 
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-	@Override
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    @Override
     public void onCreate(Bundle icicle) {
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         mSettings = new VimSettings(getResources(), mPrefs);
 
-        if(mSettings.getDarkTheme())
+        if (mSettings.getDarkTheme()) {
             setTheme(R.style.VimDarkTheme);
-        else
+        } else {
             setTheme(R.style.VimTheme);
+        }
 
         super.onCreate(icicle);
         Log.e(VimTouch.LOG_TAG, "onCreate");
 
-        if(mSettings.getFullscreen() != ((getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_FULLSCREEN ) != 0)) {
+        if (mSettings.getFullscreen() != (
+            (getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_FULLSCREEN)
+            != 0)) {
             doToggleFullscreen();
         }
 
@@ -391,12 +423,13 @@ public class VimTouch extends ActionBarActivity implements
             Log.w(VimTouch.LOG_TAG, "bind to service failed!");
         }
 
-
-        if(Integer.valueOf(android.os.Build.VERSION.SDK) < 11)
+        if (Integer.valueOf(android.os.Build.VERSION.SDK) < 11) {
             requestWindowFeature(Window.FEATURE_NO_TITLE);
+        }
 
         /* setup sliding menu */
         setContentView(R.layout.term_activity);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.main_drawer);
 
         //getSlidingMenu().attachToActivity(this, SlidingMenu.SLIDING_CONTENT);
 
@@ -412,7 +445,7 @@ public class VimTouch extends ActionBarActivity implements
 
         mButtonBarLayout = (LinearLayout) findViewById(R.id.button_bar_layout);
         if (AndroidCompat.SDK >= 11) {
-            mButtonBarLayout.setShowDividers(LinearLayout. SHOW_DIVIDER_MIDDLE);
+            mButtonBarLayout.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
         }
         /*
         TextView button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
@@ -422,42 +455,45 @@ public class VimTouch extends ActionBarActivity implements
         });
         */
 
-		ActionBar actionBar = getSupportActionBar();
-        mTabSpinner = (Spinner)findViewById(R.id.tab_spinner);
-            mTabSpinner.setVisibility(View.GONE);
-		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-            actionBar.setDisplayShowTitleEnabled(false);
-            mTabAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item);
-            mTabAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ActionBar actionBar = getSupportActionBar();
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.app_vimtouch, R.drawable.app_vimtouch, R.drawable.app_vimtouch);
+        mTabSpinner = (Spinner) findViewById(R.id.tab_spinner);
+        mTabSpinner.setVisibility(View.GONE);
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setDisplayUseLogoEnabled(true);
+        mTabAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item);
+        mTabAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-            actionBar.setListNavigationCallbacks(mTabAdapter, this);
+        actionBar.setListNavigationCallbacks(mTabAdapter, this);
 
-        mMainLayout = (LinearLayout)findViewById(R.id.main_layout);
+        mMainLayout = (LinearLayout) findViewById(R.id.main_layout);
 
-		createExtensions();
+        createExtensions();
 
-        if(checkVimRuntime())
+        if (checkVimRuntime()) {
             startEmulator();
+        }
 
-		Exec.vimtouch = this;
+        Exec.vimtouch = this;
     }
 
-	private void createExtensions() {
-		IntegrationManager.getInstance(this).addExtension(
-				new ToastExtension(this));
-		IntegrationManager.getInstance(this).addExtension(
-				new QuickbarExtension(this));
-		IntegrationManager.getInstance(this).addExtension(
-				new InputExtension(this));
-	}
+    private void createExtensions() {
+        IntegrationManager.getInstance(this).addExtension(
+            new ToastExtension(this));
+        IntegrationManager.getInstance(this).addExtension(
+            new QuickbarExtension(this));
+        IntegrationManager.getInstance(this).addExtension(
+            new InputExtension(this));
+    }
 
-	public void onDestroy() {
+    public void onDestroy() {
         super.onDestroy();
         unbindService(mTSConnection);
         stopService(TSIntent);
         mService = null;
         mTSConnection = null;
-		IntegrationManager.getInstance(this).stop();
+        IntegrationManager.getInstance(this).stop();
 
         System.runFinalizersOnExit(true);
 
@@ -474,15 +510,15 @@ public class VimTouch extends ActionBarActivity implements
     private boolean checkPlugins() {
         // check plugins which not installed yet first
         ArrayList<PluginAddOn> plugins = PluginFactory.getAllPlugins(getApplicationContext());
-        for (PluginAddOn addon: plugins){
-            if(!addon.isInstalled(getApplicationContext())){
+        for (PluginAddOn addon : plugins) {
+            if (!addon.isInstalled(getApplicationContext())) {
                 Intent intent = new Intent(getApplicationContext(), InstallProgress.class);
-                intent.setData(Uri.parse("plugin://"+addon.getId()));
+                intent.setData(Uri.parse("plugin://" + addon.getId()));
                 startActivityForResult(intent, REQUEST_INSTALL);
                 return false;
             }
         }
-        
+
         return true;
     }
 
@@ -493,11 +529,10 @@ public class VimTouch extends ActionBarActivity implements
             Log.w("File", file.getPath());
         }
         String appPath = getApplicationContext().getFilesDir().getPath();
-        mSession = new VimTermSession (appPath, mUrl, mSettings, "");
-        mSession.setFinishCallback(new TermSession.FinishCallback () {
+        mSession = new VimTermSession(appPath, mUrl, mSettings, "");
+        mSession.setFinishCallback(new TermSession.FinishCallback() {
             @Override
-            public void onSessionFinish(TermSession session)
-            {
+            public void onSessionFinish(TermSession session) {
                 hideIme();
                 finish();
             }
@@ -511,13 +546,14 @@ public class VimTouch extends ActionBarActivity implements
     }
 
     public String getQuickbarFile() {
-        return getApplicationContext().getFilesDir()+"/vim/quickbar";
+        return getApplicationContext().getFilesDir() + "/vim/quickbar";
     }
-    
-    private boolean checkVimRuntime(){
-        if(InstallProgress.isInstalled(this))
+
+    private boolean checkVimRuntime() {
+        if (InstallProgress.isInstalled(this)) {
             return checkPlugins();
-        
+        }
+
         // check default package
         /* FIXME: we won't change default runtime for long time , but it's better to re-check again later.
         PackageInfo info;
@@ -536,23 +572,25 @@ public class VimTouch extends ActionBarActivity implements
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == REQUEST_INSTALL){
-            if(checkVimRuntime()){
+        if (requestCode == REQUEST_INSTALL) {
+            if (checkVimRuntime()) {
                 PackageInfo info;
                 SharedPreferences.Editor editor = mPrefs.edit();
 
                 try {
-                    info = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_META_DATA);
+                    info =
+                        getPackageManager()
+                            .getPackageInfo(getPackageName(), PackageManager.GET_META_DATA);
                     editor.putLong(VimSettings.LASTVERSION_KEY, info.versionCode);
                     editor.commit();
-                }catch(Exception e){
+                } catch (Exception e) {
                 }
 
                 startEmulator();
                 updatePrefs();
                 mEmulatorView.onResume();
             }
-        }else if (requestCode == REQUEST_OPEN){
+        } else if (requestCode == REQUEST_OPEN) {
             /*
             if (resultCode == Activity.RESULT_OK) {
                 String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
@@ -592,83 +630,91 @@ public class VimTouch extends ActionBarActivity implements
         mSession.write(data);
     }
 
-	private TextView addQuickbarButton(String text) {
-        TextView button = (TextView)getLayoutInflater().inflate(R.layout.quickbutton, (ViewGroup)mButtonBarLayout, false);
+    private TextView addQuickbarButton(String text) {
+        TextView
+            button =
+            (TextView) getLayoutInflater()
+                .inflate(R.layout.quickbutton, (ViewGroup) mButtonBarLayout, false);
         button.setOnClickListener(mClickListener);
         button.setOnLongClickListener(mLongClickListener);
-        mButtonBarLayout.addView((View)button);
-		return button;
+        mButtonBarLayout.addView((View) button);
+        return button;
     }
 
     private void defaultButtons(boolean force) {
         File file = new File(getQuickbarFile());
 
-        if(!force && file.exists()) return;
+        if (!force && file.exists()) {
+            return;
+        }
 
-        try{
-            BufferedInputStream is = new BufferedInputStream(getResources().openRawResource(R.raw.quickbar));
+        try {
+            BufferedInputStream
+                is =
+                new BufferedInputStream(getResources().openRawResource(R.raw.quickbar));
             FileWriter fout = new FileWriter(file);
-            while(is.available() > 0){
+            while (is.available() > 0) {
                 fout.write(is.read());
             }
             fout.close();
-        } catch(Exception e) { 
-            Log.e(LOG_TAG, "install default quickbar", e); 
-        } 
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "install default quickbar", e);
+        }
 
     }
 
-	public void setCustomButtons(List<String> buttons) {
-		quickbarContents = new ArrayList<String>(buttons);
-		setButtons(buttons);
-	}
+    public void setCustomButtons(List<String> buttons) {
+        quickbarContents = new ArrayList<String>(buttons);
+        setButtons(buttons);
+    }
 
-	private void setButtons(List<String> buttons) {
-		int index = 0;
-		for (String line : buttons) {
-			line = line.trim();
-			if (line.length() == 0)
-				continue;
-			TextView textview = null;
-			String caption = line;
-			String keys = line;
-			int spaceIndex = line.indexOf(' ');
-			if (-1 != spaceIndex) {
-				// Have caption
-				keys = line.substring(0, spaceIndex);
-				caption = line.substring(spaceIndex + 1);
-			}
-			if (index < mButtonBarLayout.getChildCount()) {
-				textview = (TextView) mButtonBarLayout
-						.getChildAt(index);
-				textview.setVisibility(View.VISIBLE);
-			} else {
-				textview = addQuickbarButton(line);
-			}
-			textview.setText(caption);
-			textview.setTag(R.id.quickbar_button_keys, keys);
-			index++;
-		}
-		for (int i = index; i < mButtonBarLayout.getChildCount(); i++) {
-			mButtonBarLayout.getChildAt(i).setVisibility(View.GONE);
-		}
-	}
+    private void setButtons(List<String> buttons) {
+        int index = 0;
+        for (String line : buttons) {
+            line = line.trim();
+            if (line.length() == 0) {
+                continue;
+            }
+            TextView textview = null;
+            String caption = line;
+            String keys = line;
+            int spaceIndex = line.indexOf(' ');
+            if (-1 != spaceIndex) {
+                // Have caption
+                keys = line.substring(0, spaceIndex);
+                caption = line.substring(spaceIndex + 1);
+            }
+            if (index < mButtonBarLayout.getChildCount()) {
+                textview = (TextView) mButtonBarLayout
+                    .getChildAt(index);
+                textview.setVisibility(View.VISIBLE);
+            } else {
+                textview = addQuickbarButton(line);
+            }
+            textview.setText(caption);
+            textview.setTag(R.id.quickbar_button_keys, keys);
+            index++;
+        }
+        for (int i = index; i < mButtonBarLayout.getChildCount(); i++) {
+            mButtonBarLayout.getChildAt(i).setVisibility(View.GONE);
+        }
+    }
 
-	public void updateButtons() {
-		Log.i(LOG_TAG, "updateButtons");
-		quickbarContents = null;
+    public void updateButtons() {
+        Log.i(LOG_TAG, "updateButtons");
+        quickbarContents = null;
         defaultButtons(false);
         try {
             FileReader fileReader = new FileReader(getQuickbarFile());
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             String line = null;
-			List<String> buttons = new ArrayList<String>();
+            List<String> buttons = new ArrayList<String>();
             while ((line = bufferedReader.readLine()) != null) {
-				buttons.add(line);
+                buttons.add(line);
             }
             bufferedReader.close();
-			setButtons(buttons);
-        }catch (IOException e){
+            setButtons(buttons);
+        } catch (IOException e) {
         }
     }
 
@@ -677,7 +723,7 @@ public class VimTouch extends ActionBarActivity implements
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         ColorScheme colorScheme = new ColorScheme(mSettings.getColorScheme());
 
-        if(mSession.getSuRoot() != mSettings.getSuRoot()){
+        if (mSession.getSuRoot() != mSettings.getSuRoot()) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.title_need_restart)
                 .setMessage(R.string.message_need_restart)
@@ -693,14 +739,13 @@ public class VimTouch extends ActionBarActivity implements
 
         mSession.updatePrefs(mSettings);
 
-
         mButtonBar.setVisibility(View.GONE);
-        ((ViewGroup)mButtonBar).removeView(mButtonBarLayout);
+        ((ViewGroup) mButtonBar).removeView(mButtonBarLayout);
 
-		if (null == quickbarContents) {
-			updateButtons();
-		}
-        
+        if (null == quickbarContents) {
+            updateButtons();
+        }
+
         int pos = mSettings.getQuickbarPosition();
 
         switch (pos) {
@@ -722,11 +767,12 @@ public class VimTouch extends ActionBarActivity implements
                 mButtonBarLayout.setOrientation(LinearLayout.HORIZONTAL);
                 break;
         }
-        ((ViewGroup)mButtonBar).addView(mButtonBarLayout);
-        if(mSettings.getQuickbarShow())
+        ((ViewGroup) mButtonBar).addView(mButtonBarLayout);
+        if (mSettings.getQuickbarShow()) {
             mButtonBar.setVisibility(View.VISIBLE);
-        else
+        } else {
             mButtonBar.setVisibility(View.GONE);
+        }
 
     }
 
@@ -736,12 +782,12 @@ public class VimTouch extends ActionBarActivity implements
         super.onResume();
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         mSettings.readPrefs(mPrefs);
-        if(mEmulatorView != null){
+        if (mEmulatorView != null) {
             updatePrefs();
             mEmulatorView.onResume();
 
-            if(mUrl != null){
-                Exec.doCommand("tabnew "+mUrl);
+            if (mUrl != null) {
+                Exec.doCommand("tabnew " + mUrl);
                 Exec.updateScreen();
                 mUrl = null;
             }
@@ -752,44 +798,52 @@ public class VimTouch extends ActionBarActivity implements
     public void onPause() {
         Log.e(VimTouch.LOG_TAG, "on pause.");
         super.onPause();
-        if(mEmulatorView != null)
-        {
+        if (mEmulatorView != null) {
             hideIme();
             mEmulatorView.onPause();
         }
     }
 
     public void hideIme() {
-        if (mEmulatorView == null)
+        if (mEmulatorView == null) {
             return;
+        }
 
         InputMethodManager imm = (InputMethodManager)
             getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mEmulatorView.getWindowToken(), 0);
     }
 
-	public void showIme() {
-		if (mEmulatorView == null)
-			return;
-		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.showSoftInput(mEmulatorView, InputMethodManager.SHOW_FORCED);
-	}
+    public void showIme() {
+        if (mEmulatorView == null) {
+            return;
+        }
+        InputMethodManager
+            imm =
+            (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(mEmulatorView, InputMethodManager.SHOW_FORCED);
+    }
 
     @Override
     protected void onNewIntent(Intent intent) {
         Log.e(VimTouch.LOG_TAG, "on new intent.");
         String url = getIntentUrl(intent);
-        if(mSession == null){
+        if (mSession == null) {
             mUrl = url;
             startEmulator();
             return;
         }
-        if(url == mUrl || url == "") return;
-        
+        if (url == mUrl || url == "") {
+            return;
+        }
+
         Bundle extras = intent.getExtras();
-        int opentype = extras==null?VimFileActivity.FILE_TABNEW:extras.getInt(VimFileActivity.OPEN_TYPE, VimFileActivity.FILE_TABNEW);
+        int
+            opentype =
+            extras == null ? VimFileActivity.FILE_TABNEW
+                           : extras.getInt(VimFileActivity.OPEN_TYPE, VimFileActivity.FILE_TABNEW);
         String opencmd;
-        switch(opentype){
+        switch (opentype) {
             case VimFileActivity.FILE_NEW:
                 opencmd = "new";
                 break;
@@ -808,9 +862,12 @@ public class VimTouch extends ActionBarActivity implements
         mUrl = null;
     }
 
-    public void openNewFile(String url){
-        Exec.doCommand(mOpenCommand+" "+url.replaceAll(" ", "\\\\ "));
+    public void openNewFile(String url) {
+        Exec.doCommand(mOpenCommand + " " + url.replaceAll(" ", "\\\\ "));
         Exec.updateScreen();
+        if (null != mDrawerLayout) {
+            mDrawerLayout.closeDrawers();
+        }
     }
 
     @Override
@@ -818,10 +875,11 @@ public class VimTouch extends ActionBarActivity implements
         super.onConfigurationChanged(newConfig);
 
         Log.e(VimTouch.LOG_TAG, "on configuration changed");
-        if(mEmulatorView != null){
+        if (mEmulatorView != null) {
             mEmulatorView.updateSize(true);
             mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_UPDATE), 500);
         }
+        actionBarDrawerToggle.onConfigurationChanged(newConfig);
     }
 
     private static final int MSG_DIALOG = 1;
@@ -831,16 +889,21 @@ public class VimTouch extends ActionBarActivity implements
     private static final int MSG_SETCURTAB = 5;
     private static final int MSG_SETTABS = 6;
     private static final int MSG_SHOWTAB = 7;
+
     private class DialogObj {
+
         public int type;
         public String title;
         public String message;
         public String buttons;
         public int def_button;
         public String textfield;
-    };
+    }
+
+    ;
 
     static class MsgHandler extends Handler {
+
         private final WeakReference<VimTouch> mActivity;
 
         MsgHandler(VimTouch activity) {
@@ -863,47 +926,51 @@ public class VimTouch extends ActionBarActivity implements
             }
 
             switch (msg.what) {
-            case MSG_UPDATE:
-                Exec.updateScreen();
-                break;
-            case MSG_DIALOG:
-                DialogObj obj = (DialogObj) msg.obj;
-                activity.showDialog(obj.type, obj.title, obj.message,
+                case MSG_UPDATE:
+                    Exec.updateScreen();
+                    break;
+                case MSG_DIALOG:
+                    DialogObj obj = (DialogObj) msg.obj;
+                    activity.showDialog(obj.type, obj.title, obj.message,
                                         obj.buttons, obj.def_button,
                                         obj.textfield);
-                break;
-            case MSG_SYNCCLIP:
-                if(clipMgr(activity).getText() == null)
-                    activity.mClipText = "";
-                else
-                    activity.mClipText = clipMgr(activity).getText().toString();
-                break;
-            case MSG_SETCLIP:
-                activity.mClipText = (String)msg.obj;
-                clipMgr(activity).setText(activity.mClipText);
-                break;
-            case MSG_SETCURTAB:
-                int n = (int)msg.arg1;
-                activity.setVimCurTab(n);
-            case MSG_SETTABS:
-                String[] array = (String[])msg.obj;
-                if(array==null)
                     break;
-                activity.setVimTabs(array);
-                activity.setTabLabels(array);
-                break;
-            case MSG_SHOWTAB:
-                int s = (int)msg.arg1;
-                activity.showTab(s);
-                break;
-            default:
-                super.handleMessage(msg);
+                case MSG_SYNCCLIP:
+                    if (clipMgr(activity).getText() == null) {
+                        activity.mClipText = "";
+                    } else {
+                        activity.mClipText = clipMgr(activity).getText().toString();
+                    }
+                    break;
+                case MSG_SETCLIP:
+                    activity.mClipText = (String) msg.obj;
+                    clipMgr(activity).setText(activity.mClipText);
+                    break;
+                case MSG_SETCURTAB:
+                    int n = (int) msg.arg1;
+                    activity.setVimCurTab(n);
+                case MSG_SETTABS:
+                    String[] array = (String[]) msg.obj;
+                    if (array == null) {
+                        break;
+                    }
+                    activity.setVimTabs(array);
+                    activity.setTabLabels(array);
+                    break;
+                case MSG_SHOWTAB:
+                    int s = (int) msg.arg1;
+                    activity.showTab(s);
+                    break;
+                default:
+                    super.handleMessage(msg);
             }
         }
     }
+
     private MsgHandler mHandler = new MsgHandler(this);
 
-    public void nativeShowDialog(int type, String title, String message, String buttons, int def_button, String textfield) {
+    public void nativeShowDialog(int type, String title, String message, String buttons,
+                                 int def_button, String textfield) {
         DialogObj obj = new DialogObj();
         obj.type = type;
         obj.title = title;
@@ -930,24 +997,25 @@ public class VimTouch extends ActionBarActivity implements
 
     private AlertDialog.Builder actionBuilder;
 
-    private void showDialog(int type, String title, String message, String buttons, int def_button, String textfield) {
+    private void showDialog(int type, String title, String message, String buttons, int def_button,
+                            String textfield) {
         buttons = buttons.replaceAll("&", "");
         String button_array[] = buttons.split("\n");
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(message)
-               .setTitle(title)
-               .setPositiveButton(button_array[def_button], new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Exec.resultDialogDefaultState();
-                    }
-               })
-               .setNegativeButton("More", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        AlertDialog actdialog = actionBuilder.create();
-                        actdialog.show();
-                    }
-               });
+            .setTitle(title)
+            .setPositiveButton(button_array[def_button], new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    Exec.resultDialogDefaultState();
+                }
+            })
+            .setNegativeButton("More", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    AlertDialog actdialog = actionBuilder.create();
+                    actdialog.show();
+                }
+            });
                /*
         switch(type) {
             case 1:
@@ -964,31 +1032,31 @@ public class VimTouch extends ActionBarActivity implements
 
         actionBuilder = new AlertDialog.Builder(VimTouch.this);
         actionBuilder.setTitle(title)
-                  .setCancelable(false)
-                  .setItems(button_array, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog2, int item) {
-                            Exec.resultDialogState(item+1);
-                        }
-                  });
+            .setCancelable(false)
+            .setItems(button_array, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog2, int item) {
+                    Exec.resultDialogState(item + 1);
+                }
+            });
     }
 
     @Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.main, menu);
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
     private boolean doToggleFullscreen() {
         boolean ret = false;
-        WindowManager.LayoutParams attrs = getWindow().getAttributes(); 
-        if((attrs.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN ) != 0) {
+        WindowManager.LayoutParams attrs = getWindow().getAttributes();
+        if ((attrs.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0) {
             attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        }else{
-            attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN; 
+        } else {
+            attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
             ret = true;
         }
         mSettings.setFullscreen(ret);
-        getWindow().setAttributes(attrs); 
+        getWindow().setAttributes(attrs);
         mFullscreen = ret;
         return ret;
     }
@@ -1002,15 +1070,19 @@ public class VimTouch extends ActionBarActivity implements
                 String action = intent.getAction();
                 if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
                     long downloadId = intent.getLongExtra(
-                    DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+                        DownloadManager.EXTRA_DOWNLOAD_ID, 0);
                     Query query = new Query();
                     query.setFilterById(mEnqueue);
                     Cursor c = mDM.query(query);
                     if (c.moveToFirst()) {
                         int columnIndex = c.getColumnIndex(DownloadManager.COLUMN_STATUS);
                         if (DownloadManager.STATUS_SUCCESSFUL == c.getInt(columnIndex)) {
-                            String uriString = c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
-                            Intent newintent = new Intent(getApplicationContext(), InstallProgress.class);
+                            String
+                                uriString =
+                                c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
+                            Intent
+                                newintent =
+                                new Intent(getApplicationContext(), InstallProgress.class);
                             newintent.setData(Uri.parse(uriString));
                             startActivity(newintent);
                         }
@@ -1018,11 +1090,13 @@ public class VimTouch extends ActionBarActivity implements
                 }
             }
         };
-         
+
         registerReceiver(receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-     
+
         mDM = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-        Request request = new Request(Uri.parse("https://github.com/downloads/momodalo/vimtouch/vim.vrz"));
+        Request
+            request =
+            new Request(Uri.parse("https://github.com/downloads/momodalo/vimtouch/vim.vrz"));
         mEnqueue = mDM.enqueue(request);
     }
 
@@ -1045,7 +1119,7 @@ public class VimTouch extends ActionBarActivity implements
             Exec.doCommand("tabnew ~/.vimrc");
             Exec.updateScreen();
         } else if (id == R.id.menu_quickbar) {
-            Exec.doCommand("tabnew "+getQuickbarFile());
+            Exec.doCommand("tabnew " + getQuickbarFile());
             Exec.updateScreen();
         } else if (id == R.id.menu_toggle_soft_keyboard) {
             doToggleSoftKeyboard();
@@ -1058,7 +1132,7 @@ public class VimTouch extends ActionBarActivity implements
             Exec.updateScreen();
         } else if (id == R.id.menu_ime_composing) {
             item.setChecked(mEmulatorView.toggleIMEComposing());
-        } else if (id == R.id.menu_extra_downloads)  {
+        } else if (id == R.id.menu_extra_downloads) {
             Intent search = new Intent(Intent.ACTION_VIEW);
             search.setData(Uri.parse("market://search?q=VimTouch"));
             search.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -1067,35 +1141,37 @@ public class VimTouch extends ActionBarActivity implements
         } else if (id == R.id.menu_full_vim_runtime)  {
             downloadFullRuntime();
         */
-        }else if (id == R.id.menu_new) {
+        } else if (id == R.id.menu_new) {
             item.setChecked(true);
             mOpenCommand = "new";
-        }else if (id == R.id.menu_vnew) {
+        } else if (id == R.id.menu_vnew) {
             item.setChecked(true);
             mOpenCommand = "vnew";
-        }else if (id == R.id.menu_tabnew) {
+        } else if (id == R.id.menu_tabnew) {
             item.setChecked(true);
             mOpenCommand = "tabnew";
-        }else if (id == R.id.menu_diff) {
+        } else if (id == R.id.menu_diff) {
             item.setChecked(true);
             mOpenCommand = "vert diffsplit";
         } else if (id == R.id.menu_save) {
             Exec.doCommand("w");
         } else if (id == R.id.menu_backup) {
             Intent intent = new Intent(getApplicationContext(), InstallProgress.class);
-            intent.setData(Uri.parse("backup://"+Environment.getExternalStorageDirectory()+"/"+"VimTouchBackup.vrz"));
+            intent.setData(Uri.parse("backup://" + Environment.getExternalStorageDirectory() + "/"
+                                     + "VimTouchBackup.vrz"));
             startActivityForResult(intent, REQUEST_BACKUP);
         } else if (id == R.id.menu_keys) {
-            if(mButtonBarLayout.isShown()){
+            if (mButtonBarLayout.isShown()) {
                 mSettings.setQuickbarShow(false);
                 item.setChecked(false);
                 mButtonBar.setVisibility(View.GONE);
-            }else{
+            } else {
                 mSettings.setQuickbarShow(true);
                 item.setChecked(true);
                 mButtonBar.setVisibility(View.VISIBLE);
             }
         }
+        actionBarDrawerToggle.onOptionsItemSelected(item);
         return super.onOptionsItemSelected(item);
     }
 
@@ -1105,13 +1181,13 @@ public class VimTouch extends ActionBarActivity implements
 
     private void doCopyAll() {
         ClipboardManager clip = (ClipboardManager)
-             getSystemService(Context.CLIPBOARD_SERVICE);
+            getSystemService(Context.CLIPBOARD_SERVICE);
         clip.setText(Exec.getCurrBuffer());
     }
 
     private void doPaste() {
         ClipboardManager clip = (ClipboardManager)
-         getSystemService(Context.CLIPBOARD_SERVICE);
+            getSystemService(Context.CLIPBOARD_SERVICE);
         CharSequence paste = clip.getText();
         mSession.write(paste.toString());
     }
@@ -1121,65 +1197,69 @@ public class VimTouch extends ActionBarActivity implements
             getSystemService(Context.INPUT_METHOD_SERVICE);
 
         // force leave fullscreen first
-        WindowManager.LayoutParams attrs = getWindow().getAttributes(); 
-        if((attrs.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN ) != 0) {
+        WindowManager.LayoutParams attrs = getWindow().getAttributes();
+        if ((attrs.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0) {
             attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            getWindow().setAttributes(attrs); 
+            getWindow().setAttributes(attrs);
             mFullscreen = false;
             mOptionMenu.findItem(R.id.menu_fullscreen).setChecked(mFullscreen);
         }
-        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
 
     }
 
-    public ArrayAdapter<CharSequence> getTabAdapter(){
+    public ArrayAdapter<CharSequence> getTabAdapter() {
         return mTabAdapter;
     }
 
-    public void setVimTabs(String[] array){
+    public void setVimTabs(String[] array) {
         mVimTabs = array;
     }
 
-    public void setTabLabels(String[] array){
-        if(array == null) return;
+    public void setTabLabels(String[] array) {
+        if (array == null) {
+            return;
+        }
         mTabAdapter.clear();
-        for (String str: array){
+        for (String str : array) {
             mTabAdapter.add(str);
         }
         mTabAdapter.notifyDataSetChanged();
     }
 
-    public void setCurTab(int n){
-        if(n < 0){
+    public void setCurTab(int n) {
+        if (n < 0) {
             showTab(0);
             return;
         }
 
-		getSupportActionBar().setSelectedNavigationItem(n);
+        getSupportActionBar().setSelectedNavigationItem(n);
     }
 
-    public void setVimCurTab(int n){
+    public void setVimCurTab(int n) {
         mVimCurTab = n;
         setCurTab(n);
     }
 
-    public void showTab(int n){
-        if(n <= 0) mVimCurTab = -1;
+    public void showTab(int n) {
+        if (n <= 0) {
+            mVimCurTab = -1;
+        }
         //mTabSpinner.setVisibility(n>0?View.VISIBLE:View.GONE);
-		getSupportActionBar().setNavigationMode(
-				n > 0 ? ActionBar.NAVIGATION_MODE_LIST
-						: ActionBar.NAVIGATION_MODE_STANDARD);
+        getSupportActionBar().setNavigationMode(
+            n > 0 ? ActionBar.NAVIGATION_MODE_LIST
+                  : ActionBar.NAVIGATION_MODE_STANDARD);
     }
 
-    public void nativeSetCurTab(int n){
+    public void nativeSetCurTab(int n) {
         mHandler.sendMessage(mHandler.obtainMessage(MSG_SETCURTAB, n, 0));
     }
 
-    public void nativeShowTab(int n){
+    public void nativeShowTab(int n) {
         mHandler.sendMessage(mHandler.obtainMessage(MSG_SHOWTAB, n, 0));
     }
 
-    public void nativeSetTabs(String[] array){
+    public void nativeSetTabs(String[] array) {
         mHandler.sendMessage(mHandler.obtainMessage(MSG_SETTABS, array));
     }
 
@@ -1197,8 +1277,8 @@ public class VimTouch extends ActionBarActivity implements
 
     TextView mHistoryButtons[] = new TextView[10];
 
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-	public void showCmdHistory() {
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public void showCmdHistory() {
 
         final Dialog dialog = new Dialog(this, R.style.DialogSlideAnim);
 
@@ -1211,9 +1291,11 @@ public class VimTouch extends ActionBarActivity implements
         dialog.setContentView(R.layout.hist_list);
         dialog.setCancelable(true);
 
-        LinearLayout layout = (LinearLayout)dialog.findViewById(R.id.hist_layout);
+        LinearLayout layout = (LinearLayout) dialog.findViewById(R.id.hist_layout);
         if (AndroidCompat.SDK >= 11) {
-            layout.setShowDividers(LinearLayout.SHOW_DIVIDER_BEGINNING | LinearLayout.SHOW_DIVIDER_MIDDLE | LinearLayout.SHOW_DIVIDER_END);
+            layout.setShowDividers(
+                LinearLayout.SHOW_DIVIDER_BEGINNING | LinearLayout.SHOW_DIVIDER_MIDDLE
+                | LinearLayout.SHOW_DIVIDER_END);
         }
         LayoutParams params = layout.getLayoutParams();
         params.width = mScreenWidth;
@@ -1222,22 +1304,24 @@ public class VimTouch extends ActionBarActivity implements
         LayoutInflater inflater = LayoutInflater.from(this);
         boolean exists = false;
 
-        for (int i = 0; i < 10; i++){
-            TextView button = (TextView)inflater.inflate(R.layout.histbutton, layout, false);
+        for (int i = 0; i < 10; i++) {
+            TextView button = (TextView) inflater.inflate(R.layout.histbutton, layout, false);
             //String cmd = Exec.getCmdHistory(i);
             //if(cmd.length() == 0) break;
             //exists = true;
             //button.setText(":"+cmd);
             button.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v){
-                    TextView text = (TextView)v;
+                public void onClick(View v) {
+                    TextView text = (TextView) v;
                     CharSequence cmd = text.getText();
-                    if(cmd.length() > 1);
-                        Exec.doCommand(cmd.subSequence(1,cmd.length()).toString());
+                    if (cmd.length() > 1) {
+                        ;
+                    }
+                    Exec.doCommand(cmd.subSequence(1, cmd.length()).toString());
                     dialog.dismiss();
                 }
             });
-            layout.addView((View)button);
+            layout.addView((View) button);
             button.setVisibility(View.GONE);
             mHistoryButtons[i] = button;
         }
@@ -1249,17 +1333,19 @@ public class VimTouch extends ActionBarActivity implements
 
     public void setHistoryItem(int i, String text) {
         TextView button = mHistoryButtons[i];
-        if(button == null) return;
-        
-        button.setText(":"+text);
+        if (button == null) {
+            return;
+        }
+
+        button.setText(":" + text);
         button.setVisibility(View.VISIBLE);
     }
 
-    void setSlidingMenuFragment(Fragment frag){
+    void setSlidingMenuFragment(Fragment frag) {
         getSupportFragmentManager()
-	        .beginTransaction()
-			.replace(R.id.menu_frame, frag)
-			.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-			.commit();
+            .beginTransaction()
+            .replace(R.id.menu_frame, frag)
+            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+            .commit();
     }
 }
