@@ -1,23 +1,17 @@
-commit 157c1d530ab9deb33ea02a670a76e971a52c2b94
-Author: Konstantin Vorobyev <kvorobyev@gmail.com>
-Date:   Sun Oct 6 08:54:13 2013 +0900
-
-    Android integration
-
-diff --git a/vim/src/eval.c b/vim/src/eval.c
-index fc01006..d6c9c1d 100644
---- a/vim/src/eval.c
-+++ b/vim/src/eval.c
-@@ -362,6 +362,8 @@ static struct vimvar
-     {VV_NAME("operator",	 VAR_STRING), VV_RO},
+Only in vim74/src/auto: config.h
+diff -ru vim74/src/eval.c vim/src/eval.c
+--- vim74/src/eval.c	2013-07-06 01:23:42.000000000 +0900
++++ vim/src/eval.c	2014-11-18 16:46:18.517916416 +0900
+@@ -358,6 +358,8 @@
      {VV_NAME("searchforward",	 VAR_NUMBER), 0},
      {VV_NAME("oldfiles",	 VAR_LIST), 0},
+     {VV_NAME("windowid",	 VAR_NUMBER), VV_RO},
 +    {VV_NAME("android_type",	 VAR_NUMBER), VV_RO},
 +    {VV_NAME("android_object",	 VAR_STRING), VV_RO},
  };
  
  /* shorthand */
-@@ -475,6 +477,7 @@ static int call_func __ARGS((char_u *funcname, int len, typval_T *rettv, int arg
+@@ -450,6 +452,7 @@
  static void emsg_funcname __ARGS((char *ermsg, char_u *name));
  static int non_zero_arg __ARGS((typval_T *argvars));
  
@@ -25,16 +19,16 @@ index fc01006..d6c9c1d 100644
  #ifdef FEAT_FLOAT
  static void f_abs __ARGS((typval_T *argvars, typval_T *rettv));
  static void f_acos __ARGS((typval_T *argvars, typval_T *rettv));
-@@ -7649,6 +7652,7 @@ static struct fst
-     {"acos",		1, 1, f_acos},	/* WJMc */
+@@ -7838,6 +7841,7 @@
  #endif
      {"add",		2, 2, f_add},
+     {"and",		2, 2, f_and},
 +    {"android",		2, 2, f_android},
      {"append",		2, 2, f_append},
      {"argc",		0, 0, f_argc},
      {"argidx",		0, 0, f_argidx},
-@@ -16178,6 +16182,16 @@ setwinvar(argvars, rettv, off)
-     }
+@@ -16226,6 +16230,16 @@
+     return retval;
  }
  
 +    static void
@@ -48,20 +42,20 @@ index fc01006..d6c9c1d 100644
 +}
 +
  /*
-  * "shellescape({string})" function
+  * "searchpos()" function
   */
-diff --git a/vim/src/vim.h b/vim/src/vim.h
-index b9ce325..60b6382 100644
---- a/vim/src/vim.h
-+++ b/vim/src/vim.h
-@@ -1842,7 +1842,9 @@ typedef int proftime_T;	    /* dummy for function prototypes */
- #define VV_OP		52
+Only in vim74/src: feature.h
+diff -ru vim74/src/vim.h vim/src/vim.h
+--- vim74/src/vim.h	2013-08-02 23:02:27.000000000 +0900
++++ vim/src/vim.h	2014-11-18 16:46:18.517916416 +0900
+@@ -1866,7 +1866,9 @@
  #define VV_SEARCHFORWARD 53
  #define VV_OLDFILES	54
--#define VV_LEN		55	/* number of v: vars */
-+#define VV_AD_EVENT	55
-+#define VV_AD_OBJECT	56
-+#define VV_LEN		57	/* number of v: vars */
+ #define VV_WINDOWID	55
+-#define VV_LEN		56	/* number of v: vars */
++#define VV_AD_EVENT	56
++#define VV_AD_OBJECT	57
++#define VV_LEN		58	/* number of v: vars */
  
  #ifdef FEAT_CLIPBOARD
  

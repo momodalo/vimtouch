@@ -44,7 +44,7 @@ import android.util.Log;
 public class Exec
 {
     static {
-		System.loadLibrary("vimtouch");
+        System.loadLibrary("vimtouch");
     }
 
     static final String TAG = "Exec";
