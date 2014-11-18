@@ -771,7 +771,7 @@ static int registerNativeMethods(JNIEnv* env, const char* className,
  */
 static int registerNatives(JNIEnv* env)
 {
-    static const char *classPathName = "net/momodalo/app/vimtouch/Exec";
+    static const char *classPathName = "kvj/app/vimtouch/Exec";
 
     if (!registerNativeMethods(env, classPathName, method_table,
                                ARRLEN(method_table)))

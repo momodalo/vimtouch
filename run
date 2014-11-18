@@ -2,7 +2,7 @@
 
 NDK=$ANDROID_NDK_ROOT
 SDK=`grep sdk.dir local.properties | tr '=' '\n' | tail -1`
-package="net.momodalo.app.vimtouch"
+package="kvj.app.vimtouch"
 
 if ! [ -f $NDK/ndk-build ] ; then
     # If ANDROID_NDK_ROOT is not set, try this heuristics: look up all the
