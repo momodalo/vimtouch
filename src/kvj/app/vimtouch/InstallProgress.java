@@ -2,17 +2,14 @@ package kvj.app.vimtouch;
 
 import android.app.Activity;
 import android.app.DownloadManager;
-import android.app.DownloadManager.Query;
-import android.app.DownloadManager.Request;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -85,6 +82,14 @@ public class InstallProgress extends Activity {
         }
 
         installZip(getResources().openRawResource(R.raw.terminfo),null, "Terminfo");
+        File folder = new File(this.getApplicationContext().getFilesDir()+"/vim");
+        if (!folder.exists()) { // Make folder
+            try {
+                folder.mkdirs();
+            } catch (Exception e) {
+                Log.e("folder", "Failed to create folder", e);
+            }
+        }
 
         installSysVimrc(this);
 
@@ -106,17 +111,20 @@ public class InstallProgress extends Activity {
         if(runtimes.size() > 0)  return true;
 
         File md5 = new File(getMD5Filename(activity));
-        InputStream ris = activity.getResources().openRawResource(R.raw.vim);
-
-        if(!md5.exists()) return false;
+        if(!md5.exists()){
+            Log.w(LOG_TAG, "No MD5 file");
+            return false;
+        }
 
         // read md5 
         try{
             BufferedReader reader = new BufferedReader(new FileReader(md5));
 
             String saved = reader.readLine();
+            Log.w(LOG_TAG, "Compare "+activity.getResources().getString(R.string.vim_md5)+" and "+saved);
             if(saved.equals(activity.getResources().getString(R.string.vim_md5))) return true;
         }catch(Exception e){
+            Log.e(LOG_TAG, "MD5 file error", e);
         }
 
         return false;
@@ -128,6 +136,7 @@ public class InstallProgress extends Activity {
         ArrayList<RuntimeAddOn> runtimes = RuntimeFactory.getAllRuntimes(activity.getApplicationContext());
         for (RuntimeAddOn rt: runtimes){
             if(!rt.isInstalled(activity.getApplicationContext())){
+                Log.w(LOG_TAG, "Not installed runtime: "+rt);
                 return false;
             }
         }
@@ -137,16 +146,26 @@ public class InstallProgress extends Activity {
         if(vimrc.exists()){
             // Compare size to make sure the sys vimrc doesn't change
             try{
-                if(vimrc.getTotalSpace() != activity.getResources().openRawResource(R.raw.vimrc).available()){
+                
+                if(fileSize(vimrc) != activity.getResources().openRawResource(R.raw.vimrc).available()){
                     installSysVimrc(activity);
                 }
             }catch(Exception e){
                 installSysVimrc(activity);
             }
+            Log.w(LOG_TAG, "MD5 error: "+vimrc.getAbsolutePath()+" - "+checkMD5(activity));
             return checkMD5(activity);
         }
-        
+
+        Log.w(LOG_TAG, "No vimrc: "+vimrc.getAbsolutePath());
         return false;
+    }
+    
+    private static long fileSize(File file) {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) { // 2.3+
+            return file.getTotalSpace();
+        }
+        return file.length();
     }
 
     public static void installSysVimrc(Activity activity) {
@@ -338,8 +357,7 @@ public class InstallProgress extends Activity {
                     if(!file.isDirectory())
                         file.mkdirs();
                     if(ze.getName().startsWith("bin/")) {
-                        file.setExecutable(true, false);
-                        file.setReadable(true, false);
+                        setReadableExecutable(file);
                     }
                 } else {
                     File file = new File(dirname+"/"+ze.getName());
@@ -352,8 +370,7 @@ public class InstallProgress extends Activity {
                     bufferOut.flush();
                     bufferOut.close();
                     if(ze.getName().startsWith("bin/")) {
-                        file.setExecutable(true, false);
-                        file.setReadable(true, false);
+                        setReadableExecutable(file);
                     }
                     if(fw != null) fw.write(ze.getName()+"\n");
                 }
@@ -372,6 +389,15 @@ public class InstallProgress extends Activity {
             Log.e(LOG_TAG, "unzip", e);
         }
     }
+
+    private static void setReadableExecutable(File file) {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) { // 2.3+
+            file.setExecutable(true, false);
+            file.setReadable(true, false);
+            return;
+        }
+    }
+
 
     private void backupAll(File dest){
         String src = getApplicationContext().getFilesDir().getPath()+"/vim";
@@ -430,70 +456,6 @@ public class InstallProgress extends Activity {
     private DownloadManager mDM;
     private long mEnqueue = -1;
     private BroadcastReceiver mReceiver = null;
-
-    private void downloadRuntime(Uri uri) {
-        if(mReceiver == null) {
-            mReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                context.unregisterReceiver(this);
-                mReceiver = null;
-
-                String action = intent.getAction();
-                if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
-                    long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
-                    Query query = new Query();
-                    query.setFilterById(mEnqueue);
-                    Cursor c = mDM.query(query);
-                    if (c.moveToFirst()) {
-                        int columnIndex = c.getColumnIndex(DownloadManager.COLUMN_STATUS);
-                        if (DownloadManager.STATUS_SUCCESSFUL == c.getInt(columnIndex)) {
-                            mUri = Uri.parse(c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)));
-                            new Thread(new Runnable() {
-                                public void run() {
-                                    try {
-                                        InputStream attachment = getContentResolver().openInputStream(mUri);
-                                        installZip(attachment, null, "downloads");
-                                        showNotification(R.string.install_finish);
-                                    }catch(Exception e){}
-                                    finish();
-                                }
-                            }).start();
-                        }
-                    }
-                }
-            }
-            };
-         
-            registerReceiver(mReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-        }
-     
-        mDM = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-        Request request = new Request(uri);
-        mEnqueue = mDM.enqueue(request);
-        
-        mProgressBar.setProgress(0);
-        mHandler.sendMessage(mHandler.obtainMessage(MSG_SET_TEXT, getString(R.string.downloading)));
-
-        while(mReceiver != null){
-            Query query = new Query();
-            query.setFilterById(mEnqueue);
-            Cursor c = mDM.query(query);
-            if (c.moveToFirst()) {
-                int columnIndex = c.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES);
-                int total = c.getInt(columnIndex);
-                columnIndex = c.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR);
-                int bytes = c.getInt(columnIndex);
-                if(total != mProgressBar.getMax()) mProgressBar.setMax(total);
-                mProgressBar.setProgress(bytes);
-                try{
-                    Thread.sleep(500);
-                }catch(Exception e){
-                }
-            }
-            c.close();
-        }
-    }
 
     public void onDestroy() {
         if(mReceiver != null)

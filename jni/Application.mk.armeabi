@@ -1,2 +1,2 @@
 APP_STL := stlport_static
-APP_PLATFORM := android-5
+APP_PLATFORM := android-3

@@ -1,5 +1,9 @@
 package kvj.app.vimtouch;
 
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -8,15 +12,9 @@ import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
-
 import jackpal.androidterm.emulatorview.ColorScheme;
 import jackpal.androidterm.emulatorview.TermSession;
 import jackpal.androidterm.emulatorview.UpdateCallback;
-
-import kvj.app.vimtouch.compat.FileCompat;
 
 /**
  * A terminal session, consisting of a TerminalEmulator, a TranscriptScreen,
@@ -160,7 +158,7 @@ public class VimTermSession extends TermSession {
         StringBuilder checkedPath = new StringBuilder(path.length());
         for (String dirname : dirs) {
             File dir = new File(dirname);
-            if (dir.isDirectory() && FileCompat.canExecute(dir)) {
+            if (dir.isDirectory()) {
                 checkedPath.append(dirname);
                 checkedPath.append(":");
             }

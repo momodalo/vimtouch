@@ -1,19 +1,18 @@
 package kvj.app.vimtouch;
 
 import android.content.Context;
-import android.util.DisplayMetrics;
-import android.view.MotionEvent;
-import android.view.GestureDetector;
-import android.view.ScaleGestureDetector;
 import android.graphics.Canvas;
+import android.os.Build;
 import android.os.Handler;
+import android.text.InputType;
+import android.util.DisplayMetrics;
+import android.view.GestureDetector;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
-import android.text.InputType;
 import android.view.inputmethod.InputMethodManager;
-import android.view.KeyEvent;
 
-import java.lang.Runnable;
 import java.lang.reflect.Field;
 
 import jackpal.androidterm.emulatorview.ColorScheme;
@@ -21,15 +20,14 @@ import jackpal.androidterm.emulatorview.EmulatorView;
 import jackpal.androidterm.emulatorview.TermSession;
 
 public class TermView extends EmulatorView implements
-        GestureDetector.OnGestureListener,
-        ScaleGestureDetector.OnScaleGestureListener {
+        GestureDetector.OnGestureListener {
     private TermSession mSession;
     private int mTopRow = 0; //we don't use termnial scroll
     private GestureDetector mGestureDetector;
-    private ScaleGestureDetector mScaleDetector;
+    private ScaleDetectorCompat mScaleDetector;
     private boolean mSingleTapESC;
     private boolean mTouchGesture;
-    private VimSettings mSettings;
+    VimSettings mSettings;
     private boolean mInserted = false;
     private Runnable mCheckRunnable;
     private Handler mCheckHandler;
@@ -69,9 +67,11 @@ public class TermView extends EmulatorView implements
     public TermView(Context context, TermSession session, DisplayMetrics metrics) {
         super(context, session, metrics);
         mSession = session;
-        mGestureDetector = new GestureDetector(this);
-        mScaleDetector = new ScaleGestureDetector(context, this);
-
+        mGestureDetector = new GestureDetector(context, this);
+        mScaleDetector = null;
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) { // 2.2+
+            mScaleDetector = new ScaleDetectorCompat(this);
+        }
         mCheckRunnable = new Runnable() {
             public void run() {
                 if(!checkInsertMode() && mCheckCount < 10)
@@ -80,11 +80,6 @@ public class TermView extends EmulatorView implements
             }
         };
         mCheckHandler = new Handler();
-    }
-
-    public ScaleGestureDetector getScaleDetector ()
-    {
-        return mScaleDetector;
     }
 
     public void updatePrefs(VimSettings settings, ColorScheme scheme) {
@@ -135,30 +130,6 @@ public class TermView extends EmulatorView implements
     }
 
     float mScaleSpan = -1.0f;
-
-    public boolean onScale(ScaleGestureDetector detector) {
-        float span = detector.getCurrentSpan()/mScaleSpan;
-        setScale(span, span, 0.0f, detector.getFocusY());
-        invalidate();
-        return true;
-    }
-
-    public boolean onScaleBegin(ScaleGestureDetector detector){
-        setZoom(false);
-
-        mScaleSpan = detector.getCurrentSpan();
-        return true;
-    }
-
-    public void onScaleEnd(ScaleGestureDetector detector){
-        float span = detector.getCurrentSpan()/mScaleSpan;
-        setScale(1.0f, 1.0f, 0.0f,0.0f);
-        mScaleSpan = -1.0f;
-        int size = (int)(mSettings.getFontSize()*span);
-        if (size < 2) size = 2;
-        mSettings.setFontSize(size);
-        updatePrefs(mSettings);
-    }
 
     public boolean onSingleTapUp(MotionEvent ev) {
         Exec.mouseDown( mDownY, mDownX);
@@ -333,7 +304,10 @@ public class TermView extends EmulatorView implements
         }
         if (mTouchGesture && mScaleSpan < 0.0) 
             mGestureDetector.onTouchEvent(ev);
-        return mScaleDetector.onTouchEvent(ev);
+        if (null != mScaleDetector) { //
+            return mScaleDetector.onTouchEvent(ev);
+        }
+        return true;
     }
 
     public boolean dispatchKeyEvent(KeyEvent event){

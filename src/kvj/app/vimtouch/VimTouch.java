@@ -21,14 +21,10 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DownloadManager;
-import android.app.DownloadManager.Query;
-import android.app.DownloadManager.Request;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
@@ -1059,45 +1055,6 @@ public class VimTouch extends ActionBarActivity implements
         getWindow().setAttributes(attrs);
         mFullscreen = ret;
         return ret;
-    }
-
-    private void downloadFullRuntime() {
-
-        BroadcastReceiver receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                context.unregisterReceiver(this);
-                String action = intent.getAction();
-                if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
-                    long downloadId = intent.getLongExtra(
-                        DownloadManager.EXTRA_DOWNLOAD_ID, 0);
-                    Query query = new Query();
-                    query.setFilterById(mEnqueue);
-                    Cursor c = mDM.query(query);
-                    if (c.moveToFirst()) {
-                        int columnIndex = c.getColumnIndex(DownloadManager.COLUMN_STATUS);
-                        if (DownloadManager.STATUS_SUCCESSFUL == c.getInt(columnIndex)) {
-                            String
-                                uriString =
-                                c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
-                            Intent
-                                newintent =
-                                new Intent(getApplicationContext(), InstallProgress.class);
-                            newintent.setData(Uri.parse(uriString));
-                            startActivity(newintent);
-                        }
-                    }
-                }
-            }
-        };
-
-        registerReceiver(receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-
-        mDM = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-        Request
-            request =
-            new Request(Uri.parse("https://github.com/downloads/momodalo/vimtouch/vim.vrz"));
-        mEnqueue = mDM.enqueue(request);
     }
 
     public boolean onPrepareOptionsMenu(Menu menu) {
