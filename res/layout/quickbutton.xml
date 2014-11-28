@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="50sp"
-    android:layout_height="30sp"
-    android:layout_marginRight="4sp"
-    android:textSize="18sp"
-    android:text="@string/paste"
-    android:textColor="#DDDDDD"
-    android:gravity="center"
-    android:padding="2sp"
-    android:background="@drawable/button_selector" >
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center"
+          android:gravity="center"
+          android:focusable="true"
+          style="@style/Widget.AppCompat.ActionButton"
+        >
 </TextView>

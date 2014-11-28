@@ -151,8 +151,11 @@ static void *thread_wrapper ( void* value)
 
         setsid();
         
+        LOGI("pts0: = %s", thread_arg[0]);
         pts = open(thread_arg[0], O_RDWR);
-        if(pts < 0) exit(-1);
+        if(pts < 0) {
+            exit(11);
+        }
 
         dup2(pts, 0);
         dup2(pts, 1);
@@ -164,6 +167,7 @@ static void *thread_wrapper ( void* value)
         char buf[16384];
         sprintf(sock, "%s/%s", thread_arg[1], thread_arg[2]);
         sprintf(path, "%s/../lib/libvimexec.so", thread_arg[1]);
+        LOGI("exec: = %s", path);
 
         chmod(path, 0000755);
 
@@ -179,14 +183,15 @@ static void *thread_wrapper ( void* value)
             argv[i++] = sock;
             argv[i++] = (char*)thread_arg[4];
             argv[i++] = NULL;
+            LOGI("execv: = %s %s %s", path, sock, (char*)thread_arg[4]);
             execv(argv[0] ,argv);
         }
 
         //AndroidMain(2, (char**)argv);
         //exit(-1);
     } else {
-        LOGI("global_pid");
         global_pid = (int) pid;
+        LOGI("global_pid %i", global_pid);
     }
 
     global_vm->DetachCurrentThread();
@@ -198,7 +203,7 @@ static void *thread_wrapper ( void* value)
 
 static int create_subprocess(const char *cmd, const char* sock, const char *arg0, const char *arg1, char **envp)
 {
-    char *devname;
+    char devname[PATH_MAX];
     char tmpdir[PATH_MAX];
     char terminfodir[PATH_MAX];
 
@@ -219,18 +224,21 @@ static int create_subprocess(const char *cmd, const char* sock, const char *arg0
     }
     fcntl(ptm, F_SETFD, FD_CLOEXEC);
 
-    if(grantpt(ptm) || unlockpt(ptm) ||
-       ((devname = (char*) ptsname(ptm)) == 0)){
+    if(grantpt(ptm) || unlockpt(ptm)) {
         LOGE("[ trouble with /dev/ptmx - %s ]\n", strerror(errno));
         return -1;
     }
+    ptsname_r(ptm, devname, PATH_MAX);
 
     setenv("TMPDIR", tmpdir, 1);
+    LOGI("tmpdir = '%s'", tmpdir);
     setenv("TERM", "linux", 1);
-    //setenv("HOME", cmd, 1);
+    // setenv("HOME", cmd, 1);
     setenv("TERMINFO", terminfodir, 1);
+    LOGI("terminfo = '%s'", terminfodir);
 
     if (envp) {
+    LOGI("Haveenv");
         for (; *envp; ++envp) {
             putenv(*envp);
         }
@@ -239,18 +247,25 @@ static int create_subprocess(const char *cmd, const char* sock, const char *arg0
     char path[PATH_MAX];
     sprintf(path, "%s/bin/"TARGET_ARCH_ABI"/:%s", cmd, getenv("PATH"));
     setenv("PATH", path, 1);
+    LOGI("path = '%s'", path);
 
-    char** thread_arg = (char**)malloc(sizeof(char*)*4);
+    char** thread_arg = (char**)malloc(sizeof(char*)*6);
     thread_arg[0] = strdup(devname);
+    // thread_arg[5] = strdup(devname);
+    LOGI("thread_arg 0 = '%s'", devname);
     thread_arg[1] = strdup(cmd);
+    LOGI("thread_arg 1 = '%s'", cmd);
     thread_arg[2] = strdup(sock);
+    LOGI("thread_arg 2 = '%s'", sock);
     thread_arg[3] = arg1?strdup(arg1):NULL;
+    LOGI("thread_arg 3 = '%s'", arg1);
     if(arg0){
         struct stat st;
         if(stat(arg0, &st) == 0){
             if(S_ISDIR(st.st_mode)) chdir(arg0);
             if(S_IFREG&st.st_mode){
                 char* pdir = strdup(arg0);
+                LOGI("chdir = '%s'", pdir);
                 char* end = strrchr(pdir,'/');
                 *end = NULL;
                 chdir(pdir);
@@ -258,8 +273,10 @@ static int create_subprocess(const char *cmd, const char* sock, const char *arg0
 
         }
         thread_arg[4] = strdup(arg0);
+        LOGI("thread_arg 4 = '%s'", arg0);
     }else {
         chdir(getenv("HOME"));
+        LOGI("chdir HOME = '%s'", getenv("HOME"));
         thread_arg[4] = NULL;
     }
 
@@ -567,11 +584,13 @@ static int DEF_JNI0(nativeWait)
     int status;
 
     pthread_join((pthread_t)global_tid, NULL);
-
+    LOGI("Will wait... %i", global_pid);
     waitpid(global_pid, &status, 0);
+    LOGI("And status is %i", status);
     int result = 0;
     if (WIFEXITED(status)) {
         result = WEXITSTATUS(status);
+        LOGI("And exit status is %i", result);
     }
     return result;
 }

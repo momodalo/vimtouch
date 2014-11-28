@@ -16,10 +16,12 @@
 
 <resources>
     <style name="VimTheme" parent="@style/Theme.AppCompat.Light">
-        <item name="quickBarBackground">@drawable/bar_bg</item>
+        <item name="quickBarBackground">@style/Widget.AppCompat.ActionBar.Solid</item>
+        <item name="actionButtonStyle">@style/Widget.AppCompat.ActionButton</item>
     </style>
     <style name="VimDarkTheme" parent="@style/Theme.AppCompat">
-        <item name="quickBarBackground">@drawable/bar_bg_dark</item>
+        <item name="quickBarBackground">@style/Widget.AppCompat.ActionBar.Solid</item>
+        <item name="actionButtonStyle">@style/Widget.AppCompat.ActionButton</item>
     </style>
     <style name="VimInstallTheme" parent="@style/VimTheme">
     </style>
