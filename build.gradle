@@ -13,7 +13,7 @@ repositories {
 
 apply plugin: 'android'
 
-apply from: '../Configs/gradle/android.gradle'
+apply from: 'libraries/kvj-android.gradle'
 
 android {
 
@@ -46,7 +46,7 @@ android {
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
             jni.srcDirs = []
-            jniLibs.srcDir 'native'
+            jniLibs.srcDirs = [ 'libs' ]
         }
     }
     signingConfigs {
@@ -56,12 +56,13 @@ android {
         }
     }
     androidSetupSignConfig(signingConfigs.debug)
-    androidSetupSignConfig(signingConfigs.release)
+    // androidSetupSignConfig(signingConfigs.release)
 
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
             debuggable true
+            jniDebuggable true
         }
         release {
             signingConfig signingConfigs.release

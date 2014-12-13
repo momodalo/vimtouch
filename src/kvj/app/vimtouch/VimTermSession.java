@@ -33,6 +33,7 @@ public class VimTermSession extends TermSession {
     private String mInitialCommand;
 
     private String mApp;
+    private String mNat;
     private String mUrl;
 
     public static final int PROCESS_EXIT_FINISHES_SESSION = 0;
@@ -72,11 +73,12 @@ public class VimTermSession extends TermSession {
         }
     };
 
-    public VimTermSession(String app, String url, VimSettings settings,
+    public VimTermSession(String app, String nat, String url, VimSettings settings,
                           String initialCommand) {
         super();
 
         mApp = app;
+        mNat = nat;
         mUrl = url;
 
         updatePrefs(settings);
@@ -184,7 +186,7 @@ public class VimTermSession extends TermSession {
 
     private void createSubprocess(String shell, String[] env) {
 
-        mTermFd = Exec.createSubprocess(mApp, mUrl, getSuRoot()?"/system/xbin/su":null, env);
+        mTermFd = Exec.createSubprocess(mNat, mUrl, getSuRoot()?"/system/xbin/su":null, env);
         Log.i("TermSession", "FD: "+mTermFd);
     }
 

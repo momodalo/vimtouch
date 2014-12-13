@@ -35,7 +35,7 @@
 #include <jni.h>
 #include "common.h"
 #include "signatures.h"
-#include <linux/threads.h>
+// #include <linux/threads.h>
 #include <pthread.h>
 
 #include <sys/types.h>
@@ -166,7 +166,7 @@ static void *thread_wrapper ( void* value)
         char sock[1024];
         char buf[16384];
         sprintf(sock, "%s/%s", thread_arg[1], thread_arg[2]);
-        sprintf(path, "%s/../lib/libvimexec.so", thread_arg[1]);
+        sprintf(path, "%s/libvim.so", thread_arg[1]);
         LOGI("exec: = %s", path);
 
         chmod(path, 0000755);
