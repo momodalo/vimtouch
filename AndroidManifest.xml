@@ -14,7 +14,6 @@
     <application android:icon="@drawable/app_vimtouch"
         android:label="@string/application_vimtouch"
         android:allowBackup="true"
-        android:name=".VimTouchApp"
         >
         <activity android:name="VimTouch"
                 android:theme="@style/VimTheme"

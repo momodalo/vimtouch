@@ -33,7 +33,6 @@ android {
         compile project(':aFileChooser')
         compile project(':BasePlugin')
         compile 'com.android.support:appcompat-v7:20.0.+'
-        compile project(':AutoUpdateApk')
     }
     
     // NOTE: We are using the old folder structure to also support Eclipse
