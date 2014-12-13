@@ -12,13 +12,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
-# This makefile supplies the rules for building a library of JNI code for
-# use by our example of how to bundle a shared library with an APK.
-
-LOCAL_PATH := $(call my-dir)
 VIMTOUCH := $(call my-dir)
+
+###########################################################################
+###########################################################################
+###########################################################################
+###########################################################################
+
+include $(VIMTOUCH)/libncurses/Android.mk
+
+###########################################################################
+###########################################################################
+###########################################################################
+###########################################################################
+
+LOCAL_PATH := $(VIMTOUCH)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := eng
@@ -28,6 +37,7 @@ $(shell if [ ! -f $(LOCAL_PATH)/libiconv/include/iconv.h ]; then cp $(LOCAL_PATH
 $(shell if [ ! -f $(LOCAL_PATH)/libiconv/lib/config.h ]; then cp $(LOCAL_PATH)/iconv_h/lib/config.h $(LOCAL_PATH)/libiconv/lib/config.h; fi )
 $(shell if [ ! -f $(LOCAL_PATH)/libiconv/libcharset/config.h ]; then cp $(LOCAL_PATH)/iconv_h/libcharset/config.h $(LOCAL_PATH)/libiconv/libcharset/config.h; fi )
 $(shell if [ ! -f $(LOCAL_PATH)/libiconv/libcharset/include/localcharset.h ]; then cp $(LOCAL_PATH)/iconv_h/libcharset/include/localcharset.h $(LOCAL_PATH)/libiconv/libcharset/include/localcharset.h; fi )
+
 LOCAL_SRC_FILES:= termExec.cpp
 LOCAL_PRELINK_MODULE := false
 # Also need the JNI headers.
@@ -47,6 +57,11 @@ LOCAL_LDLIBS := -llog
 
 include $(BUILD_SHARED_LIBRARY)
 
+###########################################################################
+###########################################################################
+###########################################################################
+###########################################################################
+
 LOCAL_PATH:= $(VIMTOUCH)
 include $(CLEAR_VARS)
 
@@ -54,8 +69,6 @@ LOCAL_MODULE_TAGS := eng
 
 # This is the target being built.
 LOCAL_MODULE:= vim
-
-
 
 # All of the source files that we will compile.
 LOCAL_SRC_FILES:= \
@@ -116,14 +129,12 @@ LOCAL_SRC_FILES:= \
   vim/src/netbeans.c\
   vim/src/memfile.c
 
-# No static libraries.
 LOCAL_STATIC_LIBRARIES := libncurses
 
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/libiconv/include \
                    $(LOCAL_PATH)/libiconv/libcharset \
                    $(LOCAL_PATH)/libiconv/libcharset/include 
 
-# No special compiler flags.
 LOCAL_CFLAGS += -I$(LOCAL_PATH) -I$(LOCAL_PATH)/vim/src/ -I$(LOCAL_PATH)/vim/src/proto -I$(LOCAL_PATH)/libncurses/include -DUNIX -DHAVE_CONFIG_H
 LOCAL_CFLAGS += -DLIBDIR=\"\" -DTARGET_ARCH_ABI=\"$(TARGET_ARCH_ABI)\"
 
@@ -135,7 +146,3 @@ LOCAL_CFLAGS += -DLIBDIR=\"\" -DTARGET_ARCH_ABI=\"$(TARGET_ARCH_ABI)\"
 LOCAL_PRELINK_MODULE := false
 
 include $(BUILD_EXECUTABLE)
-
-include $(VIMTOUCH)/libncurses/Android.mk
-
-
