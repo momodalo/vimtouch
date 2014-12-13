@@ -27,6 +27,8 @@ import android.support.v4.content.Loader;
 import android.view.View;
 import android.widget.ListView;
 
+import com.ipaulpro.afilechooser.utils.FileInfo;
+
 /**
  * Fragment that displays a list of Files in a given path.
  * 
@@ -36,27 +38,32 @@ import android.widget.ListView;
  * 
  */
 public class FileListFragment extends ListFragment implements
-		LoaderManager.LoaderCallbacks<List<File>> {
+		LoaderManager.LoaderCallbacks<List<FileInfo>> {
 
 	private static final int LOADER_ID = 0;
 
 	private FileListAdapter mAdapter;
 	private String mPath;
+    private boolean addRoot;
 
-	/**
-	 * Create a new instance with the given file path.
-	 * 
-	 * @param path The absolute path of the file (directory) to display.
-	 * @return A new Fragment with the given file path. 
-	 */
-	public static FileListFragment newInstance(String path) {
-		FileListFragment fragment = new FileListFragment();
-		Bundle args = new Bundle();
-		args.putString(FileChooserActivity.PATH, path);
-		fragment.setArguments(args);
+    /**
+     * Create a new instance with the given file path.
+     *
+     * @param path The absolute path of the file (directory) to display.
+     * @return A new Fragment with the given file path.
+     */
+    public static FileListFragment newInstance(String path) {
+        return newInstance(path, false);
+    }
+    public static FileListFragment newInstance(String path, boolean addRoot) {
+        FileListFragment fragment = new FileListFragment();
+        Bundle args = new Bundle();
+        args.putString(FileChooserActivity.PATH, path);
+        fragment.setArguments(args);
+        fragment.setAddRoot(addRoot);
 
-		return fragment;
-	}
+        return fragment;
+    }
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -83,19 +90,19 @@ public class FileListFragment extends ListFragment implements
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		FileListAdapter adapter = (FileListAdapter) l.getAdapter();
 		if (adapter != null) {
-			File file = (File) adapter.getItem(position);
-			mPath = file.getAbsolutePath();
+			FileInfo file = (FileInfo) adapter.getItem(position);
+			mPath = file.getFile().getAbsolutePath();
 		    mListener.onFileSelected(file);
 		}
 	}
 
 	@Override
-	public Loader<List<File>> onCreateLoader(int id, Bundle args) {
-		return new FileLoader(getActivity(), mPath);
+	public Loader<List<FileInfo>> onCreateLoader(int id, Bundle args) {
+		return new FileLoader(getActivity(), mPath).setAddRoot(addRoot);
 	}
 
 	@Override
-	public void onLoadFinished(Loader<List<File>> loader, List<File> data) {
+	public void onLoadFinished(Loader<List<FileInfo>> loader, List<FileInfo> data) {
 		mAdapter.setListItems(data);
 
 		if (isResumed())
@@ -105,12 +112,20 @@ public class FileListFragment extends ListFragment implements
 	}
 
 	@Override
-	public void onLoaderReset(Loader<List<File>> loader) {
+	public void onLoaderReset(Loader<List<FileInfo>> loader) {
 		mAdapter.clear();
 	}
 
     private FileChoosedListener mListener = null;
     public void setFileChoosedListener(FileChoosedListener li){
         mListener = li;
+    }
+
+    public void setAddRoot(boolean addRoot) {
+        this.addRoot = addRoot;
+    }
+
+    public boolean isAddRoot() {
+        return addRoot;
     }
 }

@@ -1,0 +1,83 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" 
+    package="kvj.app.vimtouch"
+    android:versionCode="21100030"
+    android:versionName="2.6r2"
+    android:installLocation="auto"
+    >
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-sdk
+        android:minSdkVersion="7"
+        android:targetSdkVersion="19"
+        />
+    <application android:icon="@drawable/app_vimtouch"
+        android:label="@string/application_vimtouch"
+        android:allowBackup="true"
+        android:name=".VimTouchApp"
+        >
+        <activity android:name="VimTouch"
+                android:theme="@style/VimTheme"
+                android:launchMode="singleInstance"
+                android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+                android:windowSoftInputMode="adjustResize|stateHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.EDIT" />
+                <action android:name="android.intent.action.PICK" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.EDIT" />
+                <action android:name="android.intent.action.PICK" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/octet-stream" />
+                <data android:mimeType="application/javascript" />
+                <data android:mimeType="application/json" />
+                <data android:mimeType="application/atom+xml" />
+                <data android:mimeType="application/soap+xm" />
+                <data android:mimeType="application/xhtml+xml" />
+                <data android:mimeType="application/xml-dtd" />
+                <data android:mimeType="application/x-latex" />
+                <data android:mimeType="application/*xml" />
+                <data android:mimeType="application/ecmascript" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.googlecode.android_scripting.action.EDIT_SCRIPT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name="VimTouchPreferences"/>
+        <activity android:name=".VimFileActivity"
+                  android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
+                  android:excludeFromRecents="true"
+        />
+        <activity android:name="InstallProgress"
+                  android:theme="@style/VimInstallTheme"
+                  android:launchMode="singleInstance"
+                  android:label="@string/install_activity"
+        >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" />
+                <data android:scheme="ftp" />
+                <data android:host="*" />
+                <data android:pathPattern=".*\\.vrz" />
+            </intent-filter>
+        </activity>
+        <service android:name="VimTermService" />
+        <service android:name=".ext.manager.IntegrationProviderService" android:exported="true">
+            <intent-filter>
+                <action android:name="vimtouch.REMOTE_PROVIDER"/>
+            </intent-filter>
+        </service>
+    </application>
+</manifest>

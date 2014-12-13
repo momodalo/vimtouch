@@ -2,7 +2,7 @@
 
 NDK=$ANDROID_NDK_ROOT
 SDK=`grep sdk.dir local.properties | tr '=' '\n' | tail -1`
-package="net.momodalo.app.vimtouch"
+package="kvj.app.vimtouch"
 
 if ! [ -f $NDK/ndk-build ] ; then
     # If ANDROID_NDK_ROOT is not set, try this heuristics: look up all the
@@ -39,10 +39,10 @@ function gen_signatures {
     echo "#define SIGNATURES_H__" >> $signatures
     echo "" >> $signatures
 
-    class="./bin/classes/`echo $package | tr '.' '/'`/Exec"
+    class="./build/intermediates/classes/debug/`echo $package | tr '.' '/'`/Exec"
     javap -s $class \
-        | awk '/native/,/Signature/{ print };' \
-        | awk '/Signature/{ print "\011\042"$2"\042;\n"; next }{ split($5,a1,/\(/); print "char const* jni_signature_"a1[1]" = " };' \
+        | awk '/native/,/descriptor/{ print };' \
+        | awk '/descriptor/{ print "\011\042"$2"\042;\n"; next }{ split($5,a1,/\(/); print "char const* jni_signature_"a1[1]" = " };' \
         >> $signatures
 
     echo "#endif // SIGNATURES_H__" >> $signatures

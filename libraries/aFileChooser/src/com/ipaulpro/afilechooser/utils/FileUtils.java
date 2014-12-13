@@ -441,8 +441,8 @@ public class FileUtils {
 
 	 * @author paulburke
 	 */
-	public static List<File> getFileList(String path) {
-		ArrayList<File> list = new ArrayList<File>();
+	public static List<FileInfo> getFileList(String path, boolean addParent) {
+		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
 
 		// Current directory File instance
 		final File pathDir = new File(path);
@@ -453,7 +453,7 @@ public class FileUtils {
 			// Sort the folders alphabetically
 			Arrays.sort(dirs, mComparator);
 			// Add each folder to the File list for the list adapter
-			for (File dir : dirs) list.add(dir);
+			for (File dir : dirs) list.add(new FileInfo(dir, dir.getName()));
 		}
 
 		// List file in this directory with the file filter
@@ -462,8 +462,16 @@ public class FileUtils {
 			// Sort the files alphabetically
 			Arrays.sort(files, mComparator);
 			// Add each file to the File list for the list adapter
-			for (File file : files) list.add(file);
-		}		
+			for (File file : files) list.add(new FileInfo(file, file.getName()));
+		}
+            if (addParent) {
+                File parent = pathDir.getParentFile();
+                if (null != parent) {
+                    list.add(0, new FileInfo(parent, String.format("[..] %s", parent.getAbsolutePath())));
+                }
+            }
+
+
 		
 		return list;
 	}

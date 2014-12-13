@@ -65,7 +65,7 @@ LOCAL_SRC_FILES:= \
   clipboard.c\
   exit.c\
   misc.c\
-  version.c\
+  vim/src/version.c\
   libiconv/lib/iconv.c \
   libiconv/libcharset/lib/localcharset.c \
   libiconv/lib/relocatable.c \

@@ -15,22 +15,17 @@
 -->
 
 <resources>
-    <style name="VimTheme" parent="@android:style/Theme.Black">
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowFrame">@null</item>
+    <style name="VimTheme" parent="@style/Theme.AppCompat.Light">
+        <item name="quickBarBackground">@style/Widget.AppCompat.ActionBar.Solid</item>
+        <item name="actionButtonStyle">@style/Widget.AppCompat.ActionButton</item>
     </style>
-    <style name="VimDarkTheme" parent="@android:style/Theme.Black">
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowFrame">@null</item>
+    <style name="VimDarkTheme" parent="@style/Theme.AppCompat">
+        <item name="quickBarBackground">@style/Widget.AppCompat.ActionBar.Solid</item>
+        <item name="actionButtonStyle">@style/Widget.AppCompat.ActionButton</item>
     </style>
     <style name="VimInstallTheme" parent="@style/VimTheme">
     </style>
-    <style name="DialogAnimation">
-        <item name="android:windowEnterAnimation">@anim/slide_in</item>
-        <item name="android:windowExitAnimation">@anim/slide_out</item>
-    </style>
     <style name="DialogSlideAnim" parent="@android:style/Theme.Dialog">
-        <item name="android:windowAnimationStyle">@style/DialogAnimation</item>
         <item name="android:windowFrame">@null</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:windowContentOverlay">@null</item>

@@ -93,6 +93,9 @@ int Gpm_GetEvent(Gpm_Event *e){
     if(event.type == VIM_EVENT_TYPE_GPM) {
         memcpy(e, (void*)&event.event.gpm, sizeof(Gpm_Event));
         return 1;
+    }else if(event.type == VIM_EVENT_TYPE_ANDROID_SEND) {
+        vimtouch_send_android_event(event.event.num, (char_u *) &event.event.nums[1]);
+		return 0;
     }else if(event.type == VIM_EVENT_TYPE_CMD) {
         do_cmdline_cmd((char_u *) event.event.cmd);
     }else if(event.type == VIM_EVENT_TYPE_RELINE) {
@@ -147,6 +150,18 @@ int synced_state = -1;
 int synced_col = -1;
 int synced_lnum = -1;
 
+void vimtouch_send_android_event(type, object) 
+int type;
+char_u *object;
+{
+	// long ltype = type;
+	set_vim_var_nr(VV_AD_EVENT, type);
+	set_vim_var_string(VV_AD_OBJECT, object, -1);
+    apply_autocmds(EVENT_USER, NULL, NULL, FALSE, curbuf);
+	set_vim_var_nr(VV_AD_EVENT, 0);
+	set_vim_var_string(VV_AD_OBJECT, NULL, -1);
+}
+
 void vimtouch_sync() {
     if( synced_state != State || 
         synced_col != curwin->w_cursor.col ||
@@ -180,6 +195,28 @@ int vimtouch_dialog_result(){
     n = vimtouch_eventloop(VIM_EVENT_TYPE_DIALOG, &event);
     if(n > 0)
         return event.event.num;
+}
+
+    char_u *
+vim_android(type, command)
+    char_u	*type;
+    char_u	*command;
+{
+	char buf[8192];
+	sprintf(buf, "ANDROID:%s %s",type, command);
+	write(gpm_fd, buf, strlen(buf));
+    int n = -1;
+    VimEvent event;
+    n = vimtouch_eventloop(VIM_EVENT_TYPE_ANDROID, &event);
+	char_u *result;
+    if(n > 0){
+		result = alloc(strlen(event.event.cmd)+1);
+		strcpy(result, event.event.cmd);
+    } else {
+		result = alloc(1);
+		result[0] = 0;
+	}
+	return result;
 }
 
 void vimtouch_get_clipboard( VimClipboard *cbd ){

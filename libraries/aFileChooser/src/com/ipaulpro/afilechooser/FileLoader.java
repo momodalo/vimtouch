@@ -23,6 +23,7 @@ import android.content.Context;
 import android.os.FileObserver;
 import android.support.v4.content.AsyncTaskLoader;
 
+import com.ipaulpro.afilechooser.utils.FileInfo;
 import com.ipaulpro.afilechooser.utils.FileUtils;
 
 /**
@@ -33,7 +34,7 @@ import com.ipaulpro.afilechooser.utils.FileUtils;
  * @author paulburke (ipaulpro)
  * 
  */
-public class FileLoader extends AsyncTaskLoader<List<File>> {
+public class FileLoader extends AsyncTaskLoader<List<FileInfo>> {
 
 	private static final int FILE_OBSERVER_MASK = FileObserver.CREATE
 			| FileObserver.DELETE | FileObserver.DELETE_SELF
@@ -42,8 +43,10 @@ public class FileLoader extends AsyncTaskLoader<List<File>> {
 	
 	private FileObserver mFileObserver;
 	
-	private List<File> mData;
+	private List<FileInfo> mData;
 	private String mPath;
+
+    private boolean addRoot = false;
 
 	public FileLoader(Context context, String path) {
 		super(context);
@@ -51,18 +54,18 @@ public class FileLoader extends AsyncTaskLoader<List<File>> {
 	}
 
 	@Override
-	public List<File> loadInBackground() {
-		return FileUtils.getFileList(mPath);
+	public List<FileInfo> loadInBackground() {
+		return FileUtils.getFileList(mPath, addRoot);
 	}
 
 	@Override
-	public void deliverResult(List<File> data) {
+	public void deliverResult(List<FileInfo> data) {
 		if (isReset()) {
 			onReleaseResources(data);
 			return;
 		}
 
-		List<File> oldData = mData;
+		List<FileInfo> oldData = mData;
 		mData = data;
 		
 		if (isStarted())
@@ -107,17 +110,22 @@ public class FileLoader extends AsyncTaskLoader<List<File>> {
 	}
 
 	@Override
-	public void onCanceled(List<File> data) {
+	public void onCanceled(List<FileInfo> data) {
 		super.onCanceled(data);
 
 		onReleaseResources(data);
 	}
 
-	protected void onReleaseResources(List<File> data) {
+	protected void onReleaseResources(List<FileInfo> data) {
 		
 		if (mFileObserver != null) {
 			mFileObserver.stopWatching();
 			mFileObserver = null;
 		}
 	}
+
+    public FileLoader setAddRoot(boolean addRoot) {
+        this.addRoot = addRoot;
+        return this;
+    }
 }

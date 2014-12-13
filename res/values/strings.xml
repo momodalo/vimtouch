@@ -65,10 +65,6 @@
    <string name="summary_fnkey_preference">Choose Fn key.</string>
    <string name="dialog_title_fnkey_preference">Fn key</string>
 
-   <string name="title_ime_preference">Input method</string>
-   <string name="summary_ime_preference">Choose input method for soft keyboard.</string>
-   <string name="dialog_title_ime_preference">Input method</string>
-
    <string name="vim_preferences">Vim</string>
    <string name="title_touch_gesture_preference">Touch Gesture</string>
    <string name="summary_touch_gesture_preference">Whether touch gestures is enabled.</string>
@@ -101,7 +97,7 @@
 
    <string name="extra_downloads">Extra Downloads</string>
 
-   <string name="vim_md5">4ca08ccbe3f4cf2caa9443795d324ac2</string>
+   <string name="vim_md5">034e000f70f2a3b157079bea7ca35096</string>
 
    <string name="install_activity">Install Vim Add-On</string>
 
