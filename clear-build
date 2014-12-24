@@ -1,5 +1,0 @@
-#!/bin/sh
-
-rm libs/armeabi/lib*
-rm -r obj/
-ant clean

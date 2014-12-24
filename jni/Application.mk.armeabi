@@ -1,3 +1,0 @@
-APP_STL := stlport_static
-APP_PLATFORM := android-3
-APP_ABI := armeabi

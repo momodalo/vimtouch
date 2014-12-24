@@ -1,0 +1,39 @@
+// apply from: System.getProperty("user.home")+"/.config/config.gradle";
+
+def androidSetupSignConfig (config) {
+//     config.storeFile = file(keysFile)
+//     config.storePassword = keysPassword
+//     config.keyPassword = keysPassword
+//     config.keyAlias = keysAlias
+}
+
+def androidAutoVersion (config, txtVersion) {
+    def version = Integer.parseInt(new Date().format("yyMMddHHmm"), 10)
+    config.versionCode = version
+    config.versionName = txtVersion+version
+}
+
+def androidEnablePushLink (p, variants, afterTask) {
+    def taskName = "deployToPushLink"
+    def newTask = p.tasks.create(taskName)
+    newTask.doFirst {
+        variants.all { variant ->
+            if (variant.buildType.name == "release") {
+                def fileName = variant.outputFile.absolutePath
+                System.err << "Uploading: " << fileName << "\n"
+                def proc = "curl -F apiKey=${pushLinkKey} -F apk=@\"${fileName}\" https://push-link.com/apps/api_upload".execute()
+                Thread.start {
+                    System.err << proc.err
+                }
+                proc.waitFor()
+            }
+        }
+    }
+    // assembleRelease
+    afterTask.finalizedBy = [newTask]
+}
+
+ext{
+	androidSetupSignConfig = this.&androidSetupSignConfig
+	androidAutoVersion = this.&androidAutoVersion
+}

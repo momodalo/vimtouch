@@ -33,30 +33,29 @@ https://github.com/momodalo/vimtouch/issues
 ## Developer
 ### How to compile the source code?
 Before starting, you need the following prerequisites:
+
 -   Android SDK: http://developer.android.com/sdk/index.html
 -   Android NDK: http://developer.android.com/tools/sdk/ndk/index.html
--   Apache ant: http://ant.apache.org/
-
-    (Use `sudo apt-get install ant` on a proper OS)
-
 -   Git: http://git-scm.com/
 
     (Use `sudo apt-get install git-core` on a proper OS)
 
 Get the source code:
 
-    git clone git://github.com/momodalo/vimtouch.git && cd vimtouch
+    git clone git://github.com/nwf/vimtouch.git && cd vimtouch
 
 Now prepare the development environment:
 
-    ANDROID_SDK_HOME=~/path/to/android/sdk && ./prepare-clean-checkout.sh
+    ANDROID_SDK_HOME=~/path/to/android/sdk
+    ANDROID_NDK_ROOT=~/path/to/android/ndk
+    ./prepare-clean-checkout.sh
 
 You're ready to compile it!
 
-    ant debug
+   ${ANDROID_SDK_HOME}/tools/templates/gradle/wrapper/gradlew assembleDebug
+   ${ANDROID_NDK_ROOT}/ndk-build
+   for i in libs/*; do cp $i/vim $i/libvim.so; done
+   ${ANDROID_SDK_HOME}/tools/templates/gradle/wrapper/gradlew assembleDebug
 
-(Note: the build script uses some magic to discover NDK and call `ndk-build`.
-Since magic is prone to failures, your build might fail with complaints about
-Android NDK. If that happens, make sure you export `ANDROID_NDK_ROOT`
-environment variable or read the `run` script to discover what heuristics it
-uses to deduce your NDK location.)
+Yes, we need to run the build loop twice at the moment.  It is less than
+ideal, but it does produce an executable that can hobble along at least.
