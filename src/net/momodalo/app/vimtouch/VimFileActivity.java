@@ -1,4 +1,4 @@
-package kvj.app.vimtouch;
+package net.momodalo.app.vimtouch;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -8,6 +8,8 @@ import android.os.Bundle;
 import com.ipaulpro.afilechooser.utils.FileUtils;
 
 import java.io.File;
+
+import net.momodalo.app.vimtouch.R;
 
 public class VimFileActivity extends Activity{
     public static final String OPEN_TYPE = "open_type";

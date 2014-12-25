@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" 
-    package="kvj.app.vimtouch"
+    package="net.momodalo.app.vimtouch"
     android:versionCode="21100030"
-    android:versionName="2.6r2"
+    android:versionName="3.0"
     android:installLocation="auto"
     >
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
@@ -15,7 +15,7 @@
         android:label="@string/application_vimtouch"
         android:allowBackup="true"
         >
-        <activity android:name="VimTouch"
+        <activity android:name="net.momodalo.app.vimtouch.VimTouch"
                 android:theme="@style/VimTheme"
                 android:launchMode="singleInstance"
                 android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
@@ -52,12 +52,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name="VimTouchPreferences"/>
-        <activity android:name=".VimFileActivity"
+        <activity android:name="net.momodalo.app.vimtouch.VimTouchPreferences"/>
+        <activity android:name="net.momodalo.app.vimtouch.VimFileActivity"
                   android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
                   android:excludeFromRecents="true"
         />
-        <activity android:name="InstallProgress"
+        <activity android:name="net.momodalo.app.vimtouch.InstallProgress"
                   android:theme="@style/VimInstallTheme"
                   android:launchMode="singleInstance"
                   android:label="@string/install_activity"
@@ -72,8 +72,8 @@
                 <data android:pathPattern=".*\\.vrz" />
             </intent-filter>
         </activity>
-        <service android:name="VimTermService" />
-        <service android:name=".ext.manager.IntegrationProviderService" android:exported="true">
+        <service android:name="net.momodalo.app.vimtouch.VimTermService" />
+        <service android:name="kvj.app.vimtouch.ext.manager.IntegrationProviderService" android:exported="true">
             <intent-filter>
                 <action android:name="vimtouch.REMOTE_PROVIDER"/>
             </intent-filter>

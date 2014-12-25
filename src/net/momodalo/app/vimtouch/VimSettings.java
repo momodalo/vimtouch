@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package kvj.app.vimtouch;
+package net.momodalo.app.vimtouch;
 
 import android.content.res.Resources;
 import android.content.SharedPreferences;
 import android.view.KeyEvent;
+
+import net.momodalo.app.vimtouch.R;
 
 public class VimSettings {
     private SharedPreferences mPrefs;

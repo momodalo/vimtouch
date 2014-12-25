@@ -1,6 +1,6 @@
 package kvj.app.vimtouch.ext.manager;
 
-import kvj.app.vimtouch.Exec;
+import net.momodalo.app.vimtouch.Exec;
 
 import org.kvj.vimtouch.IntegrationProvider;
 import org.kvj.vimtouch.TransferableData;

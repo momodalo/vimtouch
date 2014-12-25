@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package kvj.app.vimtouch;
+package net.momodalo.app.vimtouch;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -80,9 +80,10 @@ import java.util.List;
 
 import jackpal.androidterm.emulatorview.ColorScheme;
 import jackpal.androidterm.emulatorview.TermSession;
-import kvj.app.vimtouch.addons.PluginAddOn;
-import kvj.app.vimtouch.addons.PluginFactory;
-import kvj.app.vimtouch.compat.AndroidCompat;
+
+import net.momodalo.app.vimtouch.addons.PluginAddOn;
+import net.momodalo.app.vimtouch.addons.PluginFactory;
+import net.momodalo.app.vimtouch.compat.AndroidCompat;
 import kvj.app.vimtouch.ext.manager.IntegrationManager;
 import kvj.app.vimtouch.ext.manager.impl.InputExtension;
 import kvj.app.vimtouch.ext.manager.impl.QuickbarExtension;

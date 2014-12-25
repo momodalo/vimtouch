@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package kvj.app.vimtouch;
+package net.momodalo.app.vimtouch;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -25,7 +25,9 @@ import android.os.IBinder;
 import android.util.Log;
 
 import jackpal.androidterm.emulatorview.TermSession;
-import kvj.app.vimtouch.compat.ServiceForegroundCompat;
+import net.momodalo.app.vimtouch.R;
+
+import net.momodalo.app.vimtouch.compat.ServiceForegroundCompat;
 
 public class VimTermService extends Service implements TermSession.FinishCallback
 {

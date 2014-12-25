@@ -1,6 +1,6 @@
 package kvj.app.vimtouch.ext.manager.impl;
 
-import kvj.app.vimtouch.VimTouch;
+import net.momodalo.app.vimtouch.VimTouch;
 import kvj.app.vimtouch.ext.manager.impl.ToastExtension.ToastInput;
 import kvj.app.vimtouch.ext.manager.impl.ToastExtension.ToastOutput;
 

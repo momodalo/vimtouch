@@ -1,4 +1,4 @@
-package kvj.app.vimtouch;
+package net.momodalo.app.vimtouch;
 
 import android.app.Activity;
 import android.app.DownloadManager;
@@ -35,10 +35,12 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import kvj.app.vimtouch.addons.PluginAddOn;
-import kvj.app.vimtouch.addons.PluginFactory;
-import kvj.app.vimtouch.addons.RuntimeAddOn;
-import kvj.app.vimtouch.addons.RuntimeFactory;
+import net.momodalo.app.vimtouch.R;
+
+import net.momodalo.app.vimtouch.addons.PluginAddOn;
+import net.momodalo.app.vimtouch.addons.PluginFactory;
+import net.momodalo.app.vimtouch.addons.RuntimeAddOn;
+import net.momodalo.app.vimtouch.addons.RuntimeFactory;
 
 public class InstallProgress extends Activity {
     public static final String LOG_TAG = "VIM Installation";

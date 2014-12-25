@@ -1,4 +1,4 @@
-package kvj.app.vimtouch.addons;
+package net.momodalo.app.vimtouch.addons;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package kvj.app.vimtouch.addons;
+package net.momodalo.app.vimtouch.addons;
 
 import android.content.Context;
 import android.util.AttributeSet;

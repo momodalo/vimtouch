@@ -1,4 +1,4 @@
-package kvj.app.vimtouch;
+package net.momodalo.app.vimtouch;
 
 import android.content.Context;
 import android.graphics.Canvas;

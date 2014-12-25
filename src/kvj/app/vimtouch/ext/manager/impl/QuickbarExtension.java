@@ -3,7 +3,7 @@ package kvj.app.vimtouch.ext.manager.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import kvj.app.vimtouch.VimTouch;
+import net.momodalo.app.vimtouch.VimTouch;
 import kvj.app.vimtouch.ext.manager.impl.QuickbarExtension.QuickbarInput;
 
 import org.kvj.vimtouch.ext.IncomingTransfer;

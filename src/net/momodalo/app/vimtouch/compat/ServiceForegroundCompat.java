@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package kvj.app.vimtouch.compat;
+package net.momodalo.app.vimtouch.compat;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;

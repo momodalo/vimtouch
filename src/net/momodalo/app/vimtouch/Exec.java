@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package kvj.app.vimtouch;
+package net.momodalo.app.vimtouch;
 
 import java.io.FileDescriptor;
 import java.io.IOException;

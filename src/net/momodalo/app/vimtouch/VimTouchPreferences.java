@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package kvj.app.vimtouch;
+package net.momodalo.app.vimtouch;
 
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -23,6 +23,8 @@ import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
+
+import net.momodalo.app.vimtouch.R;
 
 public class VimTouchPreferences extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 

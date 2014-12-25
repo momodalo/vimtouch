@@ -1,4 +1,4 @@
-package kvj.app.vimtouch;
+package net.momodalo.app.vimtouch;
 
 import android.os.Handler;
 import android.os.Message;

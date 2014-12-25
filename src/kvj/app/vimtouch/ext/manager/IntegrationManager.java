@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import kvj.app.vimtouch.Exec;
+import net.momodalo.app.vimtouch.Exec;
 
 import org.kvj.bravo7.ipc.RemoteServicesCollector;
 import org.kvj.vimtouch.BasePlugin;

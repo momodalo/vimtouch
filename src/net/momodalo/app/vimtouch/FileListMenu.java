@@ -1,4 +1,4 @@
-package kvj.app.vimtouch;
+package net.momodalo.app.vimtouch;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -7,14 +7,13 @@ import android.net.Uri;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.ipaulpro.afilechooser.FileChoosedListener;
 import com.ipaulpro.afilechooser.FileListFragment;
 import com.ipaulpro.afilechooser.utils.FileInfo;
 
-import java.io.File;
+import net.momodalo.app.vimtouch.R;
 
 public class FileListMenu implements VimTouch.SlidingMenuInterface, FileChoosedListener {
 

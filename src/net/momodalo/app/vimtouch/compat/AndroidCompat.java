@@ -1,4 +1,4 @@
-package kvj.app.vimtouch.compat;
+package net.momodalo.app.vimtouch.compat;
 
 /**
  * The classes in this package take advantage of the fact that the VM does
