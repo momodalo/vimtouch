@@ -309,6 +309,7 @@ int main(argc, argv)
      */
     init_homedir();		/* find real value of $HOME */
     set_init_1();
+    p_mouse = MOUSE_ALL;
     TIME_MSG("inits 1");
 
 #ifdef FEAT_EVAL
