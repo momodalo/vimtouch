@@ -53,7 +53,7 @@ Now prepare the development environment:
 You're ready to compile it!
 
    ${ANDROID_SDK_HOME}/tools/templates/gradle/wrapper/gradlew assembleDebug
-   ${ANDROID_NDK_ROOT}/ndk-build
+   ${ANDROID_NDK_ROOT}/ndk-build;
    for i in libs/*; do cp $i/vim $i/libvim.so; done
    ${ANDROID_SDK_HOME}/tools/templates/gradle/wrapper/gradlew assembleDebug
 
