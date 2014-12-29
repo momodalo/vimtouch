@@ -169,21 +169,25 @@ static void *thread_wrapper ( void* value)
         sprintf(path, "%s/libvim.so", thread_arg[1]);
         LOGI("exec: = %s", path);
 
+        char* runpath = thread_arg[3];
+        char* su = thread_arg[4];
+        char* args = thread_arg[5];
+
         chmod(path, 0000755);
 
         int i=0;
-        if(thread_arg[3]){
-            if(thread_arg[4]) {
-                sprintf(buf, "%s -c \"%s %s %s\"", thread_arg[3], path, sock, (char*)thread_arg[4]);
+        if(su){
+            if(args) {
+                sprintf(buf, "%s -c \"%s %s %s %s\"", su, path, sock, runpath, (char*)args);
             } else
-                sprintf(buf, "%s -c \"%s %s\"", thread_arg[3], path, sock);
+                sprintf(buf, "%s -c \"%s %s %s\"", su, path, sock, runpath);
             system(buf);
         }else{
             argv[i++] = path;
             argv[i++] = sock;
-            argv[i++] = (char*)thread_arg[4];
+            argv[i++] = runpath;
+            argv[i++] = (char*)args;
             argv[i++] = NULL;
-            LOGI("execv: = %s %s %s", path, sock, (char*)thread_arg[4]);
             execv(argv[0] ,argv);
         }
 
@@ -201,7 +205,7 @@ static void *thread_wrapper ( void* value)
 }
 
 
-static int create_subprocess(const char *cmd, const char* sock, const char *arg0, const char *arg1, char **envp)
+static int create_subprocess(const char *cmd, const char* filepath, const char* sock, const char *arg0, const char *arg1, char **envp)
 {
     char devname[PATH_MAX];
     char tmpdir[PATH_MAX];
@@ -211,8 +215,9 @@ static int create_subprocess(const char *cmd, const char* sock, const char *arg0
     sprintf((char*)default_vimruntime_dir, "%s/vim/", cmd);
     sprintf((char*)default_vim_dir, "%s/vim/", cmd);
     */
-    sprintf(tmpdir, "%s/tmp", cmd);
-    sprintf(terminfodir, "%s/terminfo", cmd);
+    LOGE("testtest filepath %s", filepath);
+    sprintf(tmpdir, "%s/tmp", filepath);
+    sprintf(terminfodir, "%s/terminfo", filepath);
 
     //pipe(fake_gpm_fd);
 
@@ -252,13 +257,10 @@ static int create_subprocess(const char *cmd, const char* sock, const char *arg0
     char** thread_arg = (char**)malloc(sizeof(char*)*6);
     thread_arg[0] = strdup(devname);
     // thread_arg[5] = strdup(devname);
-    LOGI("thread_arg 0 = '%s'", devname);
     thread_arg[1] = strdup(cmd);
-    LOGI("thread_arg 1 = '%s'", cmd);
     thread_arg[2] = strdup(sock);
-    LOGI("thread_arg 2 = '%s'", sock);
-    thread_arg[3] = arg1?strdup(arg1):NULL;
-    LOGI("thread_arg 3 = '%s'", arg1);
+    thread_arg[3] = strdup(filepath);
+    thread_arg[5] = arg1?strdup(arg1):NULL;
     if(arg0){
         struct stat st;
         if(stat(arg0, &st) == 0){
@@ -308,10 +310,11 @@ static int throwOutOfMemoryError(JNIEnv *env, const char *message)
 
 
 static jobject DEF_JNI(nativeCreateSubprocess,
-                       jstring cmd, jstring sock, jstring arg0, jstring arg1,
+                       jstring cmd, jstring filepath, jstring sock, jstring arg0, jstring arg1,
                        jobjectArray envVars)
 {
     char const* cmd_str = cmd ? env->GetStringUTFChars(cmd, NULL) : NULL;
+    char const* fp_str = filepath ? env->GetStringUTFChars(filepath, NULL) : NULL;
     char const* sock_str = sock ? env->GetStringUTFChars(sock, NULL) : NULL;
     char const* arg0_str = arg0 ? env->GetStringUTFChars(arg0, NULL) : NULL;
     char const* arg1_str = arg1 ? env->GetStringUTFChars(arg1, NULL) : NULL;
@@ -359,10 +362,11 @@ static jobject DEF_JNI(nativeCreateSubprocess,
         envp[num_env_vars] = NULL;
     }
 
-    int ptm = create_subprocess(cmd_str, sock_str, arg0_str, arg1_str, envp);
+    int ptm = create_subprocess(cmd_str, fp_str, sock_str, arg0_str, arg1_str, envp);
 
     env->ReleaseStringUTFChars(cmd, cmd_str);
     env->ReleaseStringUTFChars(sock, sock_str);
+    env->ReleaseStringUTFChars(filepath, fp_str);
     if(arg0 != NULL) env->ReleaseStringUTFChars(arg0, arg0_str);
     if(arg1 != NULL) env->ReleaseStringUTFChars(arg1, arg1_str);
 

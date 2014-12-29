@@ -522,7 +522,7 @@ public class VimTouch extends ActionBarActivity implements
     private void startEmulator() {
         String appPath = getApplicationContext().getFilesDir().getPath();
         String nativePath = getApplicationInfo().nativeLibraryDir;
-        mSession = new VimTermSession(appPath, nativePath, mUrl, mSettings, "");
+        mSession = new VimTermSession(appPath, nativePath, getApplicationContext().getFilesDir().getAbsolutePath(), mUrl, mSettings, "");
         mSession.setFinishCallback(new TermSession.FinishCallback() {
             @Override
             public void onSessionFinish(TermSession session) {

@@ -2,7 +2,7 @@
 #define SIGNATURES_H__
 
 char const* jni_signature_nativeCreateSubprocess = 
-	"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;)Ljava/io/FileDescriptor;";
+	"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;)Ljava/io/FileDescriptor;";
 
 char const* jni_signature_startVim = 
 	"()V";

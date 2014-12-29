@@ -125,7 +125,7 @@ int type, String title, String message,
      *
      */
     public static native FileDescriptor nativeCreateSubprocess(
-        String cmd, String sock, String arg0, String arg1, String[] envp);
+        String cmd, String filepath, String sock, String arg0, String arg1, String[] envp);
 
     public static native void startVim();
         
@@ -214,10 +214,10 @@ int type, String title, String message,
     static VimTouchSocketServer mSocketServer;
 
     public static FileDescriptor createSubprocess(
-        String cmd, String arg0, String arg1, String[] envp){
+        String cmd, String filepath, String arg0, String arg1, String[] envp){
         mSocketServer = new VimTouchSocketServer();
         mSocketServer.start();
-        return nativeCreateSubprocess( cmd, mSocketServer.getSocketName(), arg0, arg1, envp);
+        return nativeCreateSubprocess( cmd, filepath, mSocketServer.getSocketName(), arg0, arg1, envp);
     }
 
     public static class VimTouchSocketServer extends Thread {
