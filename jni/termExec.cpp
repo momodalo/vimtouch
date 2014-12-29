@@ -170,10 +170,11 @@ static void *thread_wrapper ( void* value)
         LOGI("exec: = %s", path);
 
         char* runpath = thread_arg[3];
-        char* su = thread_arg[4];
-        char* args = thread_arg[5];
+        char* args = thread_arg[4];
+        char* su = thread_arg[5];
 
         chmod(path, 0000755);
+            LOGE("testtest args %s %s", su,args);
 
         int i=0;
         if(su){
@@ -260,8 +261,8 @@ static int create_subprocess(const char *cmd, const char* filepath, const char* 
     thread_arg[1] = strdup(cmd);
     thread_arg[2] = strdup(sock);
     thread_arg[3] = strdup(filepath);
-    thread_arg[5] = arg1?strdup(arg1):NULL;
-    if(arg0){
+    thread_arg[4] = arg0?strdup(arg0):NULL;
+    if(arg1){
         struct stat st;
         if(stat(arg0, &st) == 0){
             if(S_ISDIR(st.st_mode)) chdir(arg0);
@@ -274,12 +275,12 @@ static int create_subprocess(const char *cmd, const char* filepath, const char* 
             }
 
         }
-        thread_arg[4] = strdup(arg0);
+        thread_arg[5] = strdup(arg0);
         LOGI("thread_arg 4 = '%s'", arg0);
     }else {
         chdir(getenv("HOME"));
         LOGI("chdir HOME = '%s'", getenv("HOME"));
-        thread_arg[4] = NULL;
+        thread_arg[5] = NULL;
     }
 
     pthread_t thread_id;
