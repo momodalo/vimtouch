@@ -155,11 +155,13 @@ int type;
 char_u *object;
 {
 	// long ltype = type;
+    /* FIXME revert to vim73 and disalbe this for now
 	set_vim_var_nr(VV_AD_EVENT, type);
 	set_vim_var_string(VV_AD_OBJECT, object, -1);
     apply_autocmds(EVENT_USER, NULL, NULL, FALSE, curbuf);
 	set_vim_var_nr(VV_AD_EVENT, 0);
 	set_vim_var_string(VV_AD_OBJECT, NULL, -1);
+    */
 }
 
 void vimtouch_sync() {
