@@ -671,7 +671,7 @@ public class VimTouch extends ActionBarActivity implements
             TextView textview = null;
             String caption = line;
             String keys = line;
-            int spaceIndex = line.indexOf(' ');
+            int spaceIndex = line.lastIndexOf(' ');
             if (-1 != spaceIndex) {
                 // Have caption
                 keys = line.substring(0, spaceIndex);
